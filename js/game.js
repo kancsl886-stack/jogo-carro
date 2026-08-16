@@ -503,7 +503,7 @@ const Game = {
         ctx.ellipse(p.x, p.y - hop, p.s * 22, p.s * 28, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
-      drawCarTop(ctx, p.x, p.y - hop, p.s * (1 + this.jump * 0.04), this.car, {
+      drawCarTop(ctx, p.x, p.y - hop, p.s * (1 + this.jump * 0.06), this.car, {
         nitro: this.powers.nitro,
         flash: this.flash % 0.4 < 0.2,
       });

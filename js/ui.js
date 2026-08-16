@@ -100,7 +100,7 @@ function renderShop() {
     const c2d = canvas.getContext("2d");
     c2d.imageSmoothingEnabled = false;
     c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#58dc48";
+    c2d.fillStyle = "#4ed34a";
     c2d.fillRect(0, 0, 280, 140);
     c2d.fillStyle = "#9a9a9a";
     c2d.fillRect(90, 0, 100, 140);

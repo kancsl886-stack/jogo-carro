@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#58dc48" />
+    <meta name="theme-color" content="#4ed34a" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <meta
       name="description"
@@ -41,7 +41,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #58dc48;
+  background: #4ed34a;
   color: var(--text);
   font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   touch-action: none;
@@ -88,10 +88,10 @@ canvas {
   justify-content: space-between;
   background: linear-gradient(
     180deg,
-    rgba(7, 11, 20, 0.72) 0%,
-    rgba(7, 11, 20, 0.08) 38%,
-    rgba(7, 11, 20, 0.08) 62%,
-    rgba(7, 11, 20, 0.78) 100%
+    rgba(7, 11, 20, 0.5) 0%,
+    rgba(7, 11, 20, 0) 26%,
+    rgba(7, 11, 20, 0) 74%,
+    rgba(7, 11, 20, 0.5) 100%
   );
 }
 
@@ -1102,58 +1102,53 @@ function blitSprite(ctx, ox, oy, u, rows, palette) {
 }
 
 const CONVERTIBLE = [
-  "......Y.Y......",
-  ".....BBBBB.....",
+  ".....Y...Y.....",
   "....BBBBBBB....",
   "...BBBBBBBBB...",
+  "...BBBBBBBBB...",
   ".W.BBBBBBBBB.W.",
-  "..BBKKKKKKKBB..",
-  "..BBKKKKKKKBB..",
-  "..BBBBBBBBBBB..",
-  "..BBISS.SSIBB..",
-  "..BBISS.SSIBB..",
-  "..BBISS.SSIBB..",
-  "..BBBBBBBBBBB..",
+  "...BBKKKKKBB...",
+  "...BBKKKKKBB...",
+  "...BBBBBBBBB...",
+  "...BBI.SS.SSIB.",
+  "...BBI.SS.SSIB.",
+  "...BBBBBBBBB...",
   ".W.BBBBBBBBB.W.",
   "...BBBBBBBBB...",
   "...BBR...RBB...",
   "....BBBBBBB....",
-  ".....BBBBB.....",
 ];
 
 const CONVERTIBLE_STRIPE = [
-  "......Y.Y......",
-  ".....TTBTT.....",
+  ".....Y...Y.....",
   "....BTTBTTB....",
   "...BBTTBTTBB...",
+  "...BBTTBTTBB...",
   ".W.BBTTBTTBB.W.",
-  "..BBKKKKKKKBB..",
-  "..BBKKKKKKKBB..",
-  "..BBTTBBBTTBB..",
-  "..BBISS.SSIBB..",
-  "..BBISS.SSIBB..",
-  "..BBISS.SSIBB..",
-  "..BBTTBBBTTBB..",
+  "...BBKKKKKBB...",
+  "...BBKKKKKBB...",
+  "...BBTTBTTBB...",
+  "...BBI.SS.SSIB.",
+  "...BBI.SS.SSIB.",
+  "...BBTTBTTBB...",
   ".W.BBTTBTTBB.W.",
   "...BBTTBTTBB...",
   "...BTR...RTB...",
   "....BTTBTTB....",
-  ".....TTBTT.....",
 ];
 
 const VAN = [
-  "......Y.Y......",
-  ".....BBBBB.....",
+  ".....Y...Y.....",
   "....BBBBBBB....",
   "...BBBBBBBBB...",
-  ".WBBBBBBBBBBBW.",
-  "..BBKKKKKKKBB..",
-  "..BBKKKKKKKBB..",
-  "..BBBBBBBBBBB..",
-  "..BBBBBBBBBBB..",
-  "..BBBBBBBBBBB..",
-  "..BBBBBBBBBBB..",
-  ".WBBBBBBBBBBBW.",
+  ".W.BBBBBBBBB.W.",
+  "...BBKKKKKBB...",
+  "...BBKKKKKBB...",
+  "...BBBBBBBBB...",
+  "...BBBBBBBBB...",
+  "...BBBBBBBBB...",
+  "...BBBBBBBBB...",
+  ".W.BBBBBBBBB.W.",
   "...BBBBBBBBB...",
   "...BBR...RBB...",
   "....BBBBBBB....",
@@ -1760,7 +1755,7 @@ const Sfx = {
 
 const LANES = 4;
 const LANE_GAP = 1.9;
-const GRASS = "#58dc48";
+const GRASS = "#4ed34a";
 
 function crisp(ctx) {
   ctx.imageSmoothingEnabled = false;
@@ -1937,10 +1932,10 @@ const Game = {
     const xScale = W * 0.08;
     const zScale = H / 52;
     const lanePx = xScale * LANE_GAP;
-    const u = Math.max(1, Math.floor(lanePx / 16));
+    const u = Math.max(1, Math.floor(lanePx / 14));
     return {
       x: W / 2 + worldX * xScale,
-      y: H * 0.74 - (z - this.playerZ()) * zScale,
+      y: H * 0.78 - (z - this.playerZ()) * zScale,
       s: u,
       u,
       xScale,
@@ -2216,27 +2211,27 @@ const Game = {
     const zScale = mid.zScale;
     const scroll = cameraZ == null ? this.cameraZ : cameraZ;
 
-    ctx.fillStyle = "#9a9a9a";
+    ctx.fillStyle = "#9c9c9c";
     ctx.fillRect(left, 0, roadW, this.gh);
 
     const block = rumble;
     const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
-    for (let y = -offset; y < this.gh + block; y += block) {
-      const red = Math.floor((y + offset) / block) % 2 === 0;
+    for (let y = offset - block * 2; y < this.gh + block; y += block) {
+      const red = Math.floor((y - offset) / block) % 2 === 0;
       ctx.fillStyle = red ? "#e53935" : "#ffffff";
       ctx.fillRect(left - rumble, y, rumble, block);
       ctx.fillRect(left + roadW, y, rumble, block);
     }
 
-    const dashW = Math.max(2, Math.round(laneW * 0.07));
-    const dashH = Math.max(8, Math.round(laneW * 0.38));
-    const gap = Math.max(6, Math.round(laneW * 0.28));
+    const dashW = Math.max(2, Math.round(laneW * 0.08));
+    const dashH = Math.max(8, Math.round(laneW * 0.42));
+    const gap = Math.max(6, Math.round(laneW * 0.3));
     const period = dashH + gap;
     const dashOff = Math.round(((scroll * zScale) % period + period) % period);
     ctx.fillStyle = "#ffffff";
     for (let lane = 1; lane < LANES; lane++) {
       const x = left + lane * laneW - Math.floor(dashW / 2);
-      for (let y = -dashOff; y < this.gh + period; y += period) {
+      for (let y = dashOff - period; y < this.gh + period; y += period) {
         ctx.fillRect(x, y, dashW, dashH);
       }
     }
@@ -2373,7 +2368,7 @@ const Game = {
     }
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(1, Math.floor(road.laneW / 16));
+    const u = Math.max(1, Math.floor(road.laneW / 14));
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.64);
     const lane = road.laneW;
@@ -2499,7 +2494,7 @@ function renderShop() {
     const c2d = canvas.getContext("2d");
     c2d.imageSmoothingEnabled = false;
     c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#58dc48";
+    c2d.fillStyle = "#4ed34a";
     c2d.fillRect(0, 0, 280, 140);
     c2d.fillStyle = "#9a9a9a";
     c2d.fillRect(90, 0, 100, 140);

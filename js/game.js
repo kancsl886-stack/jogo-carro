@@ -1,6 +1,6 @@
 const LANES = 4;
 const LANE_GAP = 1.9;
-const GRASS = "#58dc48";
+const GRASS = "#4ed34a";
 
 function crisp(ctx) {
   ctx.imageSmoothingEnabled = false;
@@ -177,10 +177,10 @@ const Game = {
     const xScale = W * 0.08;
     const zScale = H / 52;
     const lanePx = xScale * LANE_GAP;
-    const u = Math.max(1, Math.floor(lanePx / 16));
+    const u = Math.max(1, Math.floor(lanePx / 14));
     return {
       x: W / 2 + worldX * xScale,
-      y: H * 0.74 - (z - this.playerZ()) * zScale,
+      y: H * 0.78 - (z - this.playerZ()) * zScale,
       s: u,
       u,
       xScale,
@@ -456,27 +456,27 @@ const Game = {
     const zScale = mid.zScale;
     const scroll = cameraZ == null ? this.cameraZ : cameraZ;
 
-    ctx.fillStyle = "#9a9a9a";
+    ctx.fillStyle = "#9c9c9c";
     ctx.fillRect(left, 0, roadW, this.gh);
 
     const block = rumble;
     const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
-    for (let y = -offset; y < this.gh + block; y += block) {
-      const red = Math.floor((y + offset) / block) % 2 === 0;
+    for (let y = offset - block * 2; y < this.gh + block; y += block) {
+      const red = Math.floor((y - offset) / block) % 2 === 0;
       ctx.fillStyle = red ? "#e53935" : "#ffffff";
       ctx.fillRect(left - rumble, y, rumble, block);
       ctx.fillRect(left + roadW, y, rumble, block);
     }
 
-    const dashW = Math.max(2, Math.round(laneW * 0.07));
-    const dashH = Math.max(8, Math.round(laneW * 0.38));
-    const gap = Math.max(6, Math.round(laneW * 0.28));
+    const dashW = Math.max(2, Math.round(laneW * 0.08));
+    const dashH = Math.max(8, Math.round(laneW * 0.42));
+    const gap = Math.max(6, Math.round(laneW * 0.3));
     const period = dashH + gap;
     const dashOff = Math.round(((scroll * zScale) % period + period) % period);
     ctx.fillStyle = "#ffffff";
     for (let lane = 1; lane < LANES; lane++) {
       const x = left + lane * laneW - Math.floor(dashW / 2);
-      for (let y = -dashOff; y < this.gh + period; y += period) {
+      for (let y = dashOff - period; y < this.gh + period; y += period) {
         ctx.fillRect(x, y, dashW, dashH);
       }
     }
@@ -613,7 +613,7 @@ const Game = {
     }
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(1, Math.floor(road.laneW / 16));
+    const u = Math.max(1, Math.floor(road.laneW / 14));
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.64);
     const lane = road.laneW;

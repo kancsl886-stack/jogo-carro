@@ -15,8 +15,8 @@ const Game = {
     this.distance = 0;
     this.runCoins = 0;
     this.combo = 0;
-    this.speed = 12;
-    this.baseSpeed = 12;
+    this.speed = 16;
+    this.baseSpeed = 16;
     this.lane = 1;
     this.laneX = 0;
     this.jump = 0;
@@ -24,7 +24,7 @@ const Game = {
     this.cameraZ = 0;
     this.time = 0;
     this.shake = 0;
-    this.spawnZ = 90;
+    this.spawnZ = 70;
     this.coinZ = 30;
     this.powerZ = 140;
     this.entities = [];
@@ -223,7 +223,7 @@ const Game = {
           speed: Math.max(3, this.speed * 0.22),
         });
       }
-      const gap = 50 + Math.random() * 18 - Math.min(26, this.distance / 260);
+      const gap = 42 + Math.random() * 16 - Math.min(24, this.distance / 260);
       this.spawnZ += Math.max(20, gap);
     }
 
@@ -272,8 +272,8 @@ const Game = {
     this.spawnAhead();
 
     const nitro = this.powers.nitro > 0 ? 1.35 : 1;
-    const ramp = Math.min(1, this.distance / 4800);
-    this.baseSpeed = 11 + 50 * ramp;
+    const ramp = Math.min(1, this.distance / 4200);
+    this.baseSpeed = 16 + 48 * ramp;
     this.speed = this.baseSpeed * this.car.stats.speed * nitro;
     this.cameraZ += this.speed * dt;
     this.distance = this.cameraZ;

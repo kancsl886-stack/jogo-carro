@@ -6,6 +6,8 @@ const DEFAULT_SAVE = {
   owned: ["fusca"],
   selected: "fusca",
   muted: false,
+  volume: 70,
+  lang: "pt",
 };
 
 function loadSave() {
@@ -22,6 +24,8 @@ function loadSave() {
       owned,
       selected,
       muted: Boolean(parsed.muted),
+      volume: Math.max(0, Math.min(100, Number(parsed.volume ?? 70))),
+      lang: ["pt", "en", "es"].includes(parsed.lang) ? parsed.lang : "pt",
     };
   } catch (err) {
     return { ...DEFAULT_SAVE, owned: ["fusca"] };
@@ -67,5 +71,15 @@ const Save = {
       return true;
     }
     return false;
+  },
+  setVolume(value) {
+    this.data.volume = Math.max(0, Math.min(100, Math.round(value)));
+    this.data.muted = this.data.volume === 0;
+    this.persist();
+  },
+  setLang(lang) {
+    if (!["pt", "en", "es"].includes(lang)) return;
+    this.data.lang = lang;
+    this.persist();
   },
 };

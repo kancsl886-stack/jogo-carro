@@ -7,7 +7,7 @@ html = (ROOT / "index.html").read_text(encoding="utf-8")
 css = (ROOT / "css" / "style.css").read_text(encoding="utf-8")
 scripts = "\n".join(
     (ROOT / "js" / name).read_text(encoding="utf-8")
-    for name in ("cars.js", "storage.js", "audio.js", "game.js", "ui.js")
+    for name in ("cars.js", "storage.js", "i18n.js", "audio.js", "game.js", "ui.js")
 )
 
 html = html.replace(
@@ -29,6 +29,7 @@ html = html.replace(
 html = html.replace(
     """    <script src="js/cars.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>

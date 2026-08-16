@@ -34,6 +34,8 @@ const Game = {
     this.invuln = 0;
     this.dead = false;
     this.flash = 0;
+    this.caughtBy = null;
+    this.cop = { lane: 1, laneX: 0, gap: 16, siren: 0 };
   },
 
   init(canvas) {
@@ -288,6 +290,7 @@ const Game = {
     if (this.invuln > 0) this.invuln = Math.max(0, this.invuln - dt);
 
     const playerZ = this.cameraZ + 8;
+    this.updateCop(dt, playerZ);
     for (const e of this.entities) {
       if (e.kind === "traffic" || e.kind === "truck") e.z += (e.speed || 8) * dt;
     }
@@ -307,6 +310,7 @@ const Game = {
         if (Math.abs(dz) < 2.2 && Math.abs(dx) < 1.2) {
           e.taken = true;
           this.powers[e.power] = e.power === "nitro" ? 4 : 7;
+          if (e.power === "nitro" && this.cop) this.cop.gap = Math.min(20, this.cop.gap + 6);
           Sfx.power();
           this.burst(this.laneX, 0.6, playerZ, "#3cf0ff", 10);
         }
@@ -332,6 +336,7 @@ const Game = {
         coins: this.runCoins,
         speed: this.speed,
         powers: this.powers,
+        copGap: this.cop.gap,
       });
     }
   },
@@ -359,18 +364,41 @@ const Game = {
     }
   },
 
-  hit() {
+  updateCop(dt, playerZ) {
+    if (!this.cop) return;
+    const targetX = this.laneWorldX(this.lane);
+    this.cop.laneX += (targetX - this.cop.laneX) * Math.min(1, 5.2 * dt);
+    this.cop.lane = this.lane;
+    if (this.powers.nitro > 0) this.cop.gap += 5.2 * dt;
+    else this.cop.gap -= 0.38 * dt;
+    this.cop.gap = Math.max(1.5, Math.min(20, this.cop.gap));
+    this.cop.z = playerZ - this.cop.gap;
+    this.cop.siren -= dt;
+    if (this.cop.siren <= 0) {
+      Sfx.siren();
+      this.cop.siren = 0.82;
+    }
+    if (this.invuln <= 0 && this.cop.gap <= 2.2 && Math.abs(this.cop.laneX - this.laneX) < 1.05) {
+      this.hit("police");
+    }
+  },
+
+  hit(reason) {
     if (this.dead) return;
     if (this.powers.shield > 0) {
       this.powers.shield = 0;
       this.invuln = 1.25;
       this.shake = 10;
+      if (this.cop) {
+        this.cop.gap = reason === "police" ? Math.min(20, this.cop.gap + 7) : Math.max(1.6, this.cop.gap - 3);
+      }
       this.burst(this.laneX, 0.7, this.cameraZ + 8, "#5dffb0", 16);
       Sfx.power();
       return;
     }
     this.dead = true;
     this.running = false;
+    this.caughtBy = reason || "crash";
     this.shake = 16;
     Sfx.crash();
     const isRecord = Save.setBest(this.distance);
@@ -381,6 +409,7 @@ const Game = {
         coins: this.runCoins,
         best: Save.data.best,
         isRecord,
+        caughtBy: this.caughtBy,
       });
     }
   },
@@ -559,6 +588,7 @@ const Game = {
       }
     }
     if (!playerDrawn) drawPlayer();
+    this.drawCop(ctx);
 
     for (const part of this.particles) {
       const p = this.toScreen(part.x, part.z);
@@ -569,6 +599,19 @@ const Game = {
       ctx.fill();
       ctx.globalAlpha = 1;
     }
+  },
+
+  drawCop(ctx) {
+    if (!this.cop || this.cop.z == null) return;
+    const p = this.toScreen(this.cop.laneX, this.cop.z);
+    if (p.y < -60 || p.y > this.h + 90) return;
+    const flash = this.flash % 0.4 < 0.2;
+    ctx.fillStyle = flash ? "rgba(255, 70, 70, 0.22)" : "rgba(70, 140, 255, 0.22)";
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y, p.s * 28, p.s * 34, 0, 0, Math.PI * 2);
+    ctx.fill();
+    this.drawShadow(ctx, p.x, p.y, p.s, 0);
+    drawCarTop(ctx, p.x, p.y, p.s, getCar("policia"), { flash });
   },
 
   draw() {

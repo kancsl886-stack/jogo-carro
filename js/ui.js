@@ -2,11 +2,14 @@ const $ = (id) => document.getElementById(id);
 
 const screens = {
   menu: $("screen-menu"),
+  settings: $("screen-settings"),
   shop: $("screen-shop"),
   howto: $("screen-howto"),
   pause: $("screen-pause"),
   over: $("screen-over"),
 };
+
+let shopFrom = "settings";
 
 function showScreen(name) {
   Object.entries(screens).forEach(([key, el]) => {
@@ -22,9 +25,29 @@ function formatMeters(n) {
   return `${Math.floor(n)} m`;
 }
 
+function syncVolume() {
+  const v = Save.data.volume;
+  $("volume-slider").value = String(v);
+  $("volume-value").textContent = `${v}%`;
+  Sfx.setVolume(v);
+}
+
+function syncLang() {
+  [...$("lang-row").children].forEach((btn) => {
+    btn.classList.toggle("on", btn.dataset.lang === Save.data.lang);
+  });
+  applyI18n();
+  refreshMenu();
+}
+
+function setVolume(value) {
+  Save.setVolume(value);
+  syncVolume();
+}
+
 function refreshMenu() {
-  $("menu-coins").textContent = `${Save.data.coins} moedas`;
-  $("menu-best").textContent = `Recorde ${formatMeters(Save.data.best)}`;
+  $("menu-coins").textContent = `${Save.data.coins} ${t("coins").toLowerCase()}`;
+  $("menu-best").textContent = `${t("best")} ${formatMeters(Save.data.best)}`;
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = `${Save.data.coins} ⬤`;
   $("hud-best").textContent = formatMeters(Save.data.best);
@@ -63,12 +86,12 @@ function renderShop() {
           <h3>${car.name}</h3>
           <small>${car.type}</small>
         </div>
-        <span class="badge ${car.rarity}">${car.rarity}</span>
+        <span class="badge ${car.rarity}">${t(car.rarity)}</span>
       </div>
       <div class="bars">
-        <div class="bar-row"><span>Velocidade</span><div class="bar"><i style="width:${statPercent(car.stats.speed, maxSpeed)}%"></i></div></div>
-        <div class="bar-row"><span>Manobra</span><div class="bar"><i style="width:${statPercent(car.stats.handling, maxHand)}%"></i></div></div>
-        <div class="bar-row"><span>Ímã</span><div class="bar"><i style="width:${statPercent(car.stats.magnet, maxMag)}%"></i></div></div>
+        <div class="bar-row"><span>${t("speed")}</span><div class="bar"><i style="width:${statPercent(car.stats.speed, maxSpeed)}%"></i></div></div>
+        <div class="bar-row"><span>${t("handling")}</span><div class="bar"><i style="width:${statPercent(car.stats.handling, maxHand)}%"></i></div></div>
+        <div class="bar-row"><span>${t("magnet")}</span><div class="bar"><i style="width:${statPercent(car.stats.magnet, maxMag)}%"></i></div></div>
       </div>
       <button class="btn ${equipped ? "ghost" : "primary"}" type="button"></button>
     `;
@@ -76,23 +99,23 @@ function renderShop() {
     drawVehicle(canvas.getContext("2d"), 140, 88, 2.4, car, { flash: true });
     const btn = card.querySelector("button");
     if (equipped) {
-      btn.textContent = "Equipado";
+      btn.textContent = t("equipped");
       btn.disabled = true;
     } else if (owned) {
-      btn.textContent = "Equipar";
+      btn.textContent = t("equip");
       btn.onclick = () => {
         Save.select(car.id);
         Sfx.buy();
         refreshMenu();
         renderShop();
-        toast(`${car.name} na pista`);
+        toast(`${car.name} ${t("onTrack")}`);
       };
     } else {
-      btn.textContent = `Comprar · ${car.price}`;
+      btn.textContent = `${t("buy")} · ${car.price}`;
       btn.onclick = () => {
         if (!Save.spend(car.price)) {
           Sfx.deny();
-          toast("Moedas insuficientes");
+          toast(t("noCoins"));
           return;
         }
         Save.own(car.id);
@@ -100,7 +123,7 @@ function renderShop() {
         Sfx.buy();
         refreshMenu();
         renderShop();
-        toast(`${car.name} desbloqueado!`);
+        toast(`${car.name} ${t("unlocked")}`);
       };
     }
     grid.appendChild(card);
@@ -109,10 +132,16 @@ function renderShop() {
 
 function setPowerHud(powers) {
   const labels = [];
-  if (powers.magnet > 0) labels.push(`Ímã ${powers.magnet.toFixed(0)}s`);
-  if (powers.shield > 0) labels.push(`Escudo ${powers.shield.toFixed(0)}s`);
-  if (powers.nitro > 0) labels.push(`Nitro ${powers.nitro.toFixed(0)}s`);
-  $("powerups").innerHTML = labels.map((t) => `<div class="power">${t}</div>`).join("");
+  if (powers.magnet > 0) labels.push(`${t("magnetHud")} ${powers.magnet.toFixed(0)}s`);
+  if (powers.shield > 0) labels.push(`${t("shieldHud")} ${powers.shield.toFixed(0)}s`);
+  if (powers.nitro > 0) labels.push(`${t("nitroHud")} ${powers.nitro.toFixed(0)}s`);
+  $("powerups").innerHTML = labels.map((text) => `<div class="power">${text}</div>`).join("");
+}
+
+function openShop(from) {
+  shopFrom = from;
+  renderShop();
+  showScreen("shop");
 }
 
 function play() {
@@ -129,16 +158,24 @@ function backToMenu() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  Sfx.setVolume(Save.data.volume);
   Sfx.muted = Save.data.muted;
+  syncVolume();
+  syncLang();
   Game.init($("game"));
   Game.onHud = (info) => {
     $("hud-distance").textContent = formatMeters(info.distance);
     $("hud-run-coins").textContent = info.coins;
     $("hud-speed").textContent = `${Math.floor(info.speed * 4.2)} km/h`;
     $("speed-fill").style.width = `${Math.min(100, (info.speed / 90) * 100)}%`;
+    const danger = 1 - (info.copGap - 1.5) / 18.5;
+    $("cop-fill").style.width = `${Math.max(8, Math.min(100, danger * 100))}%`;
     setPowerHud(info.powers);
   };
   Game.onOver = (info) => {
+    const cop = info.caughtBy === "police";
+    $("over-title").textContent = cop ? t("caught") : t("crashed");
+    $("over-kicker").textContent = cop ? t("overKickerCop") : t("overKicker");
     $("over-distance").textContent = formatMeters(info.distance);
     $("over-coins").textContent = `+${info.coins}`;
     $("over-best").textContent = formatMeters(info.best);
@@ -149,18 +186,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   $("btn-play").onclick = play;
   $("btn-retry").onclick = play;
-  $("btn-shop").onclick = () => {
-    renderShop();
-    showScreen("shop");
-  };
+  $("btn-menu").onclick = () => showScreen("settings");
+  $("btn-settings-back").onclick = () => showScreen("menu");
+  $("btn-shop").onclick = () => openShop("settings");
   $("btn-over-shop").onclick = () => {
     Game.stop();
-    renderShop();
-    showScreen("shop");
+    openShop("over");
   };
   $("btn-howto").onclick = () => showScreen("howto");
-  $("btn-shop-back").onclick = backToMenu;
-  $("btn-howto-back").onclick = () => showScreen("menu");
+  $("btn-shop-back").onclick = () => {
+    if (shopFrom === "over") backToMenu();
+    else showScreen("settings");
+  };
+  $("btn-howto-back").onclick = () => showScreen("settings");
   $("btn-over-menu").onclick = backToMenu;
   $("btn-pause").onclick = () => {
     Game.pause();
@@ -171,6 +209,29 @@ window.addEventListener("DOMContentLoaded", () => {
     Game.resume();
   };
   $("btn-quit").onclick = backToMenu;
+
+  $("volume-slider").addEventListener("input", (e) => {
+    Sfx.unlock();
+    setVolume(Number(e.target.value));
+  });
+  $("btn-vol-down").onclick = () => {
+    Sfx.unlock();
+    setVolume(Save.data.volume - 10);
+    Sfx.coin();
+  };
+  $("btn-vol-up").onclick = () => {
+    Sfx.unlock();
+    setVolume(Save.data.volume + 10);
+    Sfx.coin();
+  };
+
+  $("lang-row").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-lang]");
+    if (!btn) return;
+    Save.setLang(btn.dataset.lang);
+    syncLang();
+    Sfx.lane();
+  });
 
   $("shop-filters").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-filter]");

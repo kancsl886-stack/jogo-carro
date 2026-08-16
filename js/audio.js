@@ -1,6 +1,7 @@
 const Sfx = {
   ctx: null,
   muted: false,
+  volume: 0.7,
 
   unlock() {
     if (!this.ctx) {
@@ -11,14 +12,19 @@ const Sfx = {
     if (this.ctx.state === "suspended") this.ctx.resume();
   },
 
+  setVolume(percent) {
+    this.volume = Math.max(0, Math.min(1, percent / 100));
+    this.muted = this.volume <= 0.001;
+  },
+
   beep(freq, dur, type, gain) {
-    if (this.muted || !this.ctx) return;
+    if (this.muted || !this.ctx || this.volume <= 0) return;
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const g = this.ctx.createGain();
     osc.type = type || "square";
     osc.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(gain || 0.05, t);
+    g.gain.setValueAtTime((gain || 0.05) * this.volume, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     osc.connect(g).connect(this.ctx.destination);
     osc.start(t);
@@ -47,5 +53,9 @@ const Sfx = {
   },
   deny() {
     this.beep(140, 0.18, "square", 0.04);
+  },
+  siren() {
+    this.beep(780, 0.16, "square", 0.035);
+    setTimeout(() => this.beep(520, 0.16, "square", 0.035), 170);
   },
 };

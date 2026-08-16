@@ -26,18 +26,22 @@
     <div id="hud" class="hud hidden">
       <div class="hud-top">
         <div class="hud-stat">
-          <span class="hud-label">Distância</span>
+          <span class="hud-label" data-i18n="distance">Distância</span>
           <strong id="hud-distance">0 m</strong>
         </div>
         <div class="hud-stat gold">
-          <span class="hud-label">Corrida</span>
+          <span class="hud-label" data-i18n="runCoins">Corrida</span>
           <strong id="hud-run-coins">0</strong>
         </div>
         <div class="hud-stat">
-          <span class="hud-label">Recorde</span>
+          <span class="hud-label" data-i18n="best">Recorde</span>
           <strong id="hud-best">0 m</strong>
         </div>
-        <button id="btn-pause" class="icon-btn" type="button" aria-label="Pausar">
+        <div class="hud-stat cop">
+          <span class="hud-label" data-i18n="copHud">Polícia</span>
+          <div class="cop-bar"><i id="cop-fill"></i></div>
+        </div>
+        <button id="btn-pause" class="icon-btn" type="button" data-i18n-aria="pause" aria-label="Pausar">
           ❚❚
         </button>
       </div>
@@ -53,9 +57,9 @@
     <div id="screen-menu" class="screen">
       <div class="menu-bg-cars" aria-hidden="true"></div>
       <div class="brand">
-        <p class="brand-kicker">Avenida infinita</p>
+        <p class="brand-kicker" data-i18n="kicker">Avenida infinita</p>
         <h1>NITRO <span>SURF</span></h1>
-        <p class="brand-sub">Desvie. Colete. Troque de carro.</p>
+        <p class="brand-sub" data-i18n="subtitle">Desvie. Colete. Troque de carro.</p>
       </div>
       <div class="menu-stats">
         <div class="chip gold" id="menu-coins">0 moedas</div>
@@ -63,29 +67,59 @@
         <div class="chip" id="menu-car">Fusca Flash</div>
       </div>
       <div class="menu-actions">
-        <button id="btn-play" class="btn primary pulse" type="button">Jogar</button>
-        <button id="btn-shop" class="btn" type="button">Loja de carros</button>
-        <button id="btn-howto" class="btn ghost" type="button">Como jogar</button>
+        <button id="btn-play" class="btn primary pulse" type="button" data-i18n="play">Jogar</button>
+        <button id="btn-menu" class="btn" type="button" data-i18n="menu">Menu</button>
       </div>
-      <p class="hint">← → faixas · ↑ pular · toque ou setas</p>
+      <p class="hint" data-i18n="hint">← → faixas · ↑ pular · toque ou setas</p>
+    </div>
+
+    <div id="screen-settings" class="screen hidden">
+      <header class="sheet-head">
+        <button id="btn-settings-back" class="icon-btn" type="button" data-i18n-aria="back" aria-label="Voltar">←</button>
+        <div>
+          <h2 data-i18n="settings">Menu</h2>
+          <p data-i18n="settingsSub">Volume, idioma e loja</p>
+        </div>
+      </header>
+      <div class="settings">
+        <section class="setting-card">
+          <h3 data-i18n="volume">Volume</h3>
+          <div class="volume-row">
+            <button id="btn-vol-down" class="icon-btn" type="button" aria-label="-">−</button>
+            <input id="volume-slider" type="range" min="0" max="100" value="70" />
+            <button id="btn-vol-up" class="icon-btn" type="button" aria-label="+">+</button>
+            <strong id="volume-value">70%</strong>
+          </div>
+        </section>
+        <section class="setting-card">
+          <h3 data-i18n="language">Idioma</h3>
+          <div class="lang-row" id="lang-row">
+            <button class="lang-btn on" data-lang="pt" type="button">PT</button>
+            <button class="lang-btn" data-lang="en" type="button">EN</button>
+            <button class="lang-btn" data-lang="es" type="button">ES</button>
+          </div>
+        </section>
+        <button id="btn-shop" class="btn primary" type="button" data-i18n="shop">Comprar carros</button>
+        <button id="btn-howto" class="btn ghost" type="button" data-i18n="howto">Como jogar</button>
+      </div>
     </div>
 
     <div id="screen-shop" class="screen hidden">
       <header class="sheet-head">
         <button id="btn-shop-back" class="icon-btn" type="button" aria-label="Voltar">←</button>
         <div>
-          <h2>Garagem</h2>
-          <p>Compre e equipe um carro novo</p>
+          <h2 data-i18n="garage">Garagem</h2>
+          <p data-i18n="garageSub">Compre e equipe um carro novo</p>
         </div>
         <div class="chip gold" id="shop-coins">0</div>
       </header>
       <div class="shop-filters" id="shop-filters">
-        <button class="filter on" data-filter="all" type="button">Todos</button>
-        <button class="filter" data-filter="owned" type="button">Meus</button>
-        <button class="filter" data-filter="comum" type="button">Comum</button>
-        <button class="filter" data-filter="raro" type="button">Raro</button>
-        <button class="filter" data-filter="epico" type="button">Épico</button>
-        <button class="filter" data-filter="lendario" type="button">Lendário</button>
+        <button class="filter on" data-filter="all" type="button" data-i18n="all">Todos</button>
+        <button class="filter" data-filter="owned" type="button" data-i18n="owned">Meus</button>
+        <button class="filter" data-filter="comum" type="button" data-i18n="comum">Comum</button>
+        <button class="filter" data-filter="raro" type="button" data-i18n="raro">Raro</button>
+        <button class="filter" data-filter="epico" type="button" data-i18n="epico">Épico</button>
+        <button class="filter" data-filter="lendario" type="button" data-i18n="lendario">Lendário</button>
       </div>
       <div id="shop-grid" class="shop-grid"></div>
     </div>
@@ -94,47 +128,47 @@
       <header class="sheet-head">
         <button id="btn-howto-back" class="icon-btn" type="button" aria-label="Voltar">←</button>
         <div>
-          <h2>Como jogar</h2>
-          <p>Estilo Subway Surfers, no asfalto</p>
+          <h2 data-i18n="howtoTitle">Como jogar</h2>
+          <p data-i18n="howtoSub">Estilo Subway Surfers, no asfalto</p>
         </div>
       </header>
       <div class="howto">
         <article>
-          <h3>Controles</h3>
-          <p>Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima.</p>
+          <h3 data-i18n="controls">Controles</h3>
+          <p data-i18n="controlsText">Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima.</p>
         </article>
         <article>
-          <h3>Objetivo</h3>
-          <p>Corra o máximo possível sem bater. Moedas compram carros na loja. Cada modelo muda velocidade, manobra e ímã de moedas.</p>
+          <h3 data-i18n="goal">Objetivo</h3>
+          <p data-i18n="goalText">Corra o máximo possível sem bater. Moedas compram carros na loja. Cada modelo muda velocidade, manobra e ímã de moedas.</p>
         </article>
         <article>
-          <h3>Power-ups</h3>
-          <p><strong>Ímã</strong> puxa moedas. <strong>Escudo</strong> salva uma batida. <strong>Nitro</strong> dispara a velocidade por alguns segundos.</p>
+          <h3 data-i18n="powerups">Power-ups</h3>
+          <p data-i18n="powerupsText">Ímã puxa moedas. Escudo salva uma batida. Nitro dispara a velocidade por alguns segundos.</p>
         </article>
       </div>
     </div>
 
     <div id="screen-pause" class="screen dim hidden">
       <div class="card">
-        <h2>Pausado</h2>
-        <button id="btn-resume" class="btn primary" type="button">Continuar</button>
-        <button id="btn-quit" class="btn ghost" type="button">Sair para o menu</button>
+        <h2 data-i18n="paused">Pausado</h2>
+        <button id="btn-resume" class="btn primary" type="button" data-i18n="resume">Continuar</button>
+        <button id="btn-quit" class="btn ghost" type="button" data-i18n="quit">Sair para o menu</button>
       </div>
     </div>
 
     <div id="screen-over" class="screen dim hidden">
       <div class="card">
-        <p class="over-kicker">Fim de papo</p>
-        <h2>Batida!</h2>
+        <p class="over-kicker" id="over-kicker" data-i18n="overKicker">Fim de papo</p>
+        <h2 id="over-title">Batida!</h2>
         <div class="over-stats">
-          <div><span>Distância</span><strong id="over-distance">0 m</strong></div>
-          <div><span>Moedas</span><strong id="over-coins">0</strong></div>
-          <div><span>Recorde</span><strong id="over-best">0 m</strong></div>
+          <div><span data-i18n="distance">Distância</span><strong id="over-distance">0 m</strong></div>
+          <div><span data-i18n="coins">Moedas</span><strong id="over-coins">0</strong></div>
+          <div><span data-i18n="best">Recorde</span><strong id="over-best">0 m</strong></div>
         </div>
-        <p id="over-record" class="new-record hidden">Novo recorde!</p>
-        <button id="btn-retry" class="btn primary" type="button">Correr de novo</button>
-        <button id="btn-over-shop" class="btn" type="button">Abrir loja</button>
-        <button id="btn-over-menu" class="btn ghost" type="button">Menu</button>
+        <p id="over-record" class="new-record hidden" data-i18n="newRecord">Novo recorde!</p>
+        <button id="btn-retry" class="btn primary" type="button" data-i18n="retry">Correr de novo</button>
+        <button id="btn-over-shop" class="btn" type="button" data-i18n="openShop">Abrir loja</button>
+        <button id="btn-over-menu" class="btn ghost" type="button" data-i18n="toMenu">Menu</button>
       </div>
     </div>
 
@@ -142,6 +176,7 @@
 
     <script src="js/cars.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>

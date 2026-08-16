@@ -166,10 +166,32 @@ const Game = {
 
   seedRoadside() {
     this.roadside = [];
-    for (let i = 0; i < 80; i++) {
-      const z = i * 12;
-      this.roadside.push({ z, side: -1, kind: i % 3 === 0 ? "palm" : "building" });
-      this.roadside.push({ z: z + 6, side: 1, kind: i % 4 === 0 ? "billboard" : "building" });
+    const palettes = ["#e8eef6", "#d5dee8", "#f2e6d4", "#c5d0de", "#f7f9fc", "#d8c4a8", "#b9c8d9"];
+    for (let i = 0; i < 120; i++) {
+      const z = i * 8;
+      for (const side of [-1, 1]) {
+        this.roadside.push({
+          kind: "building",
+          z,
+          side,
+          row: 0,
+          h: 6.2 + ((i * 13 + side + 3) % 8) * 0.95,
+          w: 2.1 + (i % 3) * 0.3,
+          color: palettes[(i + (side > 0 ? 2 : 0)) % palettes.length],
+        });
+        this.roadside.push({
+          kind: "building",
+          z: z + 4,
+          side,
+          row: 1,
+          h: 9.5 + ((i * 9 + side) % 9) * 1.15,
+          w: 2.5 + (i % 2) * 0.35,
+          color: palettes[(i + 3) % palettes.length],
+        });
+      }
+      if (i % 8 === 0) {
+        this.roadside.push({ kind: "palm", z: z + 2, side: i % 2 ? 1 : -1, row: 0 });
+      }
     }
   },
 
@@ -358,29 +380,48 @@ const Game = {
   },
 
   drawSky(ctx) {
+    const horizon = this.h * 0.4;
     const g = ctx.createLinearGradient(0, 0, 0, this.h);
-    g.addColorStop(0, "#0b1020");
-    g.addColorStop(0.45, "#1a1233");
-    g.addColorStop(0.72, "#ff7a4d");
-    g.addColorStop(1, "#1a1428");
+    g.addColorStop(0, "#5eb0ff");
+    g.addColorStop(0.28, "#7ec8ff");
+    g.addColorStop(0.55, "#b9e4ff");
+    g.addColorStop(0.72, "#e7f6ff");
+    g.addColorStop(1, "#cfd8e2");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, this.w, this.h);
 
-    ctx.fillStyle = "#ffe9a8";
+    ctx.fillStyle = "#fff4b8";
     ctx.beginPath();
-    ctx.arc(this.w * 0.78, this.h * 0.22, 34, 0, Math.PI * 2);
+    ctx.arc(this.w * 0.78, this.h * 0.14, 36, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "rgba(255, 180, 90, 0.18)";
+    ctx.fillStyle = "rgba(255, 244, 180, 0.28)";
     ctx.beginPath();
-    ctx.arc(this.w * 0.78, this.h * 0.22, 70, 0, Math.PI * 2);
+    ctx.arc(this.w * 0.78, this.h * 0.14, 72, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    for (let i = 0; i < 40; i++) {
-      const x = ((i * 97) % this.w);
-      const y = ((i * 53) % (this.h * 0.35));
-      ctx.fillRect(x, y, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
+    ctx.fillStyle = "rgba(255,255,255,0.82)";
+    for (let i = 0; i < 7; i++) {
+      const cx = ((i * 260 - this.cameraZ * 3) % (this.w + 260) + this.w + 260) % (this.w + 260) - 80;
+      const cy = 36 + (i % 4) * 26;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 58, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx + 32, cy + 6, 42, 14, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx - 28, cy + 8, 34, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
     }
+
+    const shift = -((this.cameraZ * 0.4) % 42);
+    for (let i = -1; i < 32; i++) {
+      const x = shift + i * 42;
+      const bh = 28 + ((i * 17 + 40) % 70);
+      ctx.fillStyle = i % 3 === 0 ? "#8fb0d2" : i % 3 === 1 ? "#7aa0c8" : "#9bb8d6";
+      ctx.fillRect(x, horizon - bh, 38, bh);
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      ctx.fillRect(x + 6, horizon - bh + 8, 8, 8);
+      ctx.fillRect(x + 20, horizon - bh + 18, 8, 8);
+    }
+    ctx.fillStyle = "#8aa6c4";
+    ctx.fillRect(0, horizon - 6, this.w, 8);
   },
 
   drawRoad(ctx) {
@@ -400,7 +441,7 @@ const Game = {
       ctx.lineTo(left1.x, left1.y);
       ctx.closePath();
       const stripe = Math.floor(z0 / 7) % 2 === 0;
-      ctx.fillStyle = stripe ? "#2a2d38" : "#23252f";
+      ctx.fillStyle = stripe ? "#4c5160" : "#434857";
       ctx.fill();
 
       const grassL0 = this.project(-18, 0, z0);
@@ -408,7 +449,7 @@ const Game = {
       const grassR0 = this.project(18, 0, z0);
       const grassR1 = this.project(18, 0, z1);
       if (grassL0 && grassL1) {
-        ctx.fillStyle = stripe ? "#102016" : "#0c1912";
+        ctx.fillStyle = stripe ? "#8f97a3" : "#818996";
         ctx.beginPath();
         ctx.moveTo(grassL0.x, grassL0.y);
         ctx.lineTo(left0.x, left0.y);
@@ -439,6 +480,32 @@ const Game = {
     }
   },
 
+  drawBuilding(ctx, p, item) {
+    const w = p.s * item.w;
+    const h = p.s * item.h;
+    const x = p.x - w / 2;
+    const y = p.y - h;
+    ctx.fillStyle = item.color;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = "rgba(40, 60, 90, 0.16)";
+    ctx.fillRect(x + w * 0.62, y, w * 0.38, h);
+    ctx.fillStyle = "#6d7f93";
+    ctx.fillRect(x, y - p.s * 0.1, w, p.s * 0.12);
+    ctx.fillStyle = "#5b7eab";
+    const cols = 3;
+    const rows = Math.max(4, Math.floor(item.h * 1.5));
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        ctx.fillRect(
+          x + w * 0.1 + c * w * 0.28,
+          y + p.s * 0.22 + r * (h / (rows + 0.8)),
+          w * 0.16,
+          p.s * 0.14
+        );
+      }
+    }
+  },
+
   drawRoadside(ctx) {
     const items = this.roadside
       .map((item) => {
@@ -446,37 +513,22 @@ const Game = {
         const rel = ((item.z - this.cameraZ) % span + span) % span;
         return { ...item, z: this.cameraZ + rel };
       })
-      .sort((a, b) => b.z - a.z);
+      .sort((a, b) => (b.row || 0) - (a.row || 0) || b.z - a.z);
 
     for (const item of items) {
-      const x = item.side * 6.4;
+      const dist = 5.1 + (item.row || 0) * 3.4;
+      const x = item.side * dist;
       const p = this.project(x, 0, item.z);
-      if (!p || p.rel > 180) continue;
+      if (!p || p.rel > 200) continue;
       if (item.kind === "palm") {
-        ctx.fillStyle = "#3b2414";
+        ctx.fillStyle = "#6b3e1f";
         ctx.fillRect(p.x - p.s * 0.06, p.y - p.s * 1.6, p.s * 0.12, p.s * 1.6);
-        ctx.fillStyle = "#1f8a4c";
+        ctx.fillStyle = "#2e9b4f";
         ctx.beginPath();
         ctx.ellipse(p.x, p.y - p.s * 1.7, p.s * 0.7, p.s * 0.28, 0, 0, Math.PI * 2);
         ctx.fill();
-      } else if (item.kind === "billboard") {
-        ctx.fillStyle = "#222";
-        ctx.fillRect(p.x - p.s * 0.08, p.y - p.s * 2.1, p.s * 0.16, p.s * 2.1);
-        ctx.fillStyle = item.side > 0 ? "#ff3d9a" : "#3cf0ff";
-        ctx.fillRect(p.x - p.s * 0.9, p.y - p.s * 2.5, p.s * 1.8, p.s * 0.9);
-        ctx.fillStyle = "#fff";
-        ctx.font = `${Math.max(8, p.s * 0.22)}px Trebuchet MS`;
-        ctx.textAlign = "center";
-        ctx.fillText("NITRO", p.x, p.y - p.s * 2.05);
       } else {
-        const bh = 2.2 + (item.z % 5) * 0.35;
-        ctx.fillStyle = "#141824";
-        ctx.fillRect(p.x - p.s * 1.1, p.y - p.s * bh, p.s * 2.2, p.s * bh);
-        ctx.fillStyle = "rgba(255, 209, 140, 0.55)";
-        for (let wy = 0; wy < 4; wy++) {
-          ctx.fillRect(p.x - p.s * 0.8, p.y - p.s * (bh - 0.3 - wy * 0.4), p.s * 0.25, p.s * 0.18);
-          ctx.fillRect(p.x + p.s * 0.2, p.y - p.s * (bh - 0.3 - wy * 0.4), p.s * 0.25, p.s * 0.18);
-        }
+        this.drawBuilding(ctx, p, item);
       }
     }
   },
@@ -575,8 +627,8 @@ const Game = {
       ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
     }
     this.drawSky(ctx);
-    this.drawRoadside(ctx);
     this.drawRoad(ctx);
+    this.drawRoadside(ctx);
     this.drawEntities(ctx);
     ctx.restore();
   },

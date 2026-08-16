@@ -522,47 +522,73 @@ function spriteFor(car) {
   return SPRITES[car && car.shape] || SPRITES.hatch;
 }
 
+let _carScratch = null;
+
+function carScratch(w, h) {
+  if (!_carScratch) _carScratch = document.createElement("canvas");
+  if (_carScratch.width !== w || _carScratch.height !== h) {
+    _carScratch.width = w;
+    _carScratch.height = h;
+  }
+  const c = _carScratch.getContext("2d");
+  c.clearRect(0, 0, w, h);
+  c.imageSmoothingEnabled = false;
+  return c;
+}
+
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
-  const u = Math.max(1, extras.u || Math.round(scale) || 2);
+  const dest = Math.max(2, extras.u || Math.round(scale) || 3);
   const c = car.colors || {};
   const body = c.body || "#6ec4f0";
   const rows = spriteFor(car);
+  const w = rows[0].length;
+  const h = rows.length;
   const palette = {
     B: body,
-    H: shadeHex(body, 0.22),
-    N: shadeHex(body, -0.28),
-    K: "#111111",
-    G: "#24344c",
-    I: "#2a2a2a",
+    H: shadeHex(body, 0.18),
+    N: shadeHex(body, -0.22),
+    K: "#1a2838",
+    G: "#5b7d9a",
+    I: "#8eb4d4",
     S: "#1a1a1a",
-    W: "#5e5e5e",
+    W: "#4a4a4a",
     Y: "#ffe14a",
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
-    T: c.stripe || "#ffffff",
+    T: c.stripe || "#f4f7fb",
     C: c.trim || "#222222",
     A: car.shape === "taxi" ? "#f1c40f" : c.trim || "#3cf0ff",
     D: "#2a2a2a",
-    M: "#d0d4dc",
+    M: "#c5ccd6",
     P: "#f2f2f2",
   };
+  const cell = 2;
+  const sctx = carScratch(w * cell, h * cell);
+  blitSprite(sctx, (w * cell) / 2, (h * cell) / 2, cell, rows, palette);
+
   ctx.save();
-  ctx.translate(Math.round(x), Math.round(y));
+  ctx.translate(x, y);
   if (extras.yaw) ctx.rotate(extras.yaw);
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.beginPath();
+  ctx.ellipse(0, dest * 0.7, (w * dest) / 2.15, h * dest * 0.12, 0, 0, Math.PI * 2);
+  ctx.fill();
   if (extras.nitro) {
-    const tail = Math.floor(rows.length / 2) * u;
     ctx.fillStyle = "#7fe7ff";
-    ctx.fillRect(-2 * u, tail - u, 4 * u, 3 * u);
+    ctx.fillRect(-1.6 * dest, (h * dest) / 2 - dest, 3.2 * dest, 2.4 * dest);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-u, tail + 2 * u, 2 * u, 2 * u);
+    ctx.fillRect(-0.8 * dest, (h * dest) / 2 + dest, 1.6 * dest, 1.4 * dest);
   }
-  blitSprite(ctx, 0, 0, u, rows, palette);
+  ctx.imageSmoothingEnabled = true;
+  if (ctx.imageSmoothingQuality) ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(sctx, (-w * dest) / 2, (-h * dest) / 2, w * dest, h * dest);
+  ctx.imageSmoothingEnabled = false;
   if (car.shape === "police") {
-    const oy = -Math.floor(rows.length / 2) * u + 2 * u;
+    const oy = -h * dest * 0.32;
     ctx.fillStyle = extras.flash ? "#ff3030" : "#3d8bff";
-    ctx.fillRect(-2 * u, oy, 2 * u, u);
+    ctx.fillRect(-1.6 * dest, oy, 1.6 * dest, dest * 0.7);
     ctx.fillStyle = extras.flash ? "#3d8bff" : "#ff3030";
-    ctx.fillRect(0, oy, 2 * u, u);
+    ctx.fillRect(0, oy, 1.6 * dest, dest * 0.7);
   }
   ctx.restore();
 }

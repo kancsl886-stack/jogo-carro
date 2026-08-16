@@ -108,7 +108,7 @@ function renderShop() {
       c2d.fillRect(122, y, 3, 10);
       c2d.fillRect(155, y, 3, 10);
     }
-    drawCarTop(c2d, 140, 72, 6, car, { u: 6, flash: true });
+    drawCarTop(c2d, 140, 72, 4, car, { u: 4, flash: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");

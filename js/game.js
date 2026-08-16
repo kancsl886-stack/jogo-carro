@@ -643,21 +643,21 @@ const Game = {
   drawEntities(ctx) {
     const playerZ = this.playerZ();
     const list = this.entities.filter((e) => !e.taken).sort((a, b) => b.z - a.z);
+    this._carsToDraw = [];
     let playerDrawn = false;
     const drawPlayer = () => {
       const p = this.toScreen(this.viewLaneX(), playerZ);
-      const hop = Math.round(this.viewJump() * 1.4);
-      if (this.powers.shield > 0) {
-        ctx.fillStyle = "#7dffb8";
-        ctx.fillRect(Math.round(p.x) - p.u * 8, Math.round(p.y) - hop - p.u * 13, p.u * 16, p.u * 26);
-        ctx.fillStyle = GRASS;
-        ctx.fillRect(Math.round(p.x) - p.u * 7, Math.round(p.y) - hop - p.u * 12, p.u * 14, p.u * 24);
-      }
-      drawCarTop(ctx, p.x, p.y - hop, p.u, this.car, {
-        u: p.u,
-        nitro: this.powers.nitro,
-        flash: this.flash % 0.4 < 0.2,
-        yaw: this.viewYaw(),
+      const hop = this.viewJump() * 1.4;
+      this._carsToDraw.push({
+        p,
+        hop,
+        car: this.car,
+        extras: {
+          nitro: this.powers.nitro,
+          flash: this.flash % 0.4 < 0.2,
+          yaw: this.viewYaw(),
+        },
+        shield: this.powers.shield > 0,
       });
     };
 
@@ -692,14 +692,17 @@ const Game = {
         for (let i = 0; i < 4; i++) {
           ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
         }
-      } else if (e.kind === "truck") {
-        drawCarTop(ctx, p.x, p.y, p.u, e.car || randomTrafficCar(), { u: p.u, brake: true });
       } else {
-        drawCarTop(ctx, p.x, p.y, p.u, e.car, { u: p.u, brake: true });
+        this._carsToDraw.push({
+          p,
+          hop: 0,
+          car: e.car || randomTrafficCar(),
+          extras: { brake: true },
+        });
       }
     }
     if (!playerDrawn) drawPlayer();
-    this.drawCop(ctx);
+    this.queueCop();
 
     for (const part of this.particles) {
       const p = this.toScreen(part.x, part.z);
@@ -708,12 +711,38 @@ const Game = {
     }
   },
 
-  drawCop(ctx) {
+  queueCop() {
     if (!this.cop || this.cop.z == null) return;
     const p = this.toScreen(this.cop.laneX, this.cop.z);
     if (p.y < -20 || p.y > this.gh + 28) return;
-    const flash = this.flash % 0.4 < 0.2;
-    drawCarTop(ctx, p.x, p.y, p.u, getCar("policia"), { u: p.u, flash, yaw: this.viewYaw() * 0.65 });
+    this._carsToDraw.push({
+      p,
+      hop: 0,
+      car: getCar("policia"),
+      extras: { flash: this.flash % 0.4 < 0.2, yaw: this.viewYaw() * 0.65 },
+    });
+  },
+
+  drawCarsHiRes() {
+    const out = this.ctx;
+    const k = this.w / this.gw;
+    const cars = (this._carsToDraw || []).slice().sort((a, b) => a.p.y - b.p.y);
+    for (const item of cars) {
+      const x = item.p.x * k;
+      const y = (item.p.y - (item.hop || 0)) * k;
+      if (y < -90 || y > this.h + 90) continue;
+      const lanePx = item.p.xScale * LANE_GAP * k;
+      const u = Math.max(3, Math.round(lanePx / 26));
+      if (item.shield) {
+        out.save();
+        out.fillStyle = "rgba(125, 255, 184, 0.28)";
+        out.beginPath();
+        out.ellipse(x, y, u * 8, u * 11, 0, 0, Math.PI * 2);
+        out.fill();
+        out.restore();
+      }
+      drawCarTop(out, x, y, u, item.car, Object.assign({ u }, item.extras));
+    }
   },
 
   draw(alpha) {
@@ -729,6 +758,7 @@ const Game = {
     this.drawRoadside(ctx);
     this.drawEntities(ctx);
     this.blit();
+    this.drawCarsHiRes();
     this._drawCam = null;
     this._drawLaneX = null;
     this._drawYaw = null;
@@ -747,7 +777,6 @@ const Game = {
     this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, 0);
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(2, Math.floor(road.laneW / 11));
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.66);
     const lane = road.laneW;
@@ -758,10 +787,12 @@ const Game = {
       { x: cx + lane, y: H * 0.30, car: { shape: "pickup", colors: { body: "#c42a1a", stripe } } },
       { x: cx - lane, y: H * 0.44, car: { shape: "sports", colors: { body: "#1fbf6a", stripe } } },
     ];
-    for (const d of demo) drawCarTop(ctx, d.x, d.y, u, d.car, { u });
-    drawCarTop(ctx, cx, cy, u, car, { u });
-    drawPixelDude(ctx, cx - 11 * u, cy + 2, Math.max(1, Math.round(u * 0.45)));
+    drawPixelDude(ctx, cx - 18, cy + 2, 2);
     this.blit();
+    const k = this.w / this.gw;
+    const u = Math.max(4, Math.round(road.laneW * k / 26));
+    for (const d of demo) drawCarTop(this.ctx, d.x * k, d.y * k, u, d.car, { u });
+    drawCarTop(this.ctx, cx * k, cy * k, u, car, { u });
   },
 
   idle() {

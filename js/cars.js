@@ -76,7 +76,7 @@ const CARS = [
     rarity: "epico",
     price: 4100,
     stats: { speed: 1.18, handling: 1.18, magnet: 1.1 },
-    colors: { body: "#f7f7f7", stripe: "#1a4b8c", glass: "#7fbfff", trim: "#111" },
+    colors: { body: "#1e3a6e", stripe: "#ffffff", glass: "#1a1a1a", trim: "#111" },
     shape: "police",
   },
   {
@@ -281,80 +281,102 @@ function drawVehicle(ctx, x, y, scale, car, extras) {
 
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
+  const u = Math.max(1, extras.u || Math.round(scale) || 2);
   const c = car.colors;
+  const ox = Math.round(x);
+  const oy = Math.round(y);
   ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
+
   if (extras.nitro) {
-    ctx.fillStyle = "rgba(60,240,255,0.5)";
-    ctx.beginPath();
-    ctx.moveTo(-7, 22);
-    ctx.lineTo(0, 40 + extras.nitro * 8);
-    ctx.lineTo(7, 22);
-    ctx.fill();
+    ctx.fillStyle = "#7fe7ff";
+    ctx.fillRect(ox - 2 * u, oy + 12 * u, 4 * u, 3 * u);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(ox - 1 * u, oy + 15 * u, 2 * u, 2 * u);
   }
-  ctx.fillStyle = "#1a1a1a";
-  roundRect(ctx, -18, -18, 6, 14, 2);
-  ctx.fill();
-  roundRect(ctx, 12, -18, 6, 14, 2);
-  ctx.fill();
-  roundRect(ctx, -18, 6, 6, 14, 2);
-  ctx.fill();
-  roundRect(ctx, 12, 6, 6, 14, 2);
-  ctx.fill();
+
+  ctx.fillStyle = "#111111";
+  ctx.fillRect(ox - 7 * u, oy - 6 * u, 2 * u, 5 * u);
+  ctx.fillRect(ox + 5 * u, oy - 6 * u, 2 * u, 5 * u);
+  ctx.fillRect(ox - 7 * u, oy + 2 * u, 2 * u, 5 * u);
+  ctx.fillRect(ox + 5 * u, oy + 2 * u, 2 * u, 5 * u);
 
   ctx.fillStyle = c.body;
-  if (car.shape === "formula") {
-    ctx.fillStyle = c.trim;
-    roundRect(ctx, -16, -6, 32, 10, 2);
-    ctx.fill();
-    ctx.fillStyle = c.body;
-    roundRect(ctx, -8, -24, 16, 48, 6);
-    ctx.fill();
-    ctx.fillStyle = c.stripe;
-    ctx.fillRect(-2.5, -22, 5, 44);
-  } else if (car.shape === "pickup") {
-    roundRect(ctx, -15, -24, 30, 28, 6);
-    ctx.fill();
-    ctx.fillStyle = c.trim;
-    roundRect(ctx, -14, 4, 28, 20, 3);
-    ctx.fill();
-  } else {
-    roundRect(ctx, -15, -26, 30, 52, 8);
-    ctx.fill();
-    ctx.fillStyle = c.stripe;
-    ctx.fillRect(-2.5, -18, 5, 36);
+  ctx.fillRect(ox - 5 * u, oy - 10 * u, 10 * u, 20 * u);
+  ctx.fillRect(ox - 4 * u, oy - 11 * u, 8 * u, 1 * u);
+  ctx.fillRect(ox - 4 * u, oy + 10 * u, 8 * u, 1 * u);
+
+  ctx.fillStyle = "#1a1a1a";
+  ctx.fillRect(ox - 4 * u, oy - 8 * u, 8 * u, 3 * u);
+  ctx.fillRect(ox - 3 * u, oy - 2 * u, 2 * u, 4 * u);
+  ctx.fillRect(ox + 1 * u, oy - 2 * u, 2 * u, 4 * u);
+  ctx.fillRect(ox - 4 * u, oy - 4 * u, 8 * u, 1 * u);
+
+  if (car.shape === "police" || car.shape === "muscle" || car.shape === "hyper" || car.shape === "formula") {
+    ctx.fillStyle = c.stripe === "#111" || c.stripe === "#111111" ? "#ffffff" : c.stripe;
+    ctx.fillRect(ox - 1 * u, oy - 10 * u, 2 * u, 20 * u);
   }
 
-  ctx.fillStyle = c.glass;
-  roundRect(ctx, -11, -18, 22, 12, 3);
-  ctx.fill();
-  if (car.shape !== "convertible" && car.shape !== "pickup") {
-    roundRect(ctx, -10, 6, 20, 10, 3);
-    ctx.fill();
-  }
-  ctx.fillStyle = "#fff6c2";
-  ctx.fillRect(-11, -26, 7, 3);
-  ctx.fillRect(4, -26, 7, 3);
-  ctx.fillStyle = extras.brake ? "#ff4d4d" : "#c0392b";
-  ctx.fillRect(-11, 24, 7, 3);
-  ctx.fillRect(4, 24, 7, 3);
+  ctx.fillStyle = "#fff3b0";
+  ctx.fillRect(ox - 4 * u, oy - 11 * u, 2 * u, 1 * u);
+  ctx.fillRect(ox + 2 * u, oy - 11 * u, 2 * u, 1 * u);
+  ctx.fillStyle = extras.brake ? "#ff3030" : "#ff7a2a";
+  ctx.fillRect(ox - 4 * u, oy + 10 * u, 2 * u, 1 * u);
+  ctx.fillRect(ox + 2 * u, oy + 10 * u, 2 * u, 1 * u);
+
   if (car.shape === "police") {
-    ctx.fillStyle = extras.flash ? "#ff4d4d" : "#4da3ff";
-    roundRect(ctx, -7, -3, 14, 6, 2);
-    ctx.fill();
+    ctx.fillStyle = extras.flash ? "#ff3030" : "#3080ff";
+    ctx.fillRect(ox - 2 * u, oy - 1 * u, 4 * u, 2 * u);
   }
   if (car.shape === "taxi") {
-    ctx.fillStyle = "#111";
-    roundRect(ctx, -8, -4, 16, 8, 2);
-    ctx.fill();
+    ctx.fillStyle = "#111111";
+    ctx.fillRect(ox - 2 * u, oy - 1 * u, 4 * u, 2 * u);
     ctx.fillStyle = "#f1c40f";
-    ctx.font = "bold 6px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("TAXI", 0, 0);
+    ctx.fillRect(ox - 1 * u, oy - 1 * u, 2 * u, 2 * u);
   }
   ctx.restore();
+}
+
+function drawPixelTree(ctx, x, y, u) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  const s = Math.max(1, u);
+  ctx.fillStyle = "#2f9e45";
+  ctx.fillRect(ox - 4 * s, oy - 3 * s, 8 * s, 6 * s);
+  ctx.fillRect(ox - 3 * s, oy - 5 * s, 6 * s, 2 * s);
+  ctx.fillRect(ox - 3 * s, oy + 3 * s, 6 * s, 2 * s);
+  ctx.fillStyle = "#1d7a32";
+  ctx.fillRect(ox - 2 * s, oy - 2 * s, 4 * s, 4 * s);
+}
+
+function drawPixelDude(ctx, x, y, u) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  ctx.fillStyle = "#e6b089";
+  ctx.fillRect(ox - 2 * u, oy - 10 * u, 4 * u, 4 * u);
+  ctx.fillStyle = "#1a1a1a";
+  ctx.fillRect(ox - 2 * u, oy - 11 * u, 5 * u, 2 * u);
+  ctx.fillStyle = "#3cf0ff";
+  ctx.fillRect(ox - 2 * u, oy - 10 * u, 5 * u, 1 * u);
+  ctx.fillStyle = "#2b3a67";
+  ctx.fillRect(ox - 2 * u, oy - 6 * u, 4 * u, 7 * u);
+  ctx.fillStyle = "#ff3d9a";
+  ctx.fillRect(ox - 2 * u, oy, 4 * u, 1 * u);
+  ctx.fillStyle = "#1b2438";
+  ctx.fillRect(ox - 2 * u, oy + 1 * u, 2 * u, 6 * u);
+  ctx.fillRect(ox + 1 * u, oy + 1 * u, 2 * u, 6 * u);
+  ctx.fillStyle = "#e6b089";
+  ctx.fillRect(ox + 2 * u, oy - 5 * u, 5 * u, 2 * u);
+}
+
+function trafficPalette() {
+  const bodies = ["#7ec8f0", "#ff8c32", "#1e3a6e", "#c4451c", "#8fd14a", "#f0d44c", "#d96ad0"];
+  const body = bodies[Math.floor(Math.random() * bodies.length)];
+  return {
+    body,
+    stripe: body === "#1e3a6e" ? "#ffffff" : "#111111",
+    glass: "#1a1a1a",
+    trim: "#111111",
+  };
 }
 
 function drawCarSide(ctx, x, y, scale, car) {
@@ -517,15 +539,4 @@ function drawCharacterLean(ctx, x, y, scale) {
   ctx.fillStyle = "#3cf0ff";
   ctx.fillRect(-8, -30, 18, 3);
   ctx.restore();
-}
-
-function trafficPalette() {
-  const bodies = ["#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#95a5a6", "#1abc9c", "#34495e"];
-  const body = bodies[Math.floor(Math.random() * bodies.length)];
-  return {
-    body,
-    stripe: "#111",
-    glass: "#b9e7ff",
-    trim: "#111",
-  };
 }

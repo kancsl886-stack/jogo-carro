@@ -97,7 +97,11 @@ function renderShop() {
       <button class="btn ${equipped ? "ghost" : "primary"}" type="button"></button>
     `;
     const canvas = card.querySelector("canvas");
-    drawVehicle(canvas.getContext("2d"), 140, 88, 2.4, car, { flash: true });
+    const c2d = canvas.getContext("2d");
+    c2d.imageSmoothingEnabled = false;
+    c2d.fillStyle = "#48c25a";
+    c2d.fillRect(0, 0, 280, 140);
+    drawCarTop(c2d, 140, 78, 5, car, { u: 5, flash: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");

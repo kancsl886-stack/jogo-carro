@@ -169,7 +169,7 @@ window.addEventListener("DOMContentLoaded", () => {
     $("hud-run-coins").textContent = info.coins;
     $("hud-speed").textContent = `${Math.floor(info.speed * 4.2)} km/h`;
     $("speed-fill").style.width = `${Math.min(100, (info.speed / 90) * 100)}%`;
-    const danger = 1 - (info.copGap - 1.5) / 18.5;
+    const danger = 1 - (info.copGap - 8.5) / 13.5;
     $("cop-fill").style.width = `${Math.max(8, Math.min(100, danger * 100))}%`;
     setPowerHud(info.powers);
   };

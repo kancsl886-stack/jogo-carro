@@ -35,7 +35,7 @@ const Game = {
     this.dead = false;
     this.flash = 0;
     this.caughtBy = null;
-    this.cop = { lane: 1, laneX: 0, gap: 16, siren: 0 };
+    this.cop = { lane: 1, laneX: 0, gap: 18, siren: 0 };
   },
 
   init(canvas) {
@@ -312,7 +312,7 @@ const Game = {
         if (Math.abs(dz) < 2.2 && Math.abs(dx) < 1.2) {
           e.taken = true;
           this.powers[e.power] = e.power === "nitro" ? 4 : 7;
-          if (e.power === "nitro" && this.cop) this.cop.gap = Math.min(20, this.cop.gap + 6);
+          if (e.power === "nitro" && this.cop) this.cop.gap = Math.min(22, this.cop.gap + 6);
           Sfx.power();
           this.burst(this.laneX, 0.6, playerZ, "#3cf0ff", 10);
         }
@@ -369,19 +369,16 @@ const Game = {
   updateCop(dt, playerZ) {
     if (!this.cop) return;
     const targetX = this.laneWorldX(this.lane);
-    this.cop.laneX += (targetX - this.cop.laneX) * Math.min(1, 5.2 * dt);
+    this.cop.laneX += (targetX - this.cop.laneX) * Math.min(1, 2.4 * dt);
     this.cop.lane = this.lane;
-    if (this.powers.nitro > 0) this.cop.gap += 5.2 * dt;
-    else this.cop.gap -= 0.38 * dt;
-    this.cop.gap = Math.max(1.5, Math.min(20, this.cop.gap));
+    if (this.powers.nitro > 0) this.cop.gap += 3.2 * dt;
+    else this.cop.gap -= 0.08 * dt;
+    this.cop.gap = Math.max(8.5, Math.min(22, this.cop.gap));
     this.cop.z = playerZ - this.cop.gap;
     this.cop.siren -= dt;
     if (this.cop.siren <= 0) {
       Sfx.siren();
-      this.cop.siren = 0.82;
-    }
-    if (this.invuln <= 0 && this.cop.gap <= 2.2 && Math.abs(this.cop.laneX - this.laneX) < 1.05) {
-      this.hit("police");
+      this.cop.siren = 1.15;
     }
   },
 
@@ -392,7 +389,7 @@ const Game = {
       this.invuln = 1.25;
       this.shake = 10;
       if (this.cop) {
-        this.cop.gap = reason === "police" ? Math.min(20, this.cop.gap + 7) : Math.max(1.6, this.cop.gap - 3);
+        this.cop.gap = Math.min(22, this.cop.gap + 2);
       }
       this.burst(this.laneX, 0.7, this.cameraZ + 8, "#5dffb0", 16);
       Sfx.power();

@@ -5,9 +5,9 @@ const CARS = [
     type: "Hatch",
     rarity: "comum",
     price: 0,
-    stats: { speed: 0.92, handling: 1.15, magnet: 1.05 },
+    stats: { speed: 0.72, handling: 0.86, magnet: 1.05 },
     colors: { body: "#6ec4f0", stripe: "#ffffff", glass: "#111111", trim: "#2b2b2b" },
-    shape: "hatch",
+    shape: "beetle",
   },
   {
     id: "uno",
@@ -15,7 +15,7 @@ const CARS = [
     type: "Hatch",
     rarity: "comum",
     price: 280,
-    stats: { speed: 1.0, handling: 1.2, magnet: 1.0 },
+    stats: { speed: 0.84, handling: 1.08, magnet: 1.0 },
     colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#1f1f1f" },
     shape: "hatch",
   },
@@ -25,7 +25,7 @@ const CARS = [
     type: "Sedan",
     rarity: "comum",
     price: 620,
-    stats: { speed: 1.08, handling: 1.05, magnet: 1.1 },
+    stats: { speed: 0.96, handling: 0.94, magnet: 1.1 },
     colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#111111", trim: "#111" },
     shape: "sedan",
   },
@@ -35,7 +35,7 @@ const CARS = [
     type: "Sedan",
     rarity: "raro",
     price: 980,
-    stats: { speed: 1.02, handling: 1.08, magnet: 1.35 },
+    stats: { speed: 0.88, handling: 1.02, magnet: 1.42 },
     colors: { body: "#f0c420", stripe: "#ffffff", glass: "#111111", trim: "#222" },
     shape: "taxi",
   },
@@ -45,7 +45,7 @@ const CARS = [
     type: "Pickup",
     rarity: "raro",
     price: 1450,
-    stats: { speed: 1.06, handling: 0.98, magnet: 1.45 },
+    stats: { speed: 0.9, handling: 0.78, magnet: 1.5 },
     colors: { body: "#c42a1a", stripe: "#ffffff", glass: "#111111", trim: "#1a1a1a" },
     shape: "pickup",
   },
@@ -55,7 +55,7 @@ const CARS = [
     type: "SUV",
     rarity: "raro",
     price: 1900,
-    stats: { speed: 1.04, handling: 0.95, magnet: 1.55 },
+    stats: { speed: 0.86, handling: 0.74, magnet: 1.6 },
     colors: { body: "#1fbf6a", stripe: "#ffffff", glass: "#111111", trim: "#0d1f14" },
     shape: "suv",
   },
@@ -65,7 +65,7 @@ const CARS = [
     type: "Muscle",
     rarity: "epico",
     price: 3200,
-    stats: { speed: 1.22, handling: 1.0, magnet: 0.95 },
+    stats: { speed: 1.18, handling: 0.88, magnet: 0.9 },
     colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#111111", trim: "#0a0a0a" },
     shape: "muscle",
   },
@@ -75,7 +75,7 @@ const CARS = [
     type: "Polícia",
     rarity: "epico",
     price: 4100,
-    stats: { speed: 1.18, handling: 1.18, magnet: 1.1 },
+    stats: { speed: 1.12, handling: 1.24, magnet: 1.1 },
     colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#1a1a1a", trim: "#111" },
     shape: "police",
   },
@@ -85,7 +85,7 @@ const CARS = [
     type: "Esportivo",
     rarity: "epico",
     price: 5600,
-    stats: { speed: 1.28, handling: 1.25, magnet: 1.05 },
+    stats: { speed: 1.28, handling: 1.38, magnet: 1.05 },
     colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#062022" },
     shape: "sports",
   },
@@ -95,7 +95,7 @@ const CARS = [
     type: "Conversível",
     rarity: "epico",
     price: 7200,
-    stats: { speed: 1.24, handling: 1.22, magnet: 1.2 },
+    stats: { speed: 1.2, handling: 1.46, magnet: 1.2 },
     colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#2a1020" },
     shape: "convertible",
   },
@@ -105,7 +105,7 @@ const CARS = [
     type: "Supercarro",
     rarity: "lendario",
     price: 9800,
-    stats: { speed: 1.36, handling: 1.3, magnet: 1.15 },
+    stats: { speed: 1.42, handling: 1.4, magnet: 1.15 },
     colors: { body: "#c42a1a", stripe: "#ffffff", glass: "#111111", trim: "#16081e" },
     shape: "super",
   },
@@ -115,7 +115,7 @@ const CARS = [
     type: "Fórmula",
     rarity: "lendario",
     price: 13500,
-    stats: { speed: 1.45, handling: 1.4, magnet: 0.85 },
+    stats: { speed: 1.58, handling: 1.55, magnet: 0.8 },
     colors: { body: "#1fbf6a", stripe: "#ffffff", glass: "#111111", trim: "#c0392b" },
     shape: "formula",
   },
@@ -125,7 +125,7 @@ const CARS = [
     type: "Hypercar",
     rarity: "lendario",
     price: 18000,
-    stats: { speed: 1.5, handling: 1.35, magnet: 1.3 },
+    stats: { speed: 1.64, handling: 1.48, magnet: 1.3 },
     colors: { body: "#6ec4f0", stripe: "#ffffff", glass: "#111111", trim: "#3cf0ff" },
     shape: "hyper",
   },
@@ -297,52 +297,220 @@ function blitSprite(ctx, ox, oy, u, rows, palette) {
   }
 }
 
-const CONVERTIBLE_STRIPE = [
-  ".....Y.Y.....",
-  "...BBBBBBB...",
-  "..BTTBBBTTB..",
-  "..BTTBBBTTB..",
-  ".WBTTKKKTTBW.",
-  "..BTTKKKTTB..",
-  "..BTTBBBTTB..",
-  ".BTTSS.SSTTB.",
-  ".BTTSS.SSTTB.",
-  "..BTTBBBTTB..",
-  ".WBTTBBBTTBW.",
-  "..BTTBBBTTB..",
-  "..BR.TTT.RB..",
-  "...BBBBBBB...",
-];
+const SPRITES = {
+  beetle: [
+    ".....Y.Y.....",
+    "....BBBBB....",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    ".W.BBSS.SSBW.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "....BBBBB....",
+  ],
+  hatch: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    ".W.B.SS.SS.W.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  sedan: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BBBBBBBBB..",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    "...BBSS.SSB..",
+    ".W.BBBBBBB.W.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  taxi: [
+    ".....Y.Y.....",
+    "....CAAAC....",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    "...BBSS.SSB..",
+    ".W.BBBBBBB.W.",
+    "...B.BBB.B...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  pickup: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    ".W.BBSS.SSBW.",
+    "...BBBBBBB...",
+    "...DDDDDDD...",
+    "...DR...RD...",
+    "...DDDDDDD...",
+  ],
+  suv: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BBKKKKKBB..",
+    ".WBBKKKKKBBW.",
+    "..BBKKKKKBB..",
+    "..BBBBBBBBB..",
+    ".W.BBSS.SSBW.",
+    "..BBBBBBBBB..",
+    "..BR.....RB..",
+    "...BBBBBBB...",
+  ],
+  muscle: [
+    ".....Y.Y.....",
+    "...BBTBTBB...",
+    "..BBTTBTTBB..",
+    ".W.BTTKTTB.W.",
+    "...BTTKTTB...",
+    "..BBTTBTTBB..",
+    ".W.BTSS.STBW.",
+    "..BBTTBTTBB..",
+    ".W.BBTBTBB.W.",
+    "...BR.T.RB...",
+    "...BBBBBBB...",
+  ],
+  police: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BBBBBBBBB..",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...TTBBBTT...",
+    "...BBSS.SSB..",
+    ".W.BBBBBBB.W.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  sports: [
+    "....Y...Y....",
+    "...BBBBBBB...",
+    "..BTTBBBTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTKKKTTB..",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".WBTTBBBTTBW.",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+  convertible: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BTTBBBTTB..",
+    "..BTTBBBTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTKKKTTB..",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".BTTSS.SSTTB.",
+    "..BTTBBBTTB..",
+    ".WBTTBBBTTBW.",
+    "..BTTBBBTTB..",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+  super: [
+    "....Y...Y....",
+    "....BBBBB....",
+    "...BTTBTTB...",
+    "..BTTKKKTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".WBTTBBBTTBW.",
+    "..BTTBBBTTB..",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+  formula: [
+    ".....Y.Y.....",
+    "......C......",
+    ".....BBB.....",
+    "....BBKBB....",
+    "..W.BBKBB.W..",
+    "....BBBBB....",
+    "..WBBSS.SBBW.",
+    "....BBBBB....",
+    ".....BRB.....",
+    "......C......",
+  ],
+  hyper: [
+    "....Y...Y....",
+    "...BTTBTTB...",
+    "..BTTKKKTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".WBTTBBBTTBW.",
+    "..BTTCCCCTT..",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+};
+
+function spriteFor(car) {
+  return SPRITES[car && car.shape] || SPRITES.hatch;
+}
 
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
   const u = Math.max(1, extras.u || Math.round(scale) || 2);
-  const c = car.colors;
+  const c = car.colors || {};
+  const rows = spriteFor(car);
   const palette = {
-    B: c.body,
+    B: c.body || "#6ec4f0",
     K: "#111111",
     I: "#2a2a2a",
     S: "#1a1a1a",
     W: "#111111",
     Y: "#ffe14a",
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
-    T: "#ffffff",
+    T: c.stripe || "#ffffff",
+    C: c.trim || "#222222",
+    A: "#f1c40f",
+    D: "#3a3a3a",
   };
   if (extras.nitro) {
+    const tail = Math.floor(rows.length / 2) * u;
     ctx.fillStyle = "#7fe7ff";
-    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + 8 * u, 4 * u, 3 * u);
+    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + tail - u, 4 * u, 3 * u);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(Math.round(x) - u, Math.round(y) + 11 * u, 2 * u, 2 * u);
+    ctx.fillRect(Math.round(x) - u, Math.round(y) + tail + 2 * u, 2 * u, 2 * u);
   }
-  blitSprite(ctx, x, y, u, CONVERTIBLE_STRIPE, palette);
+  blitSprite(ctx, x, y, u, rows, palette);
   if (car.shape === "police") {
     const ox = Math.round(x);
-    const oy = Math.round(y);
+    const oy = Math.round(y) - Math.floor(rows.length / 2) * u + 2 * u;
     ctx.fillStyle = extras.flash ? "#ff3030" : "#3d8bff";
-    ctx.fillRect(ox - 2 * u, oy - 2 * u, 2 * u, u);
+    ctx.fillRect(ox - 2 * u, oy, 2 * u, u);
     ctx.fillStyle = extras.flash ? "#3d8bff" : "#ff3030";
-    ctx.fillRect(ox, oy - 2 * u, 2 * u, u);
+    ctx.fillRect(ox, oy, 2 * u, u);
   }
+}
+
+function randomTrafficCar() {
+  const shapes = ["beetle", "hatch", "sedan", "pickup", "suv", "sports", "convertible", "muscle"];
+  return {
+    shape: shapes[Math.floor(Math.random() * shapes.length)],
+    colors: trafficPalette(),
+  };
 }
 
 function fillDisk(ctx, ox, oy, r, color) {

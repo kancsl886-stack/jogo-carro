@@ -67,9 +67,9 @@ let shopFilter = "all";
 function renderShop() {
   const grid = $("shop-grid");
   grid.innerHTML = "";
-  const maxSpeed = 1.5;
-  const maxHand = 1.4;
-  const maxMag = 1.55;
+  const maxSpeed = 1.64;
+  const maxHand = 1.55;
+  const maxMag = 1.6;
 
   CARS.filter((car) => {
     if (shopFilter === "all") return true;

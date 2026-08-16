@@ -762,11 +762,11 @@ canvas {
       <div class="howto">
         <article>
           <h3 data-i18n="controls">Controles</h3>
-          <p data-i18n="controlsText">Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima.</p>
+          <p data-i18n="controlsText">Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima. A pista faz curvas: carros com curva melhor seguram melhor a faixa.</p>
         </article>
         <article>
           <h3 data-i18n="goal">Objetivo</h3>
-          <p data-i18n="goalText">Corra o máximo possível sem bater. Moedas compram carros na loja. Cada modelo muda velocidade, manobra e ímã de moedas.</p>
+          <p data-i18n="goalText">Corra o máximo possível sem bater. Moedas compram carros na loja. Cada modelo muda velocidade e curva.</p>
         </article>
         <article>
           <h3 data-i18n="powerups">Power-ups</h3>
@@ -809,9 +809,9 @@ const CARS = [
     type: "Hatch",
     rarity: "comum",
     price: 0,
-    stats: { speed: 0.92, handling: 1.15, magnet: 1.05 },
+    stats: { speed: 0.72, handling: 0.86, magnet: 1.05 },
     colors: { body: "#6ec4f0", stripe: "#ffffff", glass: "#111111", trim: "#2b2b2b" },
-    shape: "hatch",
+    shape: "beetle",
   },
   {
     id: "uno",
@@ -819,7 +819,7 @@ const CARS = [
     type: "Hatch",
     rarity: "comum",
     price: 280,
-    stats: { speed: 1.0, handling: 1.2, magnet: 1.0 },
+    stats: { speed: 0.84, handling: 1.08, magnet: 1.0 },
     colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#1f1f1f" },
     shape: "hatch",
   },
@@ -829,7 +829,7 @@ const CARS = [
     type: "Sedan",
     rarity: "comum",
     price: 620,
-    stats: { speed: 1.08, handling: 1.05, magnet: 1.1 },
+    stats: { speed: 0.96, handling: 0.94, magnet: 1.1 },
     colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#111111", trim: "#111" },
     shape: "sedan",
   },
@@ -839,7 +839,7 @@ const CARS = [
     type: "Sedan",
     rarity: "raro",
     price: 980,
-    stats: { speed: 1.02, handling: 1.08, magnet: 1.35 },
+    stats: { speed: 0.88, handling: 1.02, magnet: 1.42 },
     colors: { body: "#f0c420", stripe: "#ffffff", glass: "#111111", trim: "#222" },
     shape: "taxi",
   },
@@ -849,7 +849,7 @@ const CARS = [
     type: "Pickup",
     rarity: "raro",
     price: 1450,
-    stats: { speed: 1.06, handling: 0.98, magnet: 1.45 },
+    stats: { speed: 0.9, handling: 0.78, magnet: 1.5 },
     colors: { body: "#c42a1a", stripe: "#ffffff", glass: "#111111", trim: "#1a1a1a" },
     shape: "pickup",
   },
@@ -859,7 +859,7 @@ const CARS = [
     type: "SUV",
     rarity: "raro",
     price: 1900,
-    stats: { speed: 1.04, handling: 0.95, magnet: 1.55 },
+    stats: { speed: 0.86, handling: 0.74, magnet: 1.6 },
     colors: { body: "#1fbf6a", stripe: "#ffffff", glass: "#111111", trim: "#0d1f14" },
     shape: "suv",
   },
@@ -869,7 +869,7 @@ const CARS = [
     type: "Muscle",
     rarity: "epico",
     price: 3200,
-    stats: { speed: 1.22, handling: 1.0, magnet: 0.95 },
+    stats: { speed: 1.18, handling: 0.88, magnet: 0.9 },
     colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#111111", trim: "#0a0a0a" },
     shape: "muscle",
   },
@@ -879,7 +879,7 @@ const CARS = [
     type: "Polícia",
     rarity: "epico",
     price: 4100,
-    stats: { speed: 1.18, handling: 1.18, magnet: 1.1 },
+    stats: { speed: 1.12, handling: 1.24, magnet: 1.1 },
     colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#1a1a1a", trim: "#111" },
     shape: "police",
   },
@@ -889,7 +889,7 @@ const CARS = [
     type: "Esportivo",
     rarity: "epico",
     price: 5600,
-    stats: { speed: 1.28, handling: 1.25, magnet: 1.05 },
+    stats: { speed: 1.28, handling: 1.38, magnet: 1.05 },
     colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#062022" },
     shape: "sports",
   },
@@ -899,7 +899,7 @@ const CARS = [
     type: "Conversível",
     rarity: "epico",
     price: 7200,
-    stats: { speed: 1.24, handling: 1.22, magnet: 1.2 },
+    stats: { speed: 1.2, handling: 1.46, magnet: 1.2 },
     colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#2a1020" },
     shape: "convertible",
   },
@@ -909,7 +909,7 @@ const CARS = [
     type: "Supercarro",
     rarity: "lendario",
     price: 9800,
-    stats: { speed: 1.36, handling: 1.3, magnet: 1.15 },
+    stats: { speed: 1.42, handling: 1.4, magnet: 1.15 },
     colors: { body: "#c42a1a", stripe: "#ffffff", glass: "#111111", trim: "#16081e" },
     shape: "super",
   },
@@ -919,7 +919,7 @@ const CARS = [
     type: "Fórmula",
     rarity: "lendario",
     price: 13500,
-    stats: { speed: 1.45, handling: 1.4, magnet: 0.85 },
+    stats: { speed: 1.58, handling: 1.55, magnet: 0.8 },
     colors: { body: "#1fbf6a", stripe: "#ffffff", glass: "#111111", trim: "#c0392b" },
     shape: "formula",
   },
@@ -929,7 +929,7 @@ const CARS = [
     type: "Hypercar",
     rarity: "lendario",
     price: 18000,
-    stats: { speed: 1.5, handling: 1.35, magnet: 1.3 },
+    stats: { speed: 1.64, handling: 1.48, magnet: 1.3 },
     colors: { body: "#6ec4f0", stripe: "#ffffff", glass: "#111111", trim: "#3cf0ff" },
     shape: "hyper",
   },
@@ -1101,52 +1101,220 @@ function blitSprite(ctx, ox, oy, u, rows, palette) {
   }
 }
 
-const CONVERTIBLE_STRIPE = [
-  ".....Y.Y.....",
-  "...BBBBBBB...",
-  "..BTTBBBTTB..",
-  "..BTTBBBTTB..",
-  ".WBTTKKKTTBW.",
-  "..BTTKKKTTB..",
-  "..BTTBBBTTB..",
-  ".BTTSS.SSTTB.",
-  ".BTTSS.SSTTB.",
-  "..BTTBBBTTB..",
-  ".WBTTBBBTTBW.",
-  "..BTTBBBTTB..",
-  "..BR.TTT.RB..",
-  "...BBBBBBB...",
-];
+const SPRITES = {
+  beetle: [
+    ".....Y.Y.....",
+    "....BBBBB....",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    ".W.BBSS.SSBW.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "....BBBBB....",
+  ],
+  hatch: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    ".W.B.SS.SS.W.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  sedan: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BBBBBBBBB..",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    "...BBSS.SSB..",
+    ".W.BBBBBBB.W.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  taxi: [
+    ".....Y.Y.....",
+    "....CAAAC....",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    "...BBSS.SSB..",
+    ".W.BBBBBBB.W.",
+    "...B.BBB.B...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  pickup: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...BBBBBBB...",
+    ".W.BBSS.SSBW.",
+    "...BBBBBBB...",
+    "...DDDDDDD...",
+    "...DR...RD...",
+    "...DDDDDDD...",
+  ],
+  suv: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BBKKKKKBB..",
+    ".WBBKKKKKBBW.",
+    "..BBKKKKKBB..",
+    "..BBBBBBBBB..",
+    ".W.BBSS.SSBW.",
+    "..BBBBBBBBB..",
+    "..BR.....RB..",
+    "...BBBBBBB...",
+  ],
+  muscle: [
+    ".....Y.Y.....",
+    "...BBTBTBB...",
+    "..BBTTBTTBB..",
+    ".W.BTTKTTB.W.",
+    "...BTTKTTB...",
+    "..BBTTBTTBB..",
+    ".W.BTSS.STBW.",
+    "..BBTTBTTBB..",
+    ".W.BBTBTBB.W.",
+    "...BR.T.RB...",
+    "...BBBBBBB...",
+  ],
+  police: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BBBBBBBBB..",
+    ".W.BBKKKBB.W.",
+    "...BBKKKBB...",
+    "...TTBBBTT...",
+    "...BBSS.SSB..",
+    ".W.BBBBBBB.W.",
+    "...BBBBBBB...",
+    "...BR...RB...",
+    "...BBBBBBB...",
+  ],
+  sports: [
+    "....Y...Y....",
+    "...BBBBBBB...",
+    "..BTTBBBTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTKKKTTB..",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".WBTTBBBTTBW.",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+  convertible: [
+    ".....Y.Y.....",
+    "...BBBBBBB...",
+    "..BTTBBBTTB..",
+    "..BTTBBBTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTKKKTTB..",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".BTTSS.SSTTB.",
+    "..BTTBBBTTB..",
+    ".WBTTBBBTTBW.",
+    "..BTTBBBTTB..",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+  super: [
+    "....Y...Y....",
+    "....BBBBB....",
+    "...BTTBTTB...",
+    "..BTTKKKTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".WBTTBBBTTBW.",
+    "..BTTBBBTTB..",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+  formula: [
+    ".....Y.Y.....",
+    "......C......",
+    ".....BBB.....",
+    "....BBKBB....",
+    "..W.BBKBB.W..",
+    "....BBBBB....",
+    "..WBBSS.SBBW.",
+    "....BBBBB....",
+    ".....BRB.....",
+    "......C......",
+  ],
+  hyper: [
+    "....Y...Y....",
+    "...BTTBTTB...",
+    "..BTTKKKTTB..",
+    ".WBTTKKKTTBW.",
+    "..BTTBBBTTB..",
+    ".BTTSS.SSTTB.",
+    ".WBTTBBBTTBW.",
+    "..BTTCCCCTT..",
+    "..BR.TTT.RB..",
+    "...BBBBBBB...",
+  ],
+};
+
+function spriteFor(car) {
+  return SPRITES[car && car.shape] || SPRITES.hatch;
+}
 
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
   const u = Math.max(1, extras.u || Math.round(scale) || 2);
-  const c = car.colors;
+  const c = car.colors || {};
+  const rows = spriteFor(car);
   const palette = {
-    B: c.body,
+    B: c.body || "#6ec4f0",
     K: "#111111",
     I: "#2a2a2a",
     S: "#1a1a1a",
     W: "#111111",
     Y: "#ffe14a",
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
-    T: "#ffffff",
+    T: c.stripe || "#ffffff",
+    C: c.trim || "#222222",
+    A: "#f1c40f",
+    D: "#3a3a3a",
   };
   if (extras.nitro) {
+    const tail = Math.floor(rows.length / 2) * u;
     ctx.fillStyle = "#7fe7ff";
-    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + 8 * u, 4 * u, 3 * u);
+    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + tail - u, 4 * u, 3 * u);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(Math.round(x) - u, Math.round(y) + 11 * u, 2 * u, 2 * u);
+    ctx.fillRect(Math.round(x) - u, Math.round(y) + tail + 2 * u, 2 * u, 2 * u);
   }
-  blitSprite(ctx, x, y, u, CONVERTIBLE_STRIPE, palette);
+  blitSprite(ctx, x, y, u, rows, palette);
   if (car.shape === "police") {
     const ox = Math.round(x);
-    const oy = Math.round(y);
+    const oy = Math.round(y) - Math.floor(rows.length / 2) * u + 2 * u;
     ctx.fillStyle = extras.flash ? "#ff3030" : "#3d8bff";
-    ctx.fillRect(ox - 2 * u, oy - 2 * u, 2 * u, u);
+    ctx.fillRect(ox - 2 * u, oy, 2 * u, u);
     ctx.fillStyle = extras.flash ? "#3d8bff" : "#ff3030";
-    ctx.fillRect(ox, oy - 2 * u, 2 * u, u);
+    ctx.fillRect(ox, oy, 2 * u, u);
   }
+}
+
+function randomTrafficCar() {
+  const shapes = ["beetle", "hatch", "sedan", "pickup", "suv", "sports", "convertible", "muscle"];
+  return {
+    shape: shapes[Math.floor(Math.random() * shapes.length)],
+    colors: trafficPalette(),
+  };
 }
 
 function fillDisk(ctx, ox, oy, r, color) {
@@ -1468,10 +1636,10 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, no asfalto",
     controls: "Controles",
     controlsText:
-      "Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima.",
+      "Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima. A pista faz curvas: carros com curva melhor seguram melhor a faixa.",
     goal: "Objetivo",
     goalText:
-      "Corra o máximo possível sem bater e sem deixar a polícia te alcançar. Moedas compram carros na loja.",
+      "Corra o máximo possível sem bater e sem deixar a polícia te alcançar. Moedas compram carros. Cada modelo tem velocidade e curva diferentes.",
     powerups: "Power-ups",
     powerupsText: "Ímã puxa moedas. Escudo salva uma batida. Nitro dispara a velocidade e afasta a polícia.",
     paused: "Pausado",
@@ -1497,7 +1665,7 @@ const I18N = {
     epico: "Épico",
     lendario: "Lendário",
     speed: "Velocidade",
-    handling: "Manobra",
+    handling: "Curva",
     magnet: "Ímã",
     buy: "Comprar",
     equip: "Equipar",
@@ -1529,9 +1697,10 @@ const I18N = {
     howtoSub: "Subway Surfers style, on the road",
     controls: "Controls",
     controlsText:
-      "Change lanes with arrows or A/D. Jump low obstacles with ↑ or W. On mobile, swipe sideways and up.",
+      "Change lanes with arrows or A/D. Jump low obstacles with ↑ or W. On mobile, swipe sideways and up. The road bends: cars with better cornering hold the lane.",
     goal: "Goal",
-    goalText: "Run as far as you can without crashing or getting caught by the police. Coins buy cars in the shop.",
+    goalText:
+      "Run as far as you can without crashing or getting caught by the police. Coins buy cars. Each model has different speed and cornering.",
     powerups: "Power-ups",
     powerupsText: "Magnet pulls coins. Shield saves one crash. Nitro boosts speed and pushes the police back.",
     paused: "Paused",
@@ -1557,7 +1726,7 @@ const I18N = {
     epico: "Epic",
     lendario: "Legendary",
     speed: "Speed",
-    handling: "Handling",
+    handling: "Cornering",
     magnet: "Magnet",
     buy: "Buy",
     equip: "Equip",
@@ -1589,10 +1758,10 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, en el asfalto",
     controls: "Controles",
     controlsText:
-      "Cambia de carril con las flechas o A/D. Salta obstáculos bajos con ↑ o W. En el celular, desliza a los lados y hacia arriba.",
+      "Cambia de carril con las flechas o A/D. Salta obstáculos bajos con ↑ o W. En el celular, desliza a los lados y hacia arriba. La pista tiene curvas: autos con mejor curva sostienen el carril.",
     goal: "Objetivo",
     goalText:
-      "Corre lo más lejos posible sin chocar y sin que te alcance la policía. Las monedas compran autos en la tienda.",
+      "Corre lo más lejos posible sin chocar y sin que te alcance la policía. Las monedas compran autos. Cada modelo tiene velocidad y curva distintas.",
     powerups: "Power-ups",
     powerupsText: "Imán atrae monedas. Escudo salva un choque. Nitro sube la velocidad y aleja a la policía.",
     paused: "Pausa",
@@ -1618,7 +1787,7 @@ const I18N = {
     epico: "Épico",
     lendario: "Legendario",
     speed: "Velocidad",
-    handling: "Manejo",
+    handling: "Curva",
     magnet: "Imán",
     buy: "Comprar",
     equip: "Equipar",
@@ -1884,6 +2053,18 @@ const Game = {
     return this.cameraZ + 8;
   },
 
+  roadBend(z) {
+    const start = 48;
+    if (z < start) return 0;
+    const t = z - start;
+    const fade = Math.min(1, t / 36);
+    const a = Math.sin(t / 64) * 2.9;
+    const b = Math.sin(t / 118 + 1.15) * 2.0;
+    const c = Math.sin(t / 196 + 0.4) * 0.9;
+    const pulse = 0.6 + 0.4 * Math.sin(t / 250);
+    return (a + b + c) * pulse * fade;
+  },
+
   toScreen(worldX, z) {
     const W = this.gw || this.w;
     const H = this.gh || this.h;
@@ -1891,8 +2072,10 @@ const Game = {
     const zScale = H / 52;
     const lanePx = xScale * LANE_GAP;
     const u = Math.max(1, Math.floor(lanePx / 13));
+    const cam = this.roadBend(this.playerZ());
+    const bend = (this.roadBend(z) - cam) * xScale;
     return {
-      x: W / 2 + worldX * xScale,
+      x: W / 2 + worldX * xScale + bend,
       y: H * 0.78 - (z - this.playerZ()) * zScale,
       s: u,
       u,
@@ -1949,7 +2132,7 @@ const Game = {
           h: 1.6,
           low: false,
           speed: Math.max(3, this.speed * 0.22),
-          car: { shape: "convertible", colors: trafficPalette() },
+          car: randomTrafficCar(),
         });
       }
       const gap = 42 + Math.random() * 16 - Math.min(24, this.distance / 260);
@@ -1987,10 +2170,7 @@ const Game = {
       h: 1.15,
       low: false,
       speed: Math.max(3, this.speed * (0.28 + Math.random() * 0.18)),
-      car: {
-        shape: "convertible",
-        colors: trafficPalette(),
-      },
+      car: randomTrafficCar(),
     };
   },
 
@@ -2001,14 +2181,22 @@ const Game = {
 
     const nitro = this.powers.nitro > 0 ? 1.35 : 1;
     const ramp = Math.min(1, this.distance / 4200);
-    this.baseSpeed = 16 + 48 * ramp;
+    this.baseSpeed = 13 + 40 * ramp;
     this.speed = this.baseSpeed * this.car.stats.speed * nitro;
     this.cameraZ += this.speed * dt;
     this.distance = this.cameraZ;
 
     const targetX = this.laneWorldX(this.lane);
-    const handle = 10 * this.car.stats.handling;
+    const handle = 5 + 18 * this.car.stats.handling;
     this.laneX += (targetX - this.laneX) * Math.min(1, handle * dt);
+    const kappa = this.roadBend(this.playerZ() + 10) - this.roadBend(this.playerZ() - 2);
+    const grip = Math.max(0.2, this.car.stats.handling);
+    this.laneX -= kappa * dt * (2.6 / grip);
+    const limit = LANE_GAP * 1.55;
+    if (Math.abs(this.laneX) > limit) {
+      this.laneX = Math.sign(this.laneX) * limit;
+      this.shake = Math.max(this.shake, 5);
+    }
 
     this.jumpVel -= 46 * dt;
     this.jump = Math.max(0, this.jump + this.jumpVel * dt);
@@ -2096,7 +2284,7 @@ const Game = {
 
   updateCop(dt, playerZ) {
     if (!this.cop) return;
-    const targetX = this.laneWorldX(this.lane);
+    const targetX = this.laneX;
     this.cop.laneX += (targetX - this.cop.laneX) * Math.min(1, 2.4 * dt);
     this.cop.lane = this.lane;
     if (this.powers.nitro > 0) this.cop.gap += 3.2 * dt;
@@ -2165,36 +2353,45 @@ const Game = {
     const mid = this.toScreen(0, this.playerZ());
     const laneW = Math.round(mid.xScale * LANE_GAP);
     const roadW = laneW * LANES;
-    const left = Math.round(this.gw / 2 - roadW / 2);
     const rumble = Math.max(5, Math.round(laneW * 0.22));
     const zScale = mid.zScale;
+    const xScale = mid.xScale;
     const scroll = cameraZ == null ? this.cameraZ : cameraZ;
-
-    ctx.fillStyle = "#7a7a7a";
-    ctx.fillRect(left, 0, roadW, this.gh);
-
+    const playerZ = scroll + 8;
+    const camBend = this.roadBend(playerZ);
+    const H = this.gh;
+    const leftAt = new Array(H);
     const block = rumble;
     const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
-    for (let y = offset - block * 2; y < this.gh + block; y += block) {
-      const red = Math.floor((y - offset) / block) % 2 === 0;
-      ctx.fillStyle = red ? "#e53935" : "#ffffff";
-      ctx.fillRect(left - rumble, y, rumble, block);
-      ctx.fillRect(left + roadW, y, rumble, block);
-    }
-
     const dashW = Math.max(2, Math.round(laneW * 0.08));
     const dashH = Math.max(8, Math.round(laneW * 0.42));
     const gap = Math.max(6, Math.round(laneW * 0.3));
     const period = dashH + gap;
     const dashOff = Math.round(((scroll * zScale) % period + period) % period);
-    ctx.fillStyle = "#ffffff";
-    for (let lane = 1; lane < LANES; lane++) {
-      const x = left + lane * laneW - Math.floor(dashW / 2);
-      for (let y = dashOff - period; y < this.gh + period; y += period) {
-        ctx.fillRect(x, y, dashW, dashH);
+
+    for (let y = 0; y < H; y++) {
+      const z = playerZ + (H * 0.78 - y) / zScale;
+      const left = Math.round(this.gw / 2 - roadW / 2 + (this.roadBend(z) - camBend) * xScale);
+      leftAt[y] = left;
+      ctx.fillStyle = "#7a7a7a";
+      ctx.fillRect(left, y, roadW, 1);
+      const red = Math.floor((y - offset) / block) % 2 === 0;
+      ctx.fillStyle = red ? "#e53935" : "#ffffff";
+      ctx.fillRect(left - rumble, y, rumble, 1);
+      ctx.fillRect(left + roadW, y, rumble, 1);
+      const dashPhase = ((y - dashOff) % period + period) % period;
+      if (dashPhase < dashH) {
+        ctx.fillStyle = "#ffffff";
+        for (let lane = 1; lane < LANES; lane++) {
+          ctx.fillRect(left + lane * laneW - Math.floor(dashW / 2), y, dashW, 1);
+        }
       }
     }
-    return { left, roadW, laneW, rumble };
+
+    const midY = Math.min(H - 1, Math.max(0, Math.round(H * 0.78)));
+    const left = leftAt[midY];
+    this._leftAt = leftAt;
+    return { left, roadW, laneW, rumble, leftAt };
   },
 
   drawRoad(ctx) {
@@ -2206,15 +2403,22 @@ const Game = {
     const off = ((scroll % period) + period) % period;
     const count = Math.ceil(this.gh / period) + 4;
     const inGrass = (x) => x > 3 && x < this.gw - 3;
+    const leftAt = this._leftAt;
+    const leftAtY = (y) => {
+      if (leftAt && y >= 0 && y < leftAt.length) return leftAt[y];
+      return left;
+    };
     for (let i = -2; i < count; i++) {
       const col = ((i % 3) + 3) % 3;
       const yL = Math.round(i * period + off);
       const yR = Math.round(i * period + off + 4);
       const size = 1 + (Math.abs(i) % 2);
-      const xl = left - rumble - 10 - col * 10;
-      const xr = left + roadW + rumble + 10 + col * 10;
-      const xl2 = left - rumble - 32;
-      const xr2 = left + roadW + rumble + 32;
+      const leftL = leftAtY(yL);
+      const leftR = leftAtY(yR);
+      const xl = leftL - rumble - 10 - col * 10;
+      const xr = leftR + roadW + rumble + 10 + col * 10;
+      const xl2 = leftL - rumble - 32;
+      const xr2 = leftR + roadW + rumble + 32;
       if (inGrass(xl)) {
         if (i % 4 === 0) drawPixelBush(ctx, xl, yL);
         else drawPixelTree(ctx, xl, yL, size);
@@ -2286,7 +2490,7 @@ const Game = {
           ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
         }
       } else if (e.kind === "truck") {
-        drawCarTop(ctx, p.x, p.y, p.u, e.car || { shape: "convertible", colors: trafficPalette() }, { u: p.u, brake: true });
+        drawCarTop(ctx, p.x, p.y, p.u, e.car || randomTrafficCar(), { u: p.u, brake: true });
       } else {
         drawCarTop(ctx, p.x, p.y, p.u, e.car, { u: p.u, brake: true });
       }
@@ -2337,10 +2541,10 @@ const Game = {
     const lane = road.laneW;
     const stripe = "#ffffff";
     const demo = [
-      { x: cx - lane, y: H * 0.22, car: { shape: "convertible", colors: { body: "#ff8c1a", stripe } } },
-      { x: cx, y: H * 0.18, car: { shape: "convertible", colors: { body: "#2d4ecf", stripe } } },
-      { x: cx + lane, y: H * 0.30, car: { shape: "convertible", colors: { body: "#c42a1a", stripe } } },
-      { x: cx - lane, y: H * 0.44, car: { shape: "convertible", colors: { body: "#1fbf6a", stripe } } },
+      { x: cx - lane, y: H * 0.22, car: { shape: "hatch", colors: { body: "#ff8c1a", stripe } } },
+      { x: cx, y: H * 0.18, car: { shape: "sedan", colors: { body: "#2d4ecf", stripe } } },
+      { x: cx + lane, y: H * 0.30, car: { shape: "pickup", colors: { body: "#c42a1a", stripe } } },
+      { x: cx - lane, y: H * 0.44, car: { shape: "sports", colors: { body: "#1fbf6a", stripe } } },
     ];
     for (const d of demo) drawCarTop(ctx, d.x, d.y, u, d.car, { u });
     drawCarTop(ctx, cx, cy, u, car, { u });
@@ -2352,6 +2556,7 @@ const Game = {
     this.car = getCar(Save.data.selected);
     this.running = false;
     this._idle = true;
+    this.cameraZ = 0;
     this.drawMenuScene();
   },
 };
@@ -2425,9 +2630,9 @@ let shopFilter = "all";
 function renderShop() {
   const grid = $("shop-grid");
   grid.innerHTML = "";
-  const maxSpeed = 1.5;
-  const maxHand = 1.4;
-  const maxMag = 1.55;
+  const maxSpeed = 1.64;
+  const maxHand = 1.55;
+  const maxMag = 1.6;
 
   CARS.filter((car) => {
     if (shopFilter === "all") return true;

@@ -8,6 +8,6 @@ if errorlevel 1 (
   exit /b 1
 )
 echo.
-echo Pronto! O atalho "Nitro Surf" esta na Area de Trabalho.
+echo Pronto! O jogo "Nitro Surf" esta na Area de Trabalho.
 echo Clique duas vezes nele para jogar.
 pause

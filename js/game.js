@@ -143,24 +143,19 @@ const Game = {
     return (lane - 1) * 2.15;
   },
 
-  curve(z) {
-    return Math.sin(z * 0.011) * 2.2 + Math.sin(z * 0.0033) * 3.4;
+  playerZ() {
+    return this.cameraZ + 8;
   },
 
-  hill(z) {
-    return Math.sin(z * 0.007) * 0.55;
-  },
-
-  project(x, y, z) {
-    const rel = z - this.cameraZ;
-    if (rel <= 0.45) return null;
-    const scale = 240 / rel;
-    const cx = this.curve(z) - this.curve(this.cameraZ + 8);
+  toScreen(worldX, z) {
+    const xScale = Math.min(this.w * 0.108, 92);
+    const zScale = this.h / 56;
     return {
-      x: this.w / 2 + (x + cx) * scale,
-      y: this.h * 0.4 + (1.15 - y - this.hill(z) + this.hill(this.cameraZ + 8)) * scale * 1.15,
-      s: scale,
-      rel,
+      x: this.w / 2 + worldX * xScale,
+      y: this.h * 0.78 - (z - this.playerZ()) * zScale,
+      s: xScale * 0.03,
+      xScale,
+      zScale,
     };
   },
 
@@ -391,130 +386,51 @@ const Game = {
   },
 
   drawSky(ctx) {
-    const horizon = this.h * 0.4;
     const g = ctx.createLinearGradient(0, 0, 0, this.h);
-    g.addColorStop(0, "#5eb0ff");
-    g.addColorStop(0.28, "#7ec8ff");
-    g.addColorStop(0.55, "#b9e4ff");
-    g.addColorStop(0.72, "#e7f6ff");
-    g.addColorStop(1, "#cfd8e2");
+    g.addColorStop(0, "#7ec8ff");
+    g.addColorStop(0.18, "#9fd4a8");
+    g.addColorStop(1, "#7aa36a");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, this.w, this.h);
-
-    ctx.fillStyle = "#fff4b8";
-    ctx.beginPath();
-    ctx.arc(this.w * 0.78, this.h * 0.14, 36, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(255, 244, 180, 0.28)";
-    ctx.beginPath();
-    ctx.arc(this.w * 0.78, this.h * 0.14, 72, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "rgba(255,255,255,0.82)";
-    for (let i = 0; i < 7; i++) {
-      const cx = ((i * 260 - this.cameraZ * 3) % (this.w + 260) + this.w + 260) % (this.w + 260) - 80;
-      const cy = 36 + (i % 4) * 26;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, 58, 18, 0, 0, Math.PI * 2);
-      ctx.ellipse(cx + 32, cy + 6, 42, 14, 0, 0, Math.PI * 2);
-      ctx.ellipse(cx - 28, cy + 8, 34, 12, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    const shift = -((this.cameraZ * 0.4) % 42);
-    for (let i = -1; i < 32; i++) {
-      const x = shift + i * 42;
-      const bh = 28 + ((i * 17 + 40) % 70);
-      ctx.fillStyle = i % 3 === 0 ? "#8fb0d2" : i % 3 === 1 ? "#7aa0c8" : "#9bb8d6";
-      ctx.fillRect(x, horizon - bh, 38, bh);
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      ctx.fillRect(x + 6, horizon - bh + 8, 8, 8);
-      ctx.fillRect(x + 20, horizon - bh + 18, 8, 8);
-    }
-    ctx.fillStyle = "#8aa6c4";
-    ctx.fillRect(0, horizon - 6, this.w, 8);
   },
 
   drawRoad(ctx) {
-    const steps = 36;
-    for (let i = steps; i >= 0; i--) {
-      const z0 = this.cameraZ + 2 + i * 7;
-      const z1 = z0 + 7;
-      const left0 = this.project(-3.6, 0, z0);
-      const right0 = this.project(3.6, 0, z0);
-      const left1 = this.project(-3.6, 0, z1);
-      const right1 = this.project(3.6, 0, z1);
-      if (!left0 || !right0 || !left1 || !right1) continue;
-      ctx.beginPath();
-      ctx.moveTo(left0.x, left0.y);
-      ctx.lineTo(right0.x, right0.y);
-      ctx.lineTo(right1.x, right1.y);
-      ctx.lineTo(left1.x, left1.y);
-      ctx.closePath();
-      const stripe = Math.floor(z0 / 7) % 2 === 0;
-      ctx.fillStyle = stripe ? "#4c5160" : "#434857";
-      ctx.fill();
+    const mid = this.toScreen(0, this.playerZ());
+    const laneW = mid.xScale * 2.15;
+    const roadW = laneW * 3;
+    const left = this.w / 2 - roadW / 2;
 
-      const grassL0 = this.project(-18, 0, z0);
-      const grassL1 = this.project(-18, 0, z1);
-      const grassR0 = this.project(18, 0, z0);
-      const grassR1 = this.project(18, 0, z1);
-      if (grassL0 && grassL1) {
-        ctx.fillStyle = stripe ? "#8f97a3" : "#818996";
-        ctx.beginPath();
-        ctx.moveTo(grassL0.x, grassL0.y);
-        ctx.lineTo(left0.x, left0.y);
-        ctx.lineTo(left1.x, left1.y);
-        ctx.lineTo(grassL1.x, grassL1.y);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(right0.x, right0.y);
-        ctx.lineTo(grassR0.x, grassR0.y);
-        ctx.lineTo(grassR1.x, grassR1.y);
-        ctx.lineTo(right1.x, right1.y);
-        ctx.fill();
-      }
+    ctx.fillStyle = "#8d949e";
+    ctx.fillRect(left - 36, 0, 36, this.h);
+    ctx.fillRect(left + roadW, 0, 36, this.h);
 
-      if (Math.floor(z0 / 7) % 2 === 0) {
-        for (const lane of [-1.075, 1.075]) {
-          const a = this.project(lane, 0.02, z0);
-          const b = this.project(lane, 0.02, z1);
-          if (!a || !b) continue;
-          ctx.strokeStyle = "rgba(255,255,255,0.55)";
-          ctx.lineWidth = Math.max(1.5, a.s * 0.04);
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
-        }
+    ctx.fillStyle = "#3f4450";
+    ctx.fillRect(left, 0, roadW, this.h);
+
+    ctx.strokeStyle = "#f4d03f";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(left + 3, 0);
+    ctx.lineTo(left + 3, this.h);
+    ctx.moveTo(left + roadW - 3, 0);
+    ctx.lineTo(left + roadW - 3, this.h);
+    ctx.stroke();
+
+    const dashH = 28;
+    const gap = 22;
+    const period = dashH + gap;
+    const offset = ((this.cameraZ * mid.zScale) % period + period) % period;
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    for (const lane of [1, 2]) {
+      const x = left + lane * laneW - 2;
+      for (let y = -offset; y < this.h + period; y += period) {
+        ctx.fillRect(x, y, 4, dashH);
       }
     }
-  },
 
-  drawBuilding(ctx, p, item) {
-    const w = p.s * item.w;
-    const h = p.s * item.h;
-    const x = p.x - w / 2;
-    const y = p.y - h;
-    ctx.fillStyle = item.color;
-    ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = "rgba(40, 60, 90, 0.16)";
-    ctx.fillRect(x + w * 0.62, y, w * 0.38, h);
-    ctx.fillStyle = "#6d7f93";
-    ctx.fillRect(x, y - p.s * 0.1, w, p.s * 0.12);
-    ctx.fillStyle = "#5b7eab";
-    const cols = 3;
-    const rows = Math.max(4, Math.floor(item.h * 1.5));
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        ctx.fillRect(
-          x + w * 0.1 + c * w * 0.28,
-          y + p.s * 0.22 + r * (h / (rows + 0.8)),
-          w * 0.16,
-          p.s * 0.14
-        );
-      }
-    }
+    ctx.fillStyle = "rgba(60, 240, 255, 0.12)";
+    const playerLaneX = this.w / 2 + this.laneX * mid.xScale - laneW / 2;
+    ctx.fillRect(playerLaneX, 0, laneW, this.h);
   },
 
   drawRoadside(ctx) {
@@ -524,41 +440,70 @@ const Game = {
         const rel = ((item.z - this.cameraZ) % span + span) % span;
         return { ...item, z: this.cameraZ + rel };
       })
-      .sort((a, b) => (b.row || 0) - (a.row || 0) || b.z - a.z);
+      .sort((a, b) => b.z - a.z);
 
     for (const item of items) {
-      const dist = 5.1 + (item.row || 0) * 3.4;
+      const dist = 5.05 + (item.row || 0) * 2.7;
       const x = item.side * dist;
-      const p = this.project(x, 0, item.z);
-      if (!p || p.rel > 200) continue;
+      const p = this.toScreen(x, item.z);
+      if (p.y < -80 || p.y > this.h + 80) continue;
       if (item.kind === "palm") {
-        ctx.fillStyle = "#6b3e1f";
-        ctx.fillRect(p.x - p.s * 0.06, p.y - p.s * 1.6, p.s * 0.12, p.s * 1.6);
         ctx.fillStyle = "#2e9b4f";
         ctx.beginPath();
-        ctx.ellipse(p.x, p.y - p.s * 1.7, p.s * 0.7, p.s * 0.28, 0, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.s * 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#1e6b34";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.s * 6, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        this.drawBuilding(ctx, p, item);
+        const bw = p.xScale * item.w * 0.72;
+        const bh = p.zScale * 3.4;
+        ctx.fillStyle = item.color;
+        ctx.fillRect(p.x - bw / 2, p.y - bh / 2, bw, bh);
+        ctx.strokeStyle = "rgba(40, 60, 90, 0.18)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(p.x - bw / 2, p.y - bh / 2, bw, bh);
+        ctx.fillStyle = "#5b7eab";
+        const cols = 3;
+        const rows = 2;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            ctx.fillRect(
+              p.x - bw / 2 + bw * 0.12 + c * bw * 0.28,
+              p.y - bh / 2 + bh * 0.18 + r * bh * 0.38,
+              bw * 0.16,
+              bh * 0.16
+            );
+          }
+        }
       }
     }
   },
 
+  drawShadow(ctx, x, y, scale, jump) {
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.beginPath();
+    ctx.ellipse(x, y + 18 * scale + jump * 6, 16 * scale, 8 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+  },
+
   drawEntities(ctx) {
-    const playerZ = this.cameraZ + 8;
+    const playerZ = this.playerZ();
     const list = this.entities.filter((e) => !e.taken).sort((a, b) => b.z - a.z);
     let playerDrawn = false;
     const drawPlayer = () => {
-      const p = this.project(this.laneX, this.jump * 0.22, playerZ);
-      if (!p) return;
+      const p = this.toScreen(this.laneX, playerZ);
+      const hop = this.jump * 10;
+      this.drawShadow(ctx, p.x, p.y, p.s, hop);
       if (this.powers.shield > 0) {
-        ctx.strokeStyle = "rgba(93,255,176,0.7)";
+        ctx.strokeStyle = "rgba(93,255,176,0.85)";
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.ellipse(p.x, p.y - p.s * 0.35, p.s * 0.9, p.s * 0.55, 0, 0, Math.PI * 2);
+        ctx.ellipse(p.x, p.y - hop, p.s * 22, p.s * 28, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
-      drawVehicle(ctx, p.x, p.y, p.s * 0.045, this.car, {
+      drawCarTop(ctx, p.x, p.y - hop, p.s * (1 + this.jump * 0.04), this.car, {
         nitro: this.powers.nitro,
         flash: this.flash % 0.4 < 0.2,
       });
@@ -570,62 +515,57 @@ const Game = {
         playerDrawn = true;
       }
       const x = this.laneWorldX(e.lane);
+      const p = this.toScreen(x, e.z);
+      if (p.y < -60 || p.y > this.h + 80) continue;
       if (e.kind === "coin") {
-        const p = this.project(x, 0.7 + Math.sin(this.time * 6 + e.z) * 0.1, e.z);
-        if (!p) continue;
         ctx.fillStyle = "#ffd166";
         ctx.beginPath();
-        ctx.ellipse(p.x, p.y, p.s * 0.18, p.s * 0.18, 0, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 11 + Math.sin(this.time * 6 + e.z) * 1.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#fff3bf";
         ctx.beginPath();
-        ctx.ellipse(p.x - p.s * 0.04, p.y - p.s * 0.04, p.s * 0.05, p.s * 0.05, 0, 0, Math.PI * 2);
+        ctx.arc(p.x - 3, p.y - 3, 3, 0, Math.PI * 2);
         ctx.fill();
       } else if (e.kind === "power") {
-        const p = this.project(x, 0.9, e.z);
-        if (!p) continue;
         const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.s * 0.28, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 16, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#071018";
-        ctx.font = `bold ${Math.max(9, p.s * 0.22)}px Trebuchet MS`;
+        ctx.font = "bold 13px Trebuchet MS";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M", p.x, p.y);
         ctx.textBaseline = "alphabetic";
       } else if (e.kind === "barrier") {
-        const p = this.project(x, 0.35, e.z);
-        if (!p) continue;
         ctx.fillStyle = "#f39c12";
-        ctx.fillRect(p.x - p.s * 0.7, p.y - p.s * 0.35, p.s * 1.4, p.s * 0.45);
+        ctx.fillRect(p.x - p.xScale * 0.85, p.y - 10, p.xScale * 1.7, 20);
         ctx.fillStyle = "#111";
-        ctx.fillRect(p.x - p.s * 0.7, p.y - p.s * 0.2, p.s * 1.4, p.s * 0.12);
+        for (let i = 0; i < 4; i++) {
+          ctx.fillRect(p.x - p.xScale * 0.85 + i * p.xScale * 0.42, p.y - 10, p.xScale * 0.2, 20);
+        }
       } else if (e.kind === "truck") {
-        const p = this.project(x, 0, e.z);
-        if (!p) continue;
+        this.drawShadow(ctx, p.x, p.y, p.s * 1.1, 0);
         ctx.fillStyle = "#4b5563";
-        ctx.fillRect(p.x - p.s * 0.85, p.y - p.s * 1.5, p.s * 1.7, p.s * 1.5);
+        ctx.fillRect(p.x - p.s * 18, p.y - p.s * 34, p.s * 36, p.s * 68);
         ctx.fillStyle = "#1f2937";
-        ctx.fillRect(p.x - p.s * 0.85, p.y - p.s * 1.7, p.s * 1.7, p.s * 0.28);
+        ctx.fillRect(p.x - p.s * 18, p.y - p.s * 34, p.s * 36, p.s * 16);
         ctx.fillStyle = "#7dd3fc";
-        ctx.fillRect(p.x - p.s * 0.35, p.y - p.s * 1.45, p.s * 0.7, p.s * 0.28);
+        ctx.fillRect(p.x - p.s * 12, p.y - p.s * 28, p.s * 24, p.s * 8);
       } else {
-        const p = this.project(x, 0, e.z);
-        if (!p) continue;
-        drawVehicle(ctx, p.x, p.y, p.s * 0.04, e.car, { brake: true });
+        this.drawShadow(ctx, p.x, p.y, p.s, 0);
+        drawCarTop(ctx, p.x, p.y, p.s, e.car, { brake: true });
       }
     }
     if (!playerDrawn) drawPlayer();
 
     for (const part of this.particles) {
-      const p = this.project(part.x, part.y, part.z);
-      if (!p) continue;
+      const p = this.toScreen(part.x, part.z);
       ctx.globalAlpha = Math.max(0, part.life * 2);
       ctx.fillStyle = part.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, Math.max(1.5, p.s * 0.08), 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 1;
     }

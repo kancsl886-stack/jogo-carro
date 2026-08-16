@@ -279,6 +279,84 @@ function drawVehicle(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
+function drawCarTop(ctx, x, y, scale, car, extras) {
+  extras = extras || {};
+  const c = car.colors;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  if (extras.nitro) {
+    ctx.fillStyle = "rgba(60,240,255,0.5)";
+    ctx.beginPath();
+    ctx.moveTo(-7, 22);
+    ctx.lineTo(0, 40 + extras.nitro * 8);
+    ctx.lineTo(7, 22);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#1a1a1a";
+  roundRect(ctx, -18, -18, 6, 14, 2);
+  ctx.fill();
+  roundRect(ctx, 12, -18, 6, 14, 2);
+  ctx.fill();
+  roundRect(ctx, -18, 6, 6, 14, 2);
+  ctx.fill();
+  roundRect(ctx, 12, 6, 6, 14, 2);
+  ctx.fill();
+
+  ctx.fillStyle = c.body;
+  if (car.shape === "formula") {
+    ctx.fillStyle = c.trim;
+    roundRect(ctx, -16, -6, 32, 10, 2);
+    ctx.fill();
+    ctx.fillStyle = c.body;
+    roundRect(ctx, -8, -24, 16, 48, 6);
+    ctx.fill();
+    ctx.fillStyle = c.stripe;
+    ctx.fillRect(-2.5, -22, 5, 44);
+  } else if (car.shape === "pickup") {
+    roundRect(ctx, -15, -24, 30, 28, 6);
+    ctx.fill();
+    ctx.fillStyle = c.trim;
+    roundRect(ctx, -14, 4, 28, 20, 3);
+    ctx.fill();
+  } else {
+    roundRect(ctx, -15, -26, 30, 52, 8);
+    ctx.fill();
+    ctx.fillStyle = c.stripe;
+    ctx.fillRect(-2.5, -18, 5, 36);
+  }
+
+  ctx.fillStyle = c.glass;
+  roundRect(ctx, -11, -18, 22, 12, 3);
+  ctx.fill();
+  if (car.shape !== "convertible" && car.shape !== "pickup") {
+    roundRect(ctx, -10, 6, 20, 10, 3);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#fff6c2";
+  ctx.fillRect(-11, -26, 7, 3);
+  ctx.fillRect(4, -26, 7, 3);
+  ctx.fillStyle = extras.brake ? "#ff4d4d" : "#c0392b";
+  ctx.fillRect(-11, 24, 7, 3);
+  ctx.fillRect(4, 24, 7, 3);
+  if (car.shape === "police") {
+    ctx.fillStyle = extras.flash ? "#ff4d4d" : "#4da3ff";
+    roundRect(ctx, -7, -3, 14, 6, 2);
+    ctx.fill();
+  }
+  if (car.shape === "taxi") {
+    ctx.fillStyle = "#111";
+    roundRect(ctx, -8, -4, 16, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = "#f1c40f";
+    ctx.font = "bold 6px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("TAXI", 0, 0);
+  }
+  ctx.restore();
+}
+
 function trafficPalette() {
   const bodies = ["#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#95a5a6", "#1abc9c", "#34495e"];
   const body = bodies[Math.floor(Math.random() * bodies.length)];

@@ -92,6 +92,35 @@ canvas {
   background: linear-gradient(180deg, rgba(7, 11, 20, 0.35), rgba(7, 11, 20, 0.78));
 }
 
+.screen.menu-home {
+  justify-content: space-between;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 11, 20, 0.72) 0%,
+    rgba(7, 11, 20, 0.08) 38%,
+    rgba(7, 11, 20, 0.08) 62%,
+    rgba(7, 11, 20, 0.78) 100%
+  );
+}
+
+.menu-top,
+.menu-bottom {
+  width: min(360px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.menu-spacer {
+  flex: 1;
+  min-height: 180px;
+  width: 100%;
+}
+
+.menu-bottom .menu-actions {
+  width: 100%;
+}
+
 .screen.dim {
   background: rgba(4, 6, 12, 0.72);
   backdrop-filter: blur(8px);
@@ -618,16 +647,6 @@ canvas {
   border-radius: 999px;
 }
 
-.menu-bg-cars {
-  position: absolute;
-  inset: auto 0 8% 0;
-  height: 90px;
-  background: radial-gradient(circle at 20% 50%, rgba(255, 61, 154, 0.25), transparent 40%),
-    radial-gradient(circle at 80% 50%, rgba(60, 240, 255, 0.2), transparent 42%);
-  filter: blur(18px);
-  z-index: -1;
-}
-
     </style>
   </head>
   <body>
@@ -666,23 +685,27 @@ canvas {
       </div>
     </div>
 
-    <div id="screen-menu" class="screen">
-      <div class="menu-bg-cars" aria-hidden="true"></div>
-      <div class="brand">
-        <p class="brand-kicker" data-i18n="kicker">Avenida infinita</p>
-        <h1>NITRO <span>SURF</span></h1>
-        <p class="brand-sub" data-i18n="subtitle">Desvie. Colete. Troque de carro.</p>
+    <div id="screen-menu" class="screen menu-home">
+      <div class="menu-top">
+        <div class="brand">
+          <p class="brand-kicker" data-i18n="kicker">Avenida infinita</p>
+          <h1>NITRO <span>SURF</span></h1>
+          <p class="brand-sub" data-i18n="subtitle">Desvie. Colete. Troque de carro.</p>
+        </div>
+        <div class="menu-stats">
+          <div class="chip gold" id="menu-coins">0 moedas</div>
+          <div class="chip" id="menu-best">Recorde 0 m</div>
+          <div class="chip" id="menu-car">Fusca Flash</div>
+        </div>
       </div>
-      <div class="menu-stats">
-        <div class="chip gold" id="menu-coins">0 moedas</div>
-        <div class="chip" id="menu-best">Recorde 0 m</div>
-        <div class="chip" id="menu-car">Fusca Flash</div>
+      <div class="menu-spacer" aria-hidden="true"></div>
+      <div class="menu-bottom">
+        <div class="menu-actions">
+          <button id="btn-play" class="btn primary pulse" type="button" data-i18n="play">Jogar</button>
+          <button id="btn-menu" class="btn" type="button" data-i18n="menu">Menu</button>
+        </div>
+        <p class="hint" data-i18n="hint">← → faixas · ↑ pular · toque ou setas</p>
       </div>
-      <div class="menu-actions">
-        <button id="btn-play" class="btn primary pulse" type="button" data-i18n="play">Jogar</button>
-        <button id="btn-menu" class="btn" type="button" data-i18n="menu">Menu</button>
-      </div>
-      <p class="hint" data-i18n="hint">← → faixas · ↑ pular · toque ou setas</p>
     </div>
 
     <div id="screen-settings" class="screen hidden">
@@ -1146,6 +1169,168 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
+function drawCarSide(ctx, x, y, scale, car) {
+  const c = car.colors;
+  const shape = car.shape;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.beginPath();
+  ctx.ellipse(0, 16, 46, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const wheel = (wx) => {
+    ctx.fillStyle = "#111";
+    ctx.beginPath();
+    ctx.arc(wx, 10, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#6b6b6b";
+    ctx.beginPath();
+    ctx.arc(wx, 10, 4, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  wheel(-24);
+  wheel(24);
+
+  ctx.fillStyle = c.body;
+  if (shape === "formula") {
+    ctx.fillStyle = c.trim;
+    roundRect(ctx, -40, 2, 80, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = c.body;
+    roundRect(ctx, -18, -8, 48, 16, 5);
+    ctx.fill();
+    ctx.fillStyle = c.stripe;
+    ctx.fillRect(-6, -8, 6, 16);
+  } else if (shape === "pickup") {
+    roundRect(ctx, -38, -8, 44, 20, 5);
+    ctx.fill();
+    ctx.fillStyle = c.trim;
+    roundRect(ctx, 4, -2, 34, 14, 3);
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    roundRect(ctx, -28, -16, 22, 10, 3);
+    ctx.fill();
+  } else if (shape === "suv") {
+    roundRect(ctx, -40, -18, 80, 30, 6);
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    roundRect(ctx, -18, -14, 36, 12, 3);
+    ctx.fill();
+  } else if (shape === "super" || shape === "hyper" || shape === "sports") {
+    ctx.beginPath();
+    ctx.moveTo(-42, 8);
+    ctx.lineTo(-28, -4);
+    ctx.lineTo(8, -8);
+    ctx.lineTo(40, 2);
+    ctx.lineTo(42, 10);
+    ctx.lineTo(-40, 12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    ctx.beginPath();
+    ctx.moveTo(-8, -6);
+    ctx.lineTo(18, -4);
+    ctx.lineTo(14, 4);
+    ctx.lineTo(-12, 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = c.stripe;
+    ctx.fillRect(-2, -6, 5, 14);
+  } else {
+    const roof = shape === "hatch" ? 18 : 28;
+    roundRect(ctx, -40, -6, 80, 20, 6);
+    ctx.fill();
+    ctx.fillStyle = c.body;
+    roundRect(ctx, -12, -22, roof + 8, 18, 5);
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    roundRect(ctx, -8, -18, roof, 12, 3);
+    ctx.fill();
+    if (shape === "taxi") {
+      ctx.fillStyle = "#111";
+      roundRect(ctx, 0, -28, 16, 8, 2);
+      ctx.fill();
+      ctx.fillStyle = "#f1c40f";
+      ctx.font = "bold 6px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("TAXI", 8, -22);
+    }
+    if (shape === "police") {
+      ctx.fillStyle = "#1a4b8c";
+      ctx.fillRect(-40, 4, 80, 5);
+      ctx.fillStyle = "#ff4d4d";
+      roundRect(ctx, -4, -28, 8, 8, 2);
+      ctx.fill();
+      ctx.fillStyle = "#4da3ff";
+      roundRect(ctx, 6, -28, 8, 8, 2);
+      ctx.fill();
+    }
+    if (shape === "convertible") {
+      ctx.fillStyle = "#2a1020";
+      roundRect(ctx, -6, -10, 24, 6, 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.fillStyle = "#fff6c2";
+  ctx.fillRect(34, 0, 6, 3);
+  ctx.fillStyle = "#ff6b6b";
+  ctx.fillRect(-40, 0, 5, 3);
+  ctx.restore();
+}
+
+function drawCharacterLean(ctx, x, y, scale) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.rotate(-0.16);
+
+  ctx.strokeStyle = "#1b2438";
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(-3, 34);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(11, 32);
+  ctx.stroke();
+
+  ctx.fillStyle = "#2b3a67";
+  roundRect(ctx, -9, -22, 18, 32, 7);
+  ctx.fill();
+  ctx.fillStyle = "#ff3d9a";
+  ctx.fillRect(-9, 4, 18, 5);
+
+  ctx.strokeStyle = "#e6b089";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(7, -14);
+  ctx.lineTo(26, -2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-6, -12);
+  ctx.lineTo(-8, 6);
+  ctx.stroke();
+
+  ctx.fillStyle = "#e6b089";
+  ctx.beginPath();
+  ctx.arc(1, -30, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#1a1a1a";
+  ctx.beginPath();
+  ctx.arc(1, -32, 9, Math.PI, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-9, -32, 20, 4);
+  ctx.fillStyle = "#3cf0ff";
+  ctx.fillRect(-8, -30, 18, 3);
+  ctx.restore();
+}
+
 function trafficPalette() {
   const bodies = ["#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#95a5a6", "#1abc9c", "#34495e"];
   const body = bodies[Math.floor(Math.random() * bodies.length)];
@@ -1562,6 +1747,7 @@ const Game = {
     this.canvas.width = Math.floor(this.w * this.dpr);
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    if (this._idle && !this.running) this.drawMenuScene();
   },
 
   bindInput() {
@@ -1618,6 +1804,7 @@ const Game = {
     this.car = getCar(selected);
     this.resetState();
     this.running = true;
+    this._idle = false;
     this.paused = false;
     this.last = performance.now();
     this.loop(this.last);
@@ -2134,24 +2321,57 @@ const Game = {
     ctx.restore();
   },
 
+  drawMenuScene() {
+    const ctx = this.ctx;
+    const g = ctx.createLinearGradient(0, 0, 0, this.h);
+    g.addColorStop(0, "#5eb0ff");
+    g.addColorStop(0.42, "#9fd6ff");
+    g.addColorStop(0.62, "#d7c7a6");
+    g.addColorStop(1, "#4d5360");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, this.w, this.h);
+
+    ctx.fillStyle = "#fff4b8";
+    ctx.beginPath();
+    ctx.arc(this.w * 0.8, this.h * 0.16, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    const ground = this.h * 0.62;
+    ctx.fillStyle = "#8aa6c4";
+    for (let i = 0; i < 18; i++) {
+      const x = (i * this.w) / 16 - 20;
+      const bh = 70 + ((i * 37) % 110);
+      ctx.fillStyle = i % 2 ? "#8fb0d2" : "#7aa0c8";
+      ctx.fillRect(x, ground - bh, this.w / 14, bh);
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(x + 10, ground - bh + 16, 10, 10);
+      ctx.fillRect(x + 28, ground - bh + 36, 10, 10);
+    }
+
+    ctx.fillStyle = "#8d949e";
+    ctx.fillRect(0, ground, this.w, 28);
+    ctx.fillStyle = "#3f4450";
+    ctx.fillRect(0, ground + 28, this.w, this.h);
+    ctx.fillStyle = "#f4d03f";
+    ctx.fillRect(0, ground + 24, this.w, 5);
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    for (let x = 20; x < this.w; x += 70) {
+      ctx.fillRect(x, ground + 70, 36, 7);
+    }
+
+    const car = getCar(Save.data.selected);
+    const s = Math.min(this.w, this.h) * 0.0078;
+    const cx = this.w / 2 + 28;
+    const cy = ground - 6;
+    drawCarSide(ctx, cx, cy, s, car);
+    drawCharacterLean(ctx, cx - 22 * s, cy - 2 * s, s * 0.92);
+  },
+
   idle() {
     this.car = getCar(Save.data.selected);
-    if (this._idle) return;
+    this.running = false;
     this._idle = true;
-    if (!this.entities.length) this.spawnAhead();
-    const tick = () => {
-      if (this.running) {
-        this._idle = false;
-        return;
-      }
-      this.cameraZ += 0.55;
-      this.time += 0.016;
-      this.spawnAhead();
-      this.entities = this.entities.filter((e) => e.z > this.cameraZ - 8);
-      this.draw();
-      requestAnimationFrame(tick);
-    };
-    tick();
+    this.drawMenuScene();
   },
 };
 
@@ -2208,6 +2428,7 @@ function refreshMenu() {
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = `${Save.data.coins} ⬤`;
   $("hud-best").textContent = formatMeters(Save.data.best);
+  if (!Game.running && Game.ctx) Game.drawMenuScene();
 }
 
 function toast(msg) {

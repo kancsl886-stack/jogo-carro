@@ -75,6 +75,35 @@ canvas {
   background: linear-gradient(180deg, rgba(7, 11, 20, 0.35), rgba(7, 11, 20, 0.78));
 }
 
+.screen.menu-home {
+  justify-content: space-between;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 11, 20, 0.72) 0%,
+    rgba(7, 11, 20, 0.08) 38%,
+    rgba(7, 11, 20, 0.08) 62%,
+    rgba(7, 11, 20, 0.78) 100%
+  );
+}
+
+.menu-top,
+.menu-bottom {
+  width: min(360px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.menu-spacer {
+  flex: 1;
+  min-height: 180px;
+  width: 100%;
+}
+
+.menu-bottom .menu-actions {
+  width: 100%;
+}
+
 .screen.dim {
   background: rgba(4, 6, 12, 0.72);
   backdrop-filter: blur(8px);
@@ -599,14 +628,4 @@ canvas {
   color: var(--text);
   padding: 10px 16px;
   border-radius: 999px;
-}
-
-.menu-bg-cars {
-  position: absolute;
-  inset: auto 0 8% 0;
-  height: 90px;
-  background: radial-gradient(circle at 20% 50%, rgba(255, 61, 154, 0.25), transparent 40%),
-    radial-gradient(circle at 80% 50%, rgba(60, 240, 255, 0.2), transparent 42%);
-  filter: blur(18px);
-  z-index: -1;
 }

@@ -357,6 +357,168 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
+function drawCarSide(ctx, x, y, scale, car) {
+  const c = car.colors;
+  const shape = car.shape;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.beginPath();
+  ctx.ellipse(0, 16, 46, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const wheel = (wx) => {
+    ctx.fillStyle = "#111";
+    ctx.beginPath();
+    ctx.arc(wx, 10, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#6b6b6b";
+    ctx.beginPath();
+    ctx.arc(wx, 10, 4, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  wheel(-24);
+  wheel(24);
+
+  ctx.fillStyle = c.body;
+  if (shape === "formula") {
+    ctx.fillStyle = c.trim;
+    roundRect(ctx, -40, 2, 80, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = c.body;
+    roundRect(ctx, -18, -8, 48, 16, 5);
+    ctx.fill();
+    ctx.fillStyle = c.stripe;
+    ctx.fillRect(-6, -8, 6, 16);
+  } else if (shape === "pickup") {
+    roundRect(ctx, -38, -8, 44, 20, 5);
+    ctx.fill();
+    ctx.fillStyle = c.trim;
+    roundRect(ctx, 4, -2, 34, 14, 3);
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    roundRect(ctx, -28, -16, 22, 10, 3);
+    ctx.fill();
+  } else if (shape === "suv") {
+    roundRect(ctx, -40, -18, 80, 30, 6);
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    roundRect(ctx, -18, -14, 36, 12, 3);
+    ctx.fill();
+  } else if (shape === "super" || shape === "hyper" || shape === "sports") {
+    ctx.beginPath();
+    ctx.moveTo(-42, 8);
+    ctx.lineTo(-28, -4);
+    ctx.lineTo(8, -8);
+    ctx.lineTo(40, 2);
+    ctx.lineTo(42, 10);
+    ctx.lineTo(-40, 12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    ctx.beginPath();
+    ctx.moveTo(-8, -6);
+    ctx.lineTo(18, -4);
+    ctx.lineTo(14, 4);
+    ctx.lineTo(-12, 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = c.stripe;
+    ctx.fillRect(-2, -6, 5, 14);
+  } else {
+    const roof = shape === "hatch" ? 18 : 28;
+    roundRect(ctx, -40, -6, 80, 20, 6);
+    ctx.fill();
+    ctx.fillStyle = c.body;
+    roundRect(ctx, -12, -22, roof + 8, 18, 5);
+    ctx.fill();
+    ctx.fillStyle = c.glass;
+    roundRect(ctx, -8, -18, roof, 12, 3);
+    ctx.fill();
+    if (shape === "taxi") {
+      ctx.fillStyle = "#111";
+      roundRect(ctx, 0, -28, 16, 8, 2);
+      ctx.fill();
+      ctx.fillStyle = "#f1c40f";
+      ctx.font = "bold 6px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("TAXI", 8, -22);
+    }
+    if (shape === "police") {
+      ctx.fillStyle = "#1a4b8c";
+      ctx.fillRect(-40, 4, 80, 5);
+      ctx.fillStyle = "#ff4d4d";
+      roundRect(ctx, -4, -28, 8, 8, 2);
+      ctx.fill();
+      ctx.fillStyle = "#4da3ff";
+      roundRect(ctx, 6, -28, 8, 8, 2);
+      ctx.fill();
+    }
+    if (shape === "convertible") {
+      ctx.fillStyle = "#2a1020";
+      roundRect(ctx, -6, -10, 24, 6, 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.fillStyle = "#fff6c2";
+  ctx.fillRect(34, 0, 6, 3);
+  ctx.fillStyle = "#ff6b6b";
+  ctx.fillRect(-40, 0, 5, 3);
+  ctx.restore();
+}
+
+function drawCharacterLean(ctx, x, y, scale) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.rotate(-0.16);
+
+  ctx.strokeStyle = "#1b2438";
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(-3, 34);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(11, 32);
+  ctx.stroke();
+
+  ctx.fillStyle = "#2b3a67";
+  roundRect(ctx, -9, -22, 18, 32, 7);
+  ctx.fill();
+  ctx.fillStyle = "#ff3d9a";
+  ctx.fillRect(-9, 4, 18, 5);
+
+  ctx.strokeStyle = "#e6b089";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(7, -14);
+  ctx.lineTo(26, -2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-6, -12);
+  ctx.lineTo(-8, 6);
+  ctx.stroke();
+
+  ctx.fillStyle = "#e6b089";
+  ctx.beginPath();
+  ctx.arc(1, -30, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#1a1a1a";
+  ctx.beginPath();
+  ctx.arc(1, -32, 9, Math.PI, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-9, -32, 20, 4);
+  ctx.fillStyle = "#3cf0ff";
+  ctx.fillRect(-8, -30, 18, 3);
+  ctx.restore();
+}
+
 function trafficPalette() {
   const bodies = ["#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#95a5a6", "#1abc9c", "#34495e"];
   const body = bodies[Math.floor(Math.random() * bodies.length)];

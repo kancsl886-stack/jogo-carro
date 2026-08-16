@@ -55,6 +55,7 @@ const Game = {
     this.canvas.width = Math.floor(this.w * this.dpr);
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    if (this._idle && !this.running) this.drawMenuScene();
   },
 
   bindInput() {
@@ -111,6 +112,7 @@ const Game = {
     this.car = getCar(selected);
     this.resetState();
     this.running = true;
+    this._idle = false;
     this.paused = false;
     this.last = performance.now();
     this.loop(this.last);
@@ -627,23 +629,56 @@ const Game = {
     ctx.restore();
   },
 
+  drawMenuScene() {
+    const ctx = this.ctx;
+    const g = ctx.createLinearGradient(0, 0, 0, this.h);
+    g.addColorStop(0, "#5eb0ff");
+    g.addColorStop(0.42, "#9fd6ff");
+    g.addColorStop(0.62, "#d7c7a6");
+    g.addColorStop(1, "#4d5360");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, this.w, this.h);
+
+    ctx.fillStyle = "#fff4b8";
+    ctx.beginPath();
+    ctx.arc(this.w * 0.8, this.h * 0.16, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    const ground = this.h * 0.62;
+    ctx.fillStyle = "#8aa6c4";
+    for (let i = 0; i < 18; i++) {
+      const x = (i * this.w) / 16 - 20;
+      const bh = 70 + ((i * 37) % 110);
+      ctx.fillStyle = i % 2 ? "#8fb0d2" : "#7aa0c8";
+      ctx.fillRect(x, ground - bh, this.w / 14, bh);
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(x + 10, ground - bh + 16, 10, 10);
+      ctx.fillRect(x + 28, ground - bh + 36, 10, 10);
+    }
+
+    ctx.fillStyle = "#8d949e";
+    ctx.fillRect(0, ground, this.w, 28);
+    ctx.fillStyle = "#3f4450";
+    ctx.fillRect(0, ground + 28, this.w, this.h);
+    ctx.fillStyle = "#f4d03f";
+    ctx.fillRect(0, ground + 24, this.w, 5);
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    for (let x = 20; x < this.w; x += 70) {
+      ctx.fillRect(x, ground + 70, 36, 7);
+    }
+
+    const car = getCar(Save.data.selected);
+    const s = Math.min(this.w, this.h) * 0.0078;
+    const cx = this.w / 2 + 28;
+    const cy = ground - 6;
+    drawCarSide(ctx, cx, cy, s, car);
+    drawCharacterLean(ctx, cx - 22 * s, cy - 2 * s, s * 0.92);
+  },
+
   idle() {
     this.car = getCar(Save.data.selected);
-    if (this._idle) return;
+    this.running = false;
     this._idle = true;
-    if (!this.entities.length) this.spawnAhead();
-    const tick = () => {
-      if (this.running) {
-        this._idle = false;
-        return;
-      }
-      this.cameraZ += 0.55;
-      this.time += 0.016;
-      this.spawnAhead();
-      this.entities = this.entities.filter((e) => e.z > this.cameraZ - 8);
-      this.draw();
-      requestAnimationFrame(tick);
-    };
-    tick();
+    this.drawMenuScene();
   },
 };

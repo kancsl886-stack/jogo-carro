@@ -51,6 +51,7 @@ function refreshMenu() {
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = `${Save.data.coins} ⬤`;
   $("hud-best").textContent = formatMeters(Save.data.best);
+  if (!Game.running && Game.ctx) Game.drawMenuScene();
 }
 
 function toast(msg) {

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#070b14" />
+    <meta
+      name="description"
+      content="Nitro Surf — corra numa avenida infinita, desvie do trânsito e compre carros na loja."
+    />
+    <title>Nitro Surf — Avenida Infinita</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+
+    <div id="hud" class="hud hidden">
+      <div class="hud-top">
+        <div class="hud-stat">
+          <span class="hud-label">Distância</span>
+          <strong id="hud-distance">0 m</strong>
+        </div>
+        <div class="hud-stat gold">
+          <span class="hud-label">Corrida</span>
+          <strong id="hud-run-coins">0</strong>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-label">Recorde</span>
+          <strong id="hud-best">0 m</strong>
+        </div>
+        <button id="btn-pause" class="icon-btn" type="button" aria-label="Pausar">
+          ❚❚
+        </button>
+      </div>
+      <div class="hud-bottom">
+        <div id="powerups" class="powerups"></div>
+        <div class="speed-wrap">
+          <span id="hud-speed">0 km/h</span>
+          <div class="speed-bar"><i id="speed-fill"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-menu" class="screen">
+      <div class="menu-bg-cars" aria-hidden="true"></div>
+      <div class="brand">
+        <p class="brand-kicker">Avenida infinita</p>
+        <h1>NITRO <span>SURF</span></h1>
+        <p class="brand-sub">Desvie. Colete. Troque de carro.</p>
+      </div>
+      <div class="menu-stats">
+        <div class="chip gold" id="menu-coins">0 moedas</div>
+        <div class="chip" id="menu-best">Recorde 0 m</div>
+        <div class="chip" id="menu-car">Fusca Flash</div>
+      </div>
+      <div class="menu-actions">
+        <button id="btn-play" class="btn primary pulse" type="button">Jogar</button>
+        <button id="btn-shop" class="btn" type="button">Loja de carros</button>
+        <button id="btn-howto" class="btn ghost" type="button">Como jogar</button>
+      </div>
+      <p class="hint">← → faixas · ↑ pular · toque ou setas</p>
+    </div>
+
+    <div id="screen-shop" class="screen hidden">
+      <header class="sheet-head">
+        <button id="btn-shop-back" class="icon-btn" type="button" aria-label="Voltar">←</button>
+        <div>
+          <h2>Garagem</h2>
+          <p>Compre e equipe um carro novo</p>
+        </div>
+        <div class="chip gold" id="shop-coins">0</div>
+      </header>
+      <div class="shop-filters" id="shop-filters">
+        <button class="filter on" data-filter="all" type="button">Todos</button>
+        <button class="filter" data-filter="owned" type="button">Meus</button>
+        <button class="filter" data-filter="comum" type="button">Comum</button>
+        <button class="filter" data-filter="raro" type="button">Raro</button>
+        <button class="filter" data-filter="epico" type="button">Épico</button>
+        <button class="filter" data-filter="lendario" type="button">Lendário</button>
+      </div>
+      <div id="shop-grid" class="shop-grid"></div>
+    </div>
+
+    <div id="screen-howto" class="screen hidden">
+      <header class="sheet-head">
+        <button id="btn-howto-back" class="icon-btn" type="button" aria-label="Voltar">←</button>
+        <div>
+          <h2>Como jogar</h2>
+          <p>Estilo Subway Surfers, no asfalto</p>
+        </div>
+      </header>
+      <div class="howto">
+        <article>
+          <h3>Controles</h3>
+          <p>Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima.</p>
+        </article>
+        <article>
+          <h3>Objetivo</h3>
+          <p>Corra o máximo possível sem bater. Moedas compram carros na loja. Cada modelo muda velocidade, manobra e ímã de moedas.</p>
+        </article>
+        <article>
+          <h3>Power-ups</h3>
+          <p><strong>Ímã</strong> puxa moedas. <strong>Escudo</strong> salva uma batida. <strong>Nitro</strong> dispara a velocidade por alguns segundos.</p>
+        </article>
+      </div>
+    </div>
+
+    <div id="screen-pause" class="screen dim hidden">
+      <div class="card">
+        <h2>Pausado</h2>
+        <button id="btn-resume" class="btn primary" type="button">Continuar</button>
+        <button id="btn-quit" class="btn ghost" type="button">Sair para o menu</button>
+      </div>
+    </div>
+
+    <div id="screen-over" class="screen dim hidden">
+      <div class="card">
+        <p class="over-kicker">Fim de papo</p>
+        <h2>Batida!</h2>
+        <div class="over-stats">
+          <div><span>Distância</span><strong id="over-distance">0 m</strong></div>
+          <div><span>Moedas</span><strong id="over-coins">0</strong></div>
+          <div><span>Recorde</span><strong id="over-best">0 m</strong></div>
+        </div>
+        <p id="over-record" class="new-record hidden">Novo recorde!</p>
+        <button id="btn-retry" class="btn primary" type="button">Correr de novo</button>
+        <button id="btn-over-shop" class="btn" type="button">Abrir loja</button>
+        <button id="btn-over-menu" class="btn ghost" type="button">Menu</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+
+    <script src="js/cars.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+  </body>
+</html>

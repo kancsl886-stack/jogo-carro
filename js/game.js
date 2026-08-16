@@ -31,6 +31,7 @@ const Game = {
     this.particles = [];
     this.roadside = [];
     this.powers = { magnet: 0, shield: 0, nitro: 0 };
+    this.invuln = 0;
     this.dead = false;
     this.flash = 0;
   },
@@ -104,7 +105,8 @@ const Game = {
   },
 
   start() {
-    this.car = getCar(Save.data.selected);
+    const selected = Save.has(Save.data.selected) ? Save.data.selected : "fusca";
+    this.car = getCar(selected);
     this.resetState();
     this.running = true;
     this.paused = false;
@@ -255,6 +257,7 @@ const Game = {
     for (const key of Object.keys(this.powers)) {
       if (this.powers[key] > 0) this.powers[key] = Math.max(0, this.powers[key] - dt);
     }
+    if (this.invuln > 0) this.invuln = Math.max(0, this.invuln - dt);
 
     const playerZ = this.cameraZ + 8;
     for (const e of this.entities) {
@@ -273,13 +276,13 @@ const Game = {
           this.collectCoin(e);
         }
       } else if (e.kind === "power") {
-        if (Math.abs(dz) < 2 && Math.abs(dx) < 1.1 && this.jump < 1.4) {
+        if (Math.abs(dz) < 2.2 && Math.abs(dx) < 1.2) {
           e.taken = true;
           this.powers[e.power] = e.power === "nitro" ? 4 : 7;
           Sfx.power();
           this.burst(this.laneX, 0.6, playerZ, "#3cf0ff", 10);
         }
-      } else if (Math.abs(dz) < (e.kind === "truck" ? 3.2 : 2.4) && Math.abs(dx) < 1.05) {
+      } else if (this.invuln <= 0 && Math.abs(dz) < (e.kind === "truck" ? 3.2 : 2.4) && Math.abs(dx) < 1.05) {
         const jumped = this.jump > 0.9 && e.low;
         if (!jumped) this.hit();
       }
@@ -332,6 +335,7 @@ const Game = {
     if (this.dead) return;
     if (this.powers.shield > 0) {
       this.powers.shield = 0;
+      this.invuln = 1.25;
       this.shake = 10;
       this.burst(this.laneX, 0.7, this.cameraZ + 8, "#5dffb0", 16);
       Sfx.power();
@@ -527,6 +531,7 @@ const Game = {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M", p.x, p.y);
+        ctx.textBaseline = "alphabetic";
       } else if (e.kind === "barrier") {
         const p = this.project(x, 0.35, e.z);
         if (!p) continue;

@@ -13,11 +13,14 @@ function loadSave() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_SAVE, owned: ["fusca"] };
     const parsed = JSON.parse(raw);
+    const owned = Array.isArray(parsed.owned) && parsed.owned.length ? parsed.owned : ["fusca"];
+    if (!owned.includes("fusca")) owned.unshift("fusca");
+    const selected = owned.includes(parsed.selected) ? parsed.selected : "fusca";
     return {
       coins: Number(parsed.coins) || 0,
       best: Number(parsed.best) || 0,
-      owned: Array.isArray(parsed.owned) && parsed.owned.length ? parsed.owned : ["fusca"],
-      selected: parsed.selected || "fusca",
+      owned,
+      selected,
       muted: Boolean(parsed.muted),
     };
   } catch (err) {

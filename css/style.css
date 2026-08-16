@@ -40,23 +40,12 @@ canvas {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 62%, rgba(0, 0, 0, 0.18) 100%);
+  background: none;
   z-index: 2;
 }
 
 .scanlines {
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 3;
-  opacity: 0.08;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.15) 0,
-    rgba(255, 255, 255, 0.15) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  display: none;
 }
 
 .hidden {

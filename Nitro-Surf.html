@@ -57,23 +57,12 @@ canvas {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 62%, rgba(0, 0, 0, 0.18) 100%);
+  background: none;
   z-index: 2;
 }
 
 .scanlines {
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 3;
-  opacity: 0.08;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.15) 0,
-    rgba(255, 255, 255, 0.15) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  display: none;
 }
 
 .hidden {
@@ -818,7 +807,7 @@ const CARS = [
     rarity: "comum",
     price: 0,
     stats: { speed: 0.92, handling: 1.15, magnet: 1.05 },
-    colors: { body: "#f4d03f", stripe: "#1b1b1b", glass: "#7ec8ff", trim: "#2b2b2b" },
+    colors: { body: "#7ec8f0", stripe: "#1b1b1b", glass: "#111111", trim: "#2b2b2b" },
     shape: "hatch",
   },
   {
@@ -828,7 +817,7 @@ const CARS = [
     rarity: "comum",
     price: 280,
     stats: { speed: 1.0, handling: 1.2, magnet: 1.0 },
-    colors: { body: "#e74c3c", stripe: "#ffffff", glass: "#9ad7ff", trim: "#1f1f1f" },
+    colors: { body: "#ff8a2b", stripe: "#1b1b1b", glass: "#111111", trim: "#1f1f1f" },
     shape: "hatch",
   },
   {
@@ -838,7 +827,7 @@ const CARS = [
     rarity: "comum",
     price: 620,
     stats: { speed: 1.08, handling: 1.05, magnet: 1.1 },
-    colors: { body: "#5d6d7e", stripe: "#3cf0ff", glass: "#b9e7ff", trim: "#111" },
+    colors: { body: "#1e3a6e", stripe: "#ffffff", glass: "#111111", trim: "#111" },
     shape: "sedan",
   },
   {
@@ -848,7 +837,7 @@ const CARS = [
     rarity: "raro",
     price: 980,
     stats: { speed: 1.02, handling: 1.08, magnet: 1.35 },
-    colors: { body: "#f1c40f", stripe: "#111", glass: "#8fd4ff", trim: "#222" },
+    colors: { body: "#f0c420", stripe: "#111111", glass: "#111111", trim: "#222" },
     shape: "taxi",
   },
   {
@@ -858,7 +847,7 @@ const CARS = [
     rarity: "raro",
     price: 1450,
     stats: { speed: 1.06, handling: 0.98, magnet: 1.45 },
-    colors: { body: "#e67e22", stripe: "#2c3e50", glass: "#9ad0ea", trim: "#1a1a1a" },
+    colors: { body: "#c4451c", stripe: "#1b1b1b", glass: "#111111", trim: "#1a1a1a" },
     shape: "pickup",
   },
   {
@@ -868,7 +857,7 @@ const CARS = [
     rarity: "raro",
     price: 1900,
     stats: { speed: 1.04, handling: 0.95, magnet: 1.55 },
-    colors: { body: "#1e8449", stripe: "#f4d03f", glass: "#a8e0c2", trim: "#0d1f14" },
+    colors: { body: "#8fd14a", stripe: "#1b1b1b", glass: "#111111", trim: "#0d1f14" },
     shape: "suv",
   },
   {
@@ -878,7 +867,7 @@ const CARS = [
     rarity: "epico",
     price: 3200,
     stats: { speed: 1.22, handling: 1.0, magnet: 0.95 },
-    colors: { body: "#7b1113", stripe: "#111", glass: "#86c5ff", trim: "#0a0a0a" },
+    colors: { body: "#1e3a6e", stripe: "#ffffff", glass: "#111111", trim: "#0a0a0a" },
     shape: "muscle",
   },
   {
@@ -898,7 +887,7 @@ const CARS = [
     rarity: "epico",
     price: 5600,
     stats: { speed: 1.28, handling: 1.25, magnet: 1.05 },
-    colors: { body: "#12c2c2", stripe: "#ff3d9a", glass: "#d6fbff", trim: "#062022" },
+    colors: { body: "#ff8a2b", stripe: "#1b1b1b", glass: "#111111", trim: "#062022" },
     shape: "sports",
   },
   {
@@ -908,7 +897,7 @@ const CARS = [
     rarity: "epico",
     price: 7200,
     stats: { speed: 1.24, handling: 1.22, magnet: 1.2 },
-    colors: { body: "#ff4d8d", stripe: "#ffd166", glass: "#ffd6ea", trim: "#2a1020" },
+    colors: { body: "#ff8a2b", stripe: "#1b1b1b", glass: "#111111", trim: "#2a1020" },
     shape: "convertible",
   },
   {
@@ -918,7 +907,7 @@ const CARS = [
     rarity: "lendario",
     price: 9800,
     stats: { speed: 1.36, handling: 1.3, magnet: 1.15 },
-    colors: { body: "#7d3c98", stripe: "#3cf0ff", glass: "#e5d4ff", trim: "#16081e" },
+    colors: { body: "#c4451c", stripe: "#1b1b1b", glass: "#111111", trim: "#16081e" },
     shape: "super",
   },
   {
@@ -928,7 +917,7 @@ const CARS = [
     rarity: "lendario",
     price: 13500,
     stats: { speed: 1.45, handling: 1.4, magnet: 0.85 },
-    colors: { body: "#ffffff", stripe: "#e74c3c", glass: "#111", trim: "#c0392b" },
+    colors: { body: "#8fd14a", stripe: "#ffffff", glass: "#111111", trim: "#c0392b" },
     shape: "formula",
   },
   {
@@ -938,7 +927,7 @@ const CARS = [
     rarity: "lendario",
     price: 18000,
     stats: { speed: 1.5, handling: 1.35, magnet: 1.3 },
-    colors: { body: "#111111", stripe: "#ffd166", glass: "#ffe9a8", trim: "#3cf0ff" },
+    colors: { body: "#7ec8f0", stripe: "#ffffff", glass: "#111111", trim: "#3cf0ff" },
     shape: "hyper",
   },
 ];
@@ -1091,73 +1080,142 @@ function drawVehicle(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
+function blitSprite(ctx, ox, oy, u, rows, palette) {
+  const h = rows.length;
+  const w = rows[0].length;
+  const x0 = Math.round(ox) - Math.floor((w * u) / 2);
+  const y0 = Math.round(oy) - Math.floor((h * u) / 2);
+  for (let y = 0; y < h; y++) {
+    const row = rows[y];
+    for (let x = 0; x < w; x++) {
+      const ch = row[x];
+      if (!ch || ch === "." || ch === " ") continue;
+      const color = palette[ch];
+      if (!color) continue;
+      ctx.fillStyle = color;
+      ctx.fillRect(x0 + x * u, y0 + y * u, u, u);
+    }
+  }
+}
+
+const CONVERTIBLE = [
+  ".....Y.Y.....",
+  "....BBBBB....",
+  "...BBBBBBB...",
+  ".W.BBBBBBB.W.",
+  "..BBKKKKKBB..",
+  "..BBKKKKKBB..",
+  "..BBKKKKKBB..",
+  "..BBBBBBBBB..",
+  "..BISS..SSIB.",
+  "..BISS..SSIB.",
+  "..BISS..SSIB.",
+  "..BBBBBBBBB..",
+  ".W.BBBBBBB.W.",
+  "..BBBBBBBBB..",
+  "..BBR...RBB..",
+  "...BBBBBBB...",
+  "....BBBBB....",
+];
+
+const CONVERTIBLE_STRIPE = [
+  ".....Y.Y.....",
+  "....TTBTT....",
+  "...BTTBTTB...",
+  ".W.BTTBTTB.W.",
+  "..BBKKKKKBB..",
+  "..BBKKKKKBB..",
+  "..BBKKKKKBB..",
+  "..BBTTBTTBB..",
+  "..BISS..SSIB.",
+  "..BISS..SSIB.",
+  "..BISS..SSIB.",
+  "..BBTTBTTBB..",
+  ".W.BTTBTTB.W.",
+  "..BBTTBTTBB..",
+  "..BTR...RTB..",
+  "...BTTBTTB...",
+  "....TTBTT....",
+];
+
+const VAN = [
+  ".....Y.Y.....",
+  "....BBBBB....",
+  "...BBBBBBB...",
+  ".WBBBBBBBBBW.",
+  "..BBKKKKKBB..",
+  "..BBKKKKKBB..",
+  "..BBBBBBBBB..",
+  "..BBBBBBBBB..",
+  "..BBBBBBBBB..",
+  "..BBBBBBBBB..",
+  "..BBBBBBBBB..",
+  ".WBBBBBBBBBW.",
+  "..BBBBBBBBB..",
+  "..BBR...RBB..",
+  "...BBBBBBB...",
+];
+
+function hasRacingStripes(car) {
+  const stripe = car.colors && car.colors.stripe;
+  return (
+    car.shape === "police" ||
+    car.shape === "muscle" ||
+    car.shape === "hyper" ||
+    car.shape === "formula" ||
+    stripe === "#ffffff"
+  );
+}
+
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
   const u = Math.max(1, extras.u || Math.round(scale) || 2);
   const c = car.colors;
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  ctx.save();
-
+  const striped = hasRacingStripes(car);
+  const sprite = extras.van ? VAN : striped ? CONVERTIBLE_STRIPE : CONVERTIBLE;
+  const palette = {
+    B: c.body,
+    K: "#0a0a0a",
+    I: "#2a2a2a",
+    S: "#141414",
+    W: "#111111",
+    Y: "#ffe14a",
+    R: extras.brake ? "#ff2a2a" : "#ff6a18",
+    T: striped ? "#f4f7ff" : c.body,
+  };
   if (extras.nitro) {
     ctx.fillStyle = "#7fe7ff";
-    ctx.fillRect(ox - 2 * u, oy + 12 * u, 4 * u, 3 * u);
+    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + 10 * u, 4 * u, 3 * u);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(ox - 1 * u, oy + 15 * u, 2 * u, 2 * u);
+    ctx.fillRect(Math.round(x) - u, Math.round(y) + 13 * u, 2 * u, 2 * u);
   }
-
-  ctx.fillStyle = "#111111";
-  ctx.fillRect(ox - 7 * u, oy - 6 * u, 2 * u, 5 * u);
-  ctx.fillRect(ox + 5 * u, oy - 6 * u, 2 * u, 5 * u);
-  ctx.fillRect(ox - 7 * u, oy + 2 * u, 2 * u, 5 * u);
-  ctx.fillRect(ox + 5 * u, oy + 2 * u, 2 * u, 5 * u);
-
-  ctx.fillStyle = c.body;
-  ctx.fillRect(ox - 5 * u, oy - 10 * u, 10 * u, 20 * u);
-  ctx.fillRect(ox - 4 * u, oy - 11 * u, 8 * u, 1 * u);
-  ctx.fillRect(ox - 4 * u, oy + 10 * u, 8 * u, 1 * u);
-
-  ctx.fillStyle = "#1a1a1a";
-  ctx.fillRect(ox - 4 * u, oy - 8 * u, 8 * u, 3 * u);
-  ctx.fillRect(ox - 3 * u, oy - 2 * u, 2 * u, 4 * u);
-  ctx.fillRect(ox + 1 * u, oy - 2 * u, 2 * u, 4 * u);
-  ctx.fillRect(ox - 4 * u, oy - 4 * u, 8 * u, 1 * u);
-
-  if (car.shape === "police" || car.shape === "muscle" || car.shape === "hyper" || car.shape === "formula") {
-    ctx.fillStyle = c.stripe === "#111" || c.stripe === "#111111" ? "#ffffff" : c.stripe;
-    ctx.fillRect(ox - 1 * u, oy - 10 * u, 2 * u, 20 * u);
-  }
-
-  ctx.fillStyle = "#fff3b0";
-  ctx.fillRect(ox - 4 * u, oy - 11 * u, 2 * u, 1 * u);
-  ctx.fillRect(ox + 2 * u, oy - 11 * u, 2 * u, 1 * u);
-  ctx.fillStyle = extras.brake ? "#ff3030" : "#ff7a2a";
-  ctx.fillRect(ox - 4 * u, oy + 10 * u, 2 * u, 1 * u);
-  ctx.fillRect(ox + 2 * u, oy + 10 * u, 2 * u, 1 * u);
-
+  blitSprite(ctx, x, y, u, sprite, palette);
   if (car.shape === "police") {
-    ctx.fillStyle = extras.flash ? "#ff3030" : "#3080ff";
-    ctx.fillRect(ox - 2 * u, oy - 1 * u, 4 * u, 2 * u);
+    const ox = Math.round(x);
+    const oy = Math.round(y);
+    ctx.fillStyle = extras.flash ? "#ff3030" : "#3d8bff";
+    ctx.fillRect(ox - 2 * u, oy - 2 * u, 2 * u, u);
+    ctx.fillStyle = extras.flash ? "#3d8bff" : "#ff3030";
+    ctx.fillRect(ox, oy - 2 * u, 2 * u, u);
   }
-  if (car.shape === "taxi") {
-    ctx.fillStyle = "#111111";
-    ctx.fillRect(ox - 2 * u, oy - 1 * u, 4 * u, 2 * u);
-    ctx.fillStyle = "#f1c40f";
-    ctx.fillRect(ox - 1 * u, oy - 1 * u, 2 * u, 2 * u);
-  }
-  ctx.restore();
 }
 
-function drawPixelTree(ctx, x, y, u) {
+function fillDisk(ctx, ox, oy, r, color) {
+  ctx.fillStyle = color;
+  const r2 = r * r;
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (dx * dx + dy * dy <= r2) ctx.fillRect(ox + dx, oy + dy, 1, 1);
+    }
+  }
+}
+
+function drawPixelTree(ctx, x, y, size) {
   const ox = Math.round(x);
   const oy = Math.round(y);
-  const s = Math.max(1, u);
-  ctx.fillStyle = "#2f9e45";
-  ctx.fillRect(ox - 4 * s, oy - 3 * s, 8 * s, 6 * s);
-  ctx.fillRect(ox - 3 * s, oy - 5 * s, 6 * s, 2 * s);
-  ctx.fillRect(ox - 3 * s, oy + 3 * s, 6 * s, 2 * s);
-  ctx.fillStyle = "#1d7a32";
-  ctx.fillRect(ox - 2 * s, oy - 2 * s, 4 * s, 4 * s);
+  const r = size > 1 ? 6 : 4;
+  fillDisk(ctx, ox, oy, r, "#166422");
+  fillDisk(ctx, ox - 1, oy - 1, Math.max(2, r - 2), "#1f8c2e");
 }
 
 function drawPixelDude(ctx, x, y, u) {
@@ -1167,12 +1225,8 @@ function drawPixelDude(ctx, x, y, u) {
   ctx.fillRect(ox - 2 * u, oy - 10 * u, 4 * u, 4 * u);
   ctx.fillStyle = "#1a1a1a";
   ctx.fillRect(ox - 2 * u, oy - 11 * u, 5 * u, 2 * u);
-  ctx.fillStyle = "#3cf0ff";
-  ctx.fillRect(ox - 2 * u, oy - 10 * u, 5 * u, 1 * u);
   ctx.fillStyle = "#2b3a67";
   ctx.fillRect(ox - 2 * u, oy - 6 * u, 4 * u, 7 * u);
-  ctx.fillStyle = "#ff3d9a";
-  ctx.fillRect(ox - 2 * u, oy, 4 * u, 1 * u);
   ctx.fillStyle = "#1b2438";
   ctx.fillRect(ox - 2 * u, oy + 1 * u, 2 * u, 6 * u);
   ctx.fillRect(ox + 1 * u, oy + 1 * u, 2 * u, 6 * u);
@@ -1181,12 +1235,12 @@ function drawPixelDude(ctx, x, y, u) {
 }
 
 function trafficPalette() {
-  const bodies = ["#7ec8f0", "#ff8c32", "#1e3a6e", "#c4451c", "#8fd14a", "#f0d44c", "#d96ad0"];
+  const bodies = ["#7ec8f0", "#ff8a2b", "#1e3a6e", "#c4451c", "#8fd14a"];
   const body = bodies[Math.floor(Math.random() * bodies.length)];
   return {
     body,
-    stripe: body === "#1e3a6e" ? "#ffffff" : "#111111",
-    glass: "#1a1a1a",
+    stripe: body === "#1e3a6e" ? "#ffffff" : "#1b1b1b",
+    glass: "#111111",
     trim: "#111111",
   };
 }
@@ -1727,7 +1781,7 @@ const Game = {
     this.cameraZ = 0;
     this.time = 0;
     this.shake = 0;
-    this.spawnZ = 70;
+    this.spawnZ = 16;
     this.coinZ = 30;
     this.powerZ = 140;
     this.entities = [];
@@ -1759,7 +1813,7 @@ const Game = {
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.ctx.imageSmoothingEnabled = false;
-    this.pixel = Math.max(3, Math.floor(Math.min(this.w, this.h) / 210));
+    this.pixel = Math.max(4, Math.floor(Math.min(this.w, this.h) / 150));
     this.gw = Math.max(96, Math.ceil(this.w / this.pixel));
     this.gh = Math.max(160, Math.ceil(this.h / this.pixel));
     if (!this.pix) this.pix = document.createElement("canvas");
@@ -1866,13 +1920,13 @@ const Game = {
   toScreen(worldX, z) {
     const W = this.gw || this.w;
     const H = this.gh || this.h;
-    const xScale = W * 0.115;
-    const zScale = H / 50;
+    const xScale = W * 0.09;
+    const zScale = H / 58;
     return {
       x: W / 2 + worldX * xScale,
-      y: H * 0.78 - (z - this.playerZ()) * zScale,
-      s: Math.max(1, Math.round(xScale / 10)),
-      u: Math.max(1, Math.round(xScale / 10)),
+      y: H * 0.76 - (z - this.playerZ()) * zScale,
+      s: Math.max(1, Math.round(xScale / 9)),
+      u: Math.max(1, Math.round(xScale / 9)),
       xScale,
       zScale,
     };
@@ -1955,7 +2009,6 @@ const Game = {
   },
 
   makeTraffic(lane, z) {
-    const shapes = ["sedan", "hatch", "suv", "pickup"];
     return {
       kind: "traffic",
       lane,
@@ -1965,7 +2018,7 @@ const Game = {
       low: false,
       speed: Math.max(3, this.speed * (0.28 + Math.random() * 0.18)),
       car: {
-        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        shape: "convertible",
         colors: trafficPalette(),
       },
     };
@@ -2121,7 +2174,7 @@ const Game = {
   blit(ctx) {
     const out = this.ctx;
     out.imageSmoothingEnabled = false;
-    out.fillStyle = "#48c25a";
+    out.fillStyle = "#4ed34a";
     out.fillRect(0, 0, this.w, this.h);
     let ox = 0;
     let oy = 0;
@@ -2133,22 +2186,24 @@ const Game = {
   },
 
   drawSky(ctx) {
-    ctx.fillStyle = "#48c25a";
+    ctx.fillStyle = "#4ed34a";
     ctx.fillRect(0, 0, this.gw, this.gh);
   },
 
-  drawRoad(ctx) {
+  paintRoad(ctx, cameraZ) {
     const mid = this.toScreen(0, this.playerZ());
     const laneW = Math.round(mid.xScale * 2.15);
     const roadW = laneW * 3;
     const left = Math.round(this.gw / 2 - roadW / 2);
-    const rumble = Math.max(3, Math.round(laneW * 0.12));
+    const rumble = Math.max(4, Math.round(laneW * 0.18));
+    const zScale = mid.zScale;
+    const scroll = cameraZ == null ? this.cameraZ : cameraZ;
 
     ctx.fillStyle = "#9a9a9a";
     ctx.fillRect(left, 0, roadW, this.gh);
 
-    const block = 8;
-    const offset = Math.round(((this.cameraZ * mid.zScale) % (block * 2) + block * 2) % (block * 2));
+    const block = rumble;
+    const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
     for (let y = -offset; y < this.gh + block; y += block) {
       const red = Math.floor((y + offset) / block) % 2 === 0;
       ctx.fillStyle = red ? "#e53935" : "#ffffff";
@@ -2156,17 +2211,23 @@ const Game = {
       ctx.fillRect(left + roadW, y, rumble, block);
     }
 
-    const dashH = 7;
-    const gap = 6;
+    const dashW = Math.max(2, Math.round(laneW * 0.07));
+    const dashH = Math.max(8, Math.round(laneW * 0.38));
+    const gap = Math.max(6, Math.round(laneW * 0.28));
     const period = dashH + gap;
-    const dashOff = Math.round(((this.cameraZ * mid.zScale) % period + period) % period);
+    const dashOff = Math.round(((scroll * zScale) % period + period) % period);
     ctx.fillStyle = "#ffffff";
     for (const lane of [1, 2]) {
-      const x = left + lane * laneW - 1;
+      const x = left + lane * laneW - Math.floor(dashW / 2);
       for (let y = -dashOff; y < this.gh + period; y += period) {
-        ctx.fillRect(x, y, 2, dashH);
+        ctx.fillRect(x, y, dashW, dashH);
       }
     }
+    return { left, roadW, laneW, rumble };
+  },
+
+  drawRoad(ctx) {
+    this.paintRoad(ctx, this.cameraZ);
   },
 
   drawRoadside(ctx) {
@@ -2179,7 +2240,7 @@ const Game = {
       .sort((a, b) => b.z - a.z);
 
     for (const item of items) {
-      const dist = 5.1 + (item.row || 0) * 1.6;
+      const dist = 4.35 + (item.row || 0) * 1.35;
       const x = item.side * dist;
       const p = this.toScreen(x, item.z);
       if (p.y < -12 || p.y > this.gh + 12) continue;
@@ -2197,7 +2258,7 @@ const Game = {
       if (this.powers.shield > 0) {
         ctx.fillStyle = "#7dffb8";
         ctx.fillRect(Math.round(p.x) - p.u * 8, Math.round(p.y) - hop - p.u * 13, p.u * 16, p.u * 26);
-        ctx.fillStyle = "#48c25a";
+        ctx.fillStyle = "#4ed34a";
         ctx.fillRect(Math.round(p.x) - p.u * 7, Math.round(p.y) - hop - p.u * 12, p.u * 14, p.u * 24);
       }
       drawCarTop(ctx, p.x, p.y - hop, p.u, this.car, {
@@ -2239,15 +2300,14 @@ const Game = {
           ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
         }
       } else if (e.kind === "truck") {
-        const u = p.u;
-        const ox = Math.round(p.x);
-        const oy = Math.round(p.y);
-        ctx.fillStyle = "#5a6570";
-        ctx.fillRect(ox - 6 * u, oy - 14 * u, 12 * u, 28 * u);
-        ctx.fillStyle = "#2c333a";
-        ctx.fillRect(ox - 6 * u, oy - 14 * u, 12 * u, 6 * u);
-        ctx.fillStyle = "#7dd3fc";
-        ctx.fillRect(ox - 4 * u, oy - 12 * u, 8 * u, 3 * u);
+        drawCarTop(
+          ctx,
+          p.x,
+          p.y,
+          p.u,
+          { shape: "suv", colors: { body: "#6b7380", stripe: "#1b1b1b", glass: "#111", trim: "#111" } },
+          { u: p.u, van: true, brake: true }
+        );
       } else {
         drawCarTop(ctx, p.x, p.y, p.u, e.car, { u: p.u, brake: true });
       }
@@ -2285,37 +2345,30 @@ const Game = {
     const ctx = this.pctx;
     const W = this.gw;
     const H = this.gh;
-    ctx.fillStyle = "#48c25a";
+    ctx.fillStyle = "#4ed34a";
     ctx.fillRect(0, 0, W, H);
 
-    const laneW = Math.round(W * 0.12);
-    const roadW = laneW * 3;
-    const left = Math.round(W / 2 - roadW / 2);
-    ctx.fillStyle = "#9a9a9a";
-    ctx.fillRect(left, 0, roadW, H);
-    const rumble = 4;
-    for (let y = 0; y < H; y += 8) {
-      ctx.fillStyle = Math.floor(y / 8) % 2 === 0 ? "#e53935" : "#ffffff";
-      ctx.fillRect(left - rumble, y, rumble, 8);
-      ctx.fillRect(left + roadW, y, rumble, 8);
-    }
-    ctx.fillStyle = "#ffffff";
-    for (const lane of [1, 2]) {
-      const x = left + lane * laneW - 1;
-      for (let y = 0; y < H; y += 13) ctx.fillRect(x, y, 2, 7);
-    }
+    const road = this.paintRoad(ctx, 0);
 
-    for (let i = 0; i < 18; i++) {
-      drawPixelTree(ctx, left - 18 - (i % 3) * 10, 16 + i * 18, 1 + (i % 2));
-      drawPixelTree(ctx, left + roadW + 18 + (i % 3) * 10, 10 + i * 18, 1 + ((i + 1) % 2));
+    for (let i = 0; i < 22; i++) {
+      drawPixelTree(ctx, road.left - 14 - (i % 3) * 9, 12 + i * 16, 1 + (i % 2));
+      drawPixelTree(ctx, road.left + road.roadW + 14 + (i % 3) * 9, 8 + i * 16, 1 + ((i + 1) % 2));
     }
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(2, Math.round(W / 70));
+    const u = Math.max(2, Math.round(W / 90));
     const cx = Math.round(W / 2);
-    const cy = Math.round(H * 0.58);
-    drawCarTop(ctx, cx + 6, cy, u, car, { u });
-    drawPixelDude(ctx, cx - 16 * u, cy + 2, u);
+    const cy = Math.round(H * 0.62);
+    const lane = road.laneW;
+    const demo = [
+      { x: cx - lane, y: H * 0.28, car: { shape: "convertible", colors: { body: "#ff8a2b", stripe: "#1b1b1b" } } },
+      { x: cx + lane, y: H * 0.24, car: { shape: "muscle", colors: { body: "#1e3a6e", stripe: "#ffffff" } } },
+      { x: cx - lane, y: H * 0.44, car: { shape: "convertible", colors: { body: "#c4451c", stripe: "#1b1b1b" } } },
+      { x: cx + lane, y: H * 0.40, car: { shape: "convertible", colors: { body: "#8fd14a", stripe: "#1b1b1b" } } },
+    ];
+    for (const d of demo) drawCarTop(ctx, d.x, d.y, u, d.car, { u });
+    drawCarTop(ctx, cx, cy, u, car, { u });
+    drawPixelDude(ctx, cx - 12 * u, cy + 2, Math.max(1, Math.round(u * 0.5)));
     this.blit();
   },
 
@@ -2428,9 +2481,13 @@ function renderShop() {
     const canvas = card.querySelector("canvas");
     const c2d = canvas.getContext("2d");
     c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#48c25a";
+    c2d.fillStyle = "#4ed34a";
     c2d.fillRect(0, 0, 280, 140);
-    drawCarTop(c2d, 140, 78, 5, car, { u: 5, flash: true });
+    c2d.fillStyle = "#9a9a9a";
+    c2d.fillRect(108, 0, 64, 140);
+    c2d.fillStyle = "#ffffff";
+    for (let y = 6; y < 140; y += 18) c2d.fillRect(138, y, 3, 10);
+    drawCarTop(c2d, 140, 72, 6, car, { u: 6, flash: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");

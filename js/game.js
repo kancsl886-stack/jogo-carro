@@ -24,7 +24,7 @@ const Game = {
     this.cameraZ = 0;
     this.time = 0;
     this.shake = 0;
-    this.spawnZ = 70;
+    this.spawnZ = 16;
     this.coinZ = 30;
     this.powerZ = 140;
     this.entities = [];
@@ -56,7 +56,7 @@ const Game = {
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.ctx.imageSmoothingEnabled = false;
-    this.pixel = Math.max(3, Math.floor(Math.min(this.w, this.h) / 210));
+    this.pixel = Math.max(4, Math.floor(Math.min(this.w, this.h) / 150));
     this.gw = Math.max(96, Math.ceil(this.w / this.pixel));
     this.gh = Math.max(160, Math.ceil(this.h / this.pixel));
     if (!this.pix) this.pix = document.createElement("canvas");
@@ -163,13 +163,13 @@ const Game = {
   toScreen(worldX, z) {
     const W = this.gw || this.w;
     const H = this.gh || this.h;
-    const xScale = W * 0.115;
-    const zScale = H / 50;
+    const xScale = W * 0.09;
+    const zScale = H / 58;
     return {
       x: W / 2 + worldX * xScale,
-      y: H * 0.78 - (z - this.playerZ()) * zScale,
-      s: Math.max(1, Math.round(xScale / 10)),
-      u: Math.max(1, Math.round(xScale / 10)),
+      y: H * 0.76 - (z - this.playerZ()) * zScale,
+      s: Math.max(1, Math.round(xScale / 9)),
+      u: Math.max(1, Math.round(xScale / 9)),
       xScale,
       zScale,
     };
@@ -252,7 +252,6 @@ const Game = {
   },
 
   makeTraffic(lane, z) {
-    const shapes = ["sedan", "hatch", "suv", "pickup"];
     return {
       kind: "traffic",
       lane,
@@ -262,7 +261,7 @@ const Game = {
       low: false,
       speed: Math.max(3, this.speed * (0.28 + Math.random() * 0.18)),
       car: {
-        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        shape: "convertible",
         colors: trafficPalette(),
       },
     };
@@ -418,7 +417,7 @@ const Game = {
   blit(ctx) {
     const out = this.ctx;
     out.imageSmoothingEnabled = false;
-    out.fillStyle = "#48c25a";
+    out.fillStyle = "#4ed34a";
     out.fillRect(0, 0, this.w, this.h);
     let ox = 0;
     let oy = 0;
@@ -430,22 +429,24 @@ const Game = {
   },
 
   drawSky(ctx) {
-    ctx.fillStyle = "#48c25a";
+    ctx.fillStyle = "#4ed34a";
     ctx.fillRect(0, 0, this.gw, this.gh);
   },
 
-  drawRoad(ctx) {
+  paintRoad(ctx, cameraZ) {
     const mid = this.toScreen(0, this.playerZ());
     const laneW = Math.round(mid.xScale * 2.15);
     const roadW = laneW * 3;
     const left = Math.round(this.gw / 2 - roadW / 2);
-    const rumble = Math.max(3, Math.round(laneW * 0.12));
+    const rumble = Math.max(4, Math.round(laneW * 0.18));
+    const zScale = mid.zScale;
+    const scroll = cameraZ == null ? this.cameraZ : cameraZ;
 
     ctx.fillStyle = "#9a9a9a";
     ctx.fillRect(left, 0, roadW, this.gh);
 
-    const block = 8;
-    const offset = Math.round(((this.cameraZ * mid.zScale) % (block * 2) + block * 2) % (block * 2));
+    const block = rumble;
+    const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
     for (let y = -offset; y < this.gh + block; y += block) {
       const red = Math.floor((y + offset) / block) % 2 === 0;
       ctx.fillStyle = red ? "#e53935" : "#ffffff";
@@ -453,17 +454,23 @@ const Game = {
       ctx.fillRect(left + roadW, y, rumble, block);
     }
 
-    const dashH = 7;
-    const gap = 6;
+    const dashW = Math.max(2, Math.round(laneW * 0.07));
+    const dashH = Math.max(8, Math.round(laneW * 0.38));
+    const gap = Math.max(6, Math.round(laneW * 0.28));
     const period = dashH + gap;
-    const dashOff = Math.round(((this.cameraZ * mid.zScale) % period + period) % period);
+    const dashOff = Math.round(((scroll * zScale) % period + period) % period);
     ctx.fillStyle = "#ffffff";
     for (const lane of [1, 2]) {
-      const x = left + lane * laneW - 1;
+      const x = left + lane * laneW - Math.floor(dashW / 2);
       for (let y = -dashOff; y < this.gh + period; y += period) {
-        ctx.fillRect(x, y, 2, dashH);
+        ctx.fillRect(x, y, dashW, dashH);
       }
     }
+    return { left, roadW, laneW, rumble };
+  },
+
+  drawRoad(ctx) {
+    this.paintRoad(ctx, this.cameraZ);
   },
 
   drawRoadside(ctx) {
@@ -476,7 +483,7 @@ const Game = {
       .sort((a, b) => b.z - a.z);
 
     for (const item of items) {
-      const dist = 5.1 + (item.row || 0) * 1.6;
+      const dist = 4.35 + (item.row || 0) * 1.35;
       const x = item.side * dist;
       const p = this.toScreen(x, item.z);
       if (p.y < -12 || p.y > this.gh + 12) continue;
@@ -494,7 +501,7 @@ const Game = {
       if (this.powers.shield > 0) {
         ctx.fillStyle = "#7dffb8";
         ctx.fillRect(Math.round(p.x) - p.u * 8, Math.round(p.y) - hop - p.u * 13, p.u * 16, p.u * 26);
-        ctx.fillStyle = "#48c25a";
+        ctx.fillStyle = "#4ed34a";
         ctx.fillRect(Math.round(p.x) - p.u * 7, Math.round(p.y) - hop - p.u * 12, p.u * 14, p.u * 24);
       }
       drawCarTop(ctx, p.x, p.y - hop, p.u, this.car, {
@@ -536,15 +543,14 @@ const Game = {
           ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
         }
       } else if (e.kind === "truck") {
-        const u = p.u;
-        const ox = Math.round(p.x);
-        const oy = Math.round(p.y);
-        ctx.fillStyle = "#5a6570";
-        ctx.fillRect(ox - 6 * u, oy - 14 * u, 12 * u, 28 * u);
-        ctx.fillStyle = "#2c333a";
-        ctx.fillRect(ox - 6 * u, oy - 14 * u, 12 * u, 6 * u);
-        ctx.fillStyle = "#7dd3fc";
-        ctx.fillRect(ox - 4 * u, oy - 12 * u, 8 * u, 3 * u);
+        drawCarTop(
+          ctx,
+          p.x,
+          p.y,
+          p.u,
+          { shape: "suv", colors: { body: "#6b7380", stripe: "#1b1b1b", glass: "#111", trim: "#111" } },
+          { u: p.u, van: true, brake: true }
+        );
       } else {
         drawCarTop(ctx, p.x, p.y, p.u, e.car, { u: p.u, brake: true });
       }
@@ -582,37 +588,30 @@ const Game = {
     const ctx = this.pctx;
     const W = this.gw;
     const H = this.gh;
-    ctx.fillStyle = "#48c25a";
+    ctx.fillStyle = "#4ed34a";
     ctx.fillRect(0, 0, W, H);
 
-    const laneW = Math.round(W * 0.12);
-    const roadW = laneW * 3;
-    const left = Math.round(W / 2 - roadW / 2);
-    ctx.fillStyle = "#9a9a9a";
-    ctx.fillRect(left, 0, roadW, H);
-    const rumble = 4;
-    for (let y = 0; y < H; y += 8) {
-      ctx.fillStyle = Math.floor(y / 8) % 2 === 0 ? "#e53935" : "#ffffff";
-      ctx.fillRect(left - rumble, y, rumble, 8);
-      ctx.fillRect(left + roadW, y, rumble, 8);
-    }
-    ctx.fillStyle = "#ffffff";
-    for (const lane of [1, 2]) {
-      const x = left + lane * laneW - 1;
-      for (let y = 0; y < H; y += 13) ctx.fillRect(x, y, 2, 7);
-    }
+    const road = this.paintRoad(ctx, 0);
 
-    for (let i = 0; i < 18; i++) {
-      drawPixelTree(ctx, left - 18 - (i % 3) * 10, 16 + i * 18, 1 + (i % 2));
-      drawPixelTree(ctx, left + roadW + 18 + (i % 3) * 10, 10 + i * 18, 1 + ((i + 1) % 2));
+    for (let i = 0; i < 22; i++) {
+      drawPixelTree(ctx, road.left - 14 - (i % 3) * 9, 12 + i * 16, 1 + (i % 2));
+      drawPixelTree(ctx, road.left + road.roadW + 14 + (i % 3) * 9, 8 + i * 16, 1 + ((i + 1) % 2));
     }
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(2, Math.round(W / 70));
+    const u = Math.max(2, Math.round(W / 90));
     const cx = Math.round(W / 2);
-    const cy = Math.round(H * 0.58);
-    drawCarTop(ctx, cx + 6, cy, u, car, { u });
-    drawPixelDude(ctx, cx - 16 * u, cy + 2, u);
+    const cy = Math.round(H * 0.62);
+    const lane = road.laneW;
+    const demo = [
+      { x: cx - lane, y: H * 0.28, car: { shape: "convertible", colors: { body: "#ff8a2b", stripe: "#1b1b1b" } } },
+      { x: cx + lane, y: H * 0.24, car: { shape: "muscle", colors: { body: "#1e3a6e", stripe: "#ffffff" } } },
+      { x: cx - lane, y: H * 0.44, car: { shape: "convertible", colors: { body: "#c4451c", stripe: "#1b1b1b" } } },
+      { x: cx + lane, y: H * 0.40, car: { shape: "convertible", colors: { body: "#8fd14a", stripe: "#1b1b1b" } } },
+    ];
+    for (const d of demo) drawCarTop(ctx, d.x, d.y, u, d.car, { u });
+    drawCarTop(ctx, cx, cy, u, car, { u });
+    drawPixelDude(ctx, cx - 12 * u, cy + 2, Math.max(1, Math.round(u * 0.5)));
     this.blit();
   },
 

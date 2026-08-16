@@ -2,6 +2,25 @@
 
 Jogo de corrida infinita no estilo Subway Surfers, só que de carro: três faixas, pulo, moedas, power-ups e uma loja para comprar vários modelos.
 
+## Jogar na área de trabalho
+
+No **Windows**:
+
+1. Clique duas vezes em `Colocar-na-Area-de-Trabalho.bat`
+2. Confirme se o atalho **Nitro Surf** apareceu na Área de Trabalho
+3. Clique duas vezes nesse atalho para jogar
+
+Se quiser jogar agora, sem instalar o atalho, clique duas vezes em `Jogar.bat`.
+
+No **Linux**:
+
+```bash
+chmod +x jogar.sh scripts/instalar-atalho.sh
+./scripts/instalar-atalho.sh
+```
+
+O atalho **Nitro Surf** vai para a pasta da área de trabalho.
+
 ## Como jogar
 
 1. Abra `index.html` no navegador (ou sirva a pasta com qualquer servidor estático).

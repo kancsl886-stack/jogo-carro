@@ -1,6 +1,6 @@
-const LANES = 4;
-const LANE_GAP = 1.9;
-const GRASS = "#4ed34a";
+const LANES = 3;
+const LANE_GAP = 2.2;
+const GRASS = "#48d048";
 
 function crisp(ctx) {
   ctx.imageSmoothingEnabled = false;
@@ -164,7 +164,7 @@ const Game = {
   },
 
   laneWorldX(lane) {
-    return (lane - (LANES - 1) / 2) * LANE_GAP;
+    return (lane - 1) * LANE_GAP;
   },
 
   playerZ() {
@@ -174,7 +174,7 @@ const Game = {
   toScreen(worldX, z) {
     const W = this.gw || this.w;
     const H = this.gh || this.h;
-    const xScale = W * 0.08;
+    const xScale = W * 0.09;
     const zScale = H / 52;
     const lanePx = xScale * LANE_GAP;
     const u = Math.max(1, Math.floor(lanePx / 14));
@@ -193,14 +193,14 @@ const Game = {
     for (let i = 0; i < 160; i++) {
       const z = i * 6;
       this.roadside.push({
-        kind: "tree",
+        kind: i % 4 === 0 ? "bush" : "tree",
         z,
         side: -1,
         row: i % 3,
         size: 1 + (i % 2),
       });
       this.roadside.push({
-        kind: "tree",
+        kind: i % 4 === 0 ? "bush" : "tree",
         z: z + 3,
         side: 1,
         row: (i + 1) % 3,
@@ -236,6 +236,7 @@ const Game = {
           h: 1.6,
           low: false,
           speed: Math.max(3, this.speed * 0.22),
+          car: { shape: "convertible", colors: trafficPalette() },
         });
       }
       const gap = 42 + Math.random() * 16 - Math.min(24, this.distance / 260);
@@ -456,7 +457,7 @@ const Game = {
     const zScale = mid.zScale;
     const scroll = cameraZ == null ? this.cameraZ : cameraZ;
 
-    ctx.fillStyle = "#9c9c9c";
+    ctx.fillStyle = "#7a7a7a";
     ctx.fillRect(left, 0, roadW, this.gh);
 
     const block = rumble;
@@ -501,7 +502,8 @@ const Game = {
       const x = item.side * dist;
       const p = this.toScreen(x, item.z);
       if (p.y < -12 || p.y > this.gh + 12) continue;
-      drawPixelTree(ctx, p.x, p.y, Math.max(1, item.size || 1));
+      if (item.kind === "bush") drawPixelBush(ctx, p.x, p.y);
+      else drawPixelTree(ctx, p.x, p.y, Math.max(1, item.size || 1));
     }
   },
 
@@ -557,14 +559,7 @@ const Game = {
           ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
         }
       } else if (e.kind === "truck") {
-        drawCarTop(
-          ctx,
-          p.x,
-          p.y,
-          p.u,
-          { shape: "suv", colors: { body: "#6b7380", stripe: "#1b1b1b", glass: "#111", trim: "#111" } },
-          { u: p.u, van: true, brake: true }
-        );
+        drawCarTop(ctx, p.x, p.y, p.u, e.car || { shape: "convertible", colors: trafficPalette() }, { u: p.u, brake: true });
       } else {
         drawCarTop(ctx, p.x, p.y, p.u, e.car, { u: p.u, brake: true });
       }
@@ -608,24 +603,31 @@ const Game = {
     const road = this.paintRoad(ctx, 0);
 
     for (let i = 0; i < 22; i++) {
-      drawPixelTree(ctx, road.left - 16 - (i % 3) * 10, 10 + i * 15, 1 + (i % 2));
-      drawPixelTree(ctx, road.left + road.roadW + 16 + (i % 3) * 10, 6 + i * 15, 1 + ((i + 1) % 2));
+      const treeFn = i % 4 === 0 ? drawPixelBush : drawPixelTree;
+      treeFn(ctx, road.left - 16 - (i % 3) * 10, 10 + i * 15, 1 + (i % 2));
+      (i % 3 === 0 ? drawPixelBush : drawPixelTree)(
+        ctx,
+        road.left + road.roadW + 16 + (i % 3) * 10,
+        6 + i * 15,
+        1 + ((i + 1) % 2)
+      );
     }
 
     const car = getCar(Save.data.selected);
     const u = Math.max(1, Math.floor(road.laneW / 14));
     const cx = Math.round(W / 2);
-    const cy = Math.round(H * 0.64);
+    const cy = Math.round(H * 0.66);
     const lane = road.laneW;
+    const stripe = "#ffffff";
     const demo = [
-      { x: cx - lane * 1.5, y: H * 0.26, car: { shape: "convertible", colors: { body: "#ff8a2b", stripe: "#1b1b1b" } } },
-      { x: cx - lane * 0.5, y: H * 0.22, car: { shape: "muscle", colors: { body: "#1e3a6e", stripe: "#ffffff" } } },
-      { x: cx + lane * 0.5, y: H * 0.30, car: { shape: "convertible", colors: { body: "#c4451c", stripe: "#1b1b1b" } } },
-      { x: cx + lane * 1.5, y: H * 0.38, car: { shape: "convertible", colors: { body: "#8fd14a", stripe: "#1b1b1b" } } },
+      { x: cx - lane, y: H * 0.22, car: { shape: "convertible", colors: { body: "#ff8c1a", stripe } } },
+      { x: cx, y: H * 0.18, car: { shape: "convertible", colors: { body: "#2d4ecf", stripe } } },
+      { x: cx + lane, y: H * 0.30, car: { shape: "convertible", colors: { body: "#c42a1a", stripe } } },
+      { x: cx - lane, y: H * 0.44, car: { shape: "convertible", colors: { body: "#1fbf6a", stripe } } },
     ];
     for (const d of demo) drawCarTop(ctx, d.x, d.y, u, d.car, { u });
-    drawCarTop(ctx, cx - lane * 0.5, cy, u, car, { u });
-    drawPixelDude(ctx, cx - lane * 0.5 - 11 * u, cy + 2, Math.max(1, Math.round(u * 0.45)));
+    drawCarTop(ctx, cx, cy, u, car, { u });
+    drawPixelDude(ctx, cx - 11 * u, cy + 2, Math.max(1, Math.round(u * 0.45)));
     this.blit();
   },
 

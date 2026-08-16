@@ -99,10 +99,9 @@ function renderShop() {
     const canvas = card.querySelector("canvas");
     const c2d = canvas.getContext("2d");
     c2d.imageSmoothingEnabled = false;
-    c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#4ed34a";
+    c2d.fillStyle = "#48d048";
     c2d.fillRect(0, 0, 280, 140);
-    c2d.fillStyle = "#9a9a9a";
+    c2d.fillStyle = "#7a7a7a";
     c2d.fillRect(90, 0, 100, 140);
     c2d.fillStyle = "#ffffff";
     for (let y = 6; y < 140; y += 18) {

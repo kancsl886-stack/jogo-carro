@@ -24,7 +24,7 @@ cat > "$LAUNCHER" <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Nitro Surf 4 faixas
+Name=Nitro Surf
 Comment=Corrida pixel art vista de cima
 Exec=$ROOT/jogar.sh
 Path=$ROOT

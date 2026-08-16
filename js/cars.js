@@ -6,7 +6,7 @@ const CARS = [
     rarity: "comum",
     price: 0,
     stats: { speed: 0.92, handling: 1.15, magnet: 1.05 },
-    colors: { body: "#7ec8f0", stripe: "#1b1b1b", glass: "#111111", trim: "#2b2b2b" },
+    colors: { body: "#6ec4f0", stripe: "#ffffff", glass: "#111111", trim: "#2b2b2b" },
     shape: "hatch",
   },
   {
@@ -16,7 +16,7 @@ const CARS = [
     rarity: "comum",
     price: 280,
     stats: { speed: 1.0, handling: 1.2, magnet: 1.0 },
-    colors: { body: "#ff8a2b", stripe: "#1b1b1b", glass: "#111111", trim: "#1f1f1f" },
+    colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#1f1f1f" },
     shape: "hatch",
   },
   {
@@ -26,7 +26,7 @@ const CARS = [
     rarity: "comum",
     price: 620,
     stats: { speed: 1.08, handling: 1.05, magnet: 1.1 },
-    colors: { body: "#1e3a6e", stripe: "#ffffff", glass: "#111111", trim: "#111" },
+    colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#111111", trim: "#111" },
     shape: "sedan",
   },
   {
@@ -36,7 +36,7 @@ const CARS = [
     rarity: "raro",
     price: 980,
     stats: { speed: 1.02, handling: 1.08, magnet: 1.35 },
-    colors: { body: "#f0c420", stripe: "#111111", glass: "#111111", trim: "#222" },
+    colors: { body: "#f0c420", stripe: "#ffffff", glass: "#111111", trim: "#222" },
     shape: "taxi",
   },
   {
@@ -46,7 +46,7 @@ const CARS = [
     rarity: "raro",
     price: 1450,
     stats: { speed: 1.06, handling: 0.98, magnet: 1.45 },
-    colors: { body: "#c4451c", stripe: "#1b1b1b", glass: "#111111", trim: "#1a1a1a" },
+    colors: { body: "#c42a1a", stripe: "#ffffff", glass: "#111111", trim: "#1a1a1a" },
     shape: "pickup",
   },
   {
@@ -56,7 +56,7 @@ const CARS = [
     rarity: "raro",
     price: 1900,
     stats: { speed: 1.04, handling: 0.95, magnet: 1.55 },
-    colors: { body: "#8fd14a", stripe: "#1b1b1b", glass: "#111111", trim: "#0d1f14" },
+    colors: { body: "#1fbf6a", stripe: "#ffffff", glass: "#111111", trim: "#0d1f14" },
     shape: "suv",
   },
   {
@@ -66,7 +66,7 @@ const CARS = [
     rarity: "epico",
     price: 3200,
     stats: { speed: 1.22, handling: 1.0, magnet: 0.95 },
-    colors: { body: "#1e3a6e", stripe: "#ffffff", glass: "#111111", trim: "#0a0a0a" },
+    colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#111111", trim: "#0a0a0a" },
     shape: "muscle",
   },
   {
@@ -76,7 +76,7 @@ const CARS = [
     rarity: "epico",
     price: 4100,
     stats: { speed: 1.18, handling: 1.18, magnet: 1.1 },
-    colors: { body: "#1e3a6e", stripe: "#ffffff", glass: "#1a1a1a", trim: "#111" },
+    colors: { body: "#2d4ecf", stripe: "#ffffff", glass: "#1a1a1a", trim: "#111" },
     shape: "police",
   },
   {
@@ -86,7 +86,7 @@ const CARS = [
     rarity: "epico",
     price: 5600,
     stats: { speed: 1.28, handling: 1.25, magnet: 1.05 },
-    colors: { body: "#ff8a2b", stripe: "#1b1b1b", glass: "#111111", trim: "#062022" },
+    colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#062022" },
     shape: "sports",
   },
   {
@@ -96,7 +96,7 @@ const CARS = [
     rarity: "epico",
     price: 7200,
     stats: { speed: 1.24, handling: 1.22, magnet: 1.2 },
-    colors: { body: "#ff8a2b", stripe: "#1b1b1b", glass: "#111111", trim: "#2a1020" },
+    colors: { body: "#ff8c1a", stripe: "#ffffff", glass: "#111111", trim: "#2a1020" },
     shape: "convertible",
   },
   {
@@ -106,7 +106,7 @@ const CARS = [
     rarity: "lendario",
     price: 9800,
     stats: { speed: 1.36, handling: 1.3, magnet: 1.15 },
-    colors: { body: "#c4451c", stripe: "#1b1b1b", glass: "#111111", trim: "#16081e" },
+    colors: { body: "#c42a1a", stripe: "#ffffff", glass: "#111111", trim: "#16081e" },
     shape: "super",
   },
   {
@@ -116,7 +116,7 @@ const CARS = [
     rarity: "lendario",
     price: 13500,
     stats: { speed: 1.45, handling: 1.4, magnet: 0.85 },
-    colors: { body: "#8fd14a", stripe: "#ffffff", glass: "#111111", trim: "#c0392b" },
+    colors: { body: "#1fbf6a", stripe: "#ffffff", glass: "#111111", trim: "#c0392b" },
     shape: "formula",
   },
   {
@@ -126,7 +126,7 @@ const CARS = [
     rarity: "lendario",
     price: 18000,
     stats: { speed: 1.5, handling: 1.35, magnet: 1.3 },
-    colors: { body: "#7ec8f0", stripe: "#ffffff", glass: "#111111", trim: "#3cf0ff" },
+    colors: { body: "#6ec4f0", stripe: "#ffffff", glass: "#111111", trim: "#3cf0ff" },
     shape: "hyper",
   },
 ];
@@ -316,21 +316,20 @@ const CONVERTIBLE = [
 ];
 
 const CONVERTIBLE_STRIPE = [
-  ".....Y...Y.....",
-  "....BTTBTTB....",
-  "...BBTTBTTBB...",
-  "...BBTTBTTBB...",
-  ".W.BBTTBTTBB.W.",
-  "...BBKKKKKBB...",
-  "...BBKKKKKBB...",
-  "...BBTTBTTBB...",
-  "...BBI.SS.SSIB.",
-  "...BBI.SS.SSIB.",
-  "...BBTTBTTBB...",
-  ".W.BBTTBTTBB.W.",
-  "...BBTTBTTBB...",
-  "...BTR...RTB...",
-  "....BTTBTTB....",
+  ".....Y.Y.....",
+  "...BBBBBBB...",
+  "..BBTTBTTBB..",
+  ".WBBTTBTTBBW.",
+  "..BBKKKKKBB..",
+  "..BBKKKKKBB..",
+  "..BBTTBTTBB..",
+  "..BI.SS.SSIB.",
+  "..BI.SS.SSIB.",
+  "..BBTTBTTBB..",
+  ".WBBTTBTTBBW.",
+  "..BBTTBTTBB..",
+  "..BR.TT.RB...",
+  "...BBBBBBB...",
 ];
 
 const VAN = [
@@ -365,8 +364,6 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
   const u = Math.max(1, extras.u || Math.round(scale) || 2);
   const c = car.colors;
-  const striped = hasRacingStripes(car);
-  const sprite = extras.van ? VAN : striped ? CONVERTIBLE_STRIPE : CONVERTIBLE;
   const palette = {
     B: c.body,
     K: "#0a0a0a",
@@ -375,15 +372,15 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     W: "#111111",
     Y: "#ffe14a",
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
-    T: striped ? "#f4f7ff" : c.body,
+    T: "#f4f7ff",
   };
   if (extras.nitro) {
     ctx.fillStyle = "#7fe7ff";
-    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + 10 * u, 4 * u, 3 * u);
+    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + 8 * u, 4 * u, 3 * u);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(Math.round(x) - u, Math.round(y) + 13 * u, 2 * u, 2 * u);
+    ctx.fillRect(Math.round(x) - u, Math.round(y) + 11 * u, 2 * u, 2 * u);
   }
-  blitSprite(ctx, x, y, u, sprite, palette);
+  blitSprite(ctx, x, y, u, CONVERTIBLE_STRIPE, palette);
   if (car.shape === "police") {
     const ox = Math.round(x);
     const oy = Math.round(y);
@@ -407,9 +404,15 @@ function fillDisk(ctx, ox, oy, r, color) {
 function drawPixelTree(ctx, x, y, size) {
   const ox = Math.round(x);
   const oy = Math.round(y);
-  const r = size > 1 ? 8 : 6;
-  fillDisk(ctx, ox, oy, r, "#14601e");
-  fillDisk(ctx, ox - 1, oy - 1, Math.max(3, r - 2), "#1e8a2c");
+  const r = size > 1 ? 7 : 5;
+  ctx.fillStyle = "#7a3f18";
+  ctx.fillRect(ox - 1, oy + r - 1, 2, Math.max(3, Math.round(r * 0.65)));
+  fillDisk(ctx, ox, oy, r, "#157022");
+  fillDisk(ctx, ox - 1, oy - 1, Math.max(2, r - 2), "#1f8a2c");
+}
+
+function drawPixelBush(ctx, x, y) {
+  fillDisk(ctx, Math.round(x), Math.round(y), 3, "#166a24");
 }
 
 function drawPixelDude(ctx, x, y, u) {
@@ -429,11 +432,11 @@ function drawPixelDude(ctx, x, y, u) {
 }
 
 function trafficPalette() {
-  const bodies = ["#7ec8f0", "#ff8a2b", "#1e3a6e", "#c4451c", "#8fd14a"];
+  const bodies = ["#6ec4f0", "#ff8c1a", "#2d4ecf", "#c42a1a", "#1fbf6a"];
   const body = bodies[Math.floor(Math.random() * bodies.length)];
   return {
     body,
-    stripe: body === "#1e3a6e" ? "#ffffff" : "#1b1b1b",
+    stripe: "#ffffff",
     glass: "#111111",
     trim: "#111111",
   };

@@ -262,7 +262,7 @@ const Game = {
     const xScale = W * 0.09;
     const zScale = H / 52;
     const lanePx = xScale * LANE_GAP;
-    const u = Math.max(1, Math.floor(lanePx / 13));
+    const u = Math.max(1, Math.floor(lanePx / 11));
     const cam = this.roadBend(this.playerZ());
     const bend = (this.roadBend(z) - cam) * xScale;
     return {
@@ -747,7 +747,7 @@ const Game = {
     this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, 0);
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(2, Math.floor(road.laneW / 13));
+    const u = Math.max(2, Math.floor(road.laneW / 11));
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.66);
     const lane = road.laneW;

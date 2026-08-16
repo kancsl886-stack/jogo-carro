@@ -504,22 +504,25 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     M: "#d0d4dc",
     P: "#f2f2f2",
   };
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(y));
+  if (extras.yaw) ctx.rotate(extras.yaw);
   if (extras.nitro) {
     const tail = Math.floor(rows.length / 2) * u;
     ctx.fillStyle = "#7fe7ff";
-    ctx.fillRect(Math.round(x) - 2 * u, Math.round(y) + tail - u, 4 * u, 3 * u);
+    ctx.fillRect(-2 * u, tail - u, 4 * u, 3 * u);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(Math.round(x) - u, Math.round(y) + tail + 2 * u, 2 * u, 2 * u);
+    ctx.fillRect(-u, tail + 2 * u, 2 * u, 2 * u);
   }
-  blitSprite(ctx, x, y, u, rows, palette);
+  blitSprite(ctx, 0, 0, u, rows, palette);
   if (car.shape === "police") {
-    const ox = Math.round(x);
-    const oy = Math.round(y) - Math.floor(rows.length / 2) * u + 2 * u;
+    const oy = -Math.floor(rows.length / 2) * u + 2 * u;
     ctx.fillStyle = extras.flash ? "#ff3030" : "#3d8bff";
-    ctx.fillRect(ox - 2 * u, oy, 2 * u, u);
+    ctx.fillRect(-2 * u, oy, 2 * u, u);
     ctx.fillStyle = extras.flash ? "#3d8bff" : "#ff3030";
-    ctx.fillRect(ox, oy, 2 * u, u);
+    ctx.fillRect(0, oy, 2 * u, u);
   }
+  ctx.restore();
 }
 
 function randomTrafficCar() {

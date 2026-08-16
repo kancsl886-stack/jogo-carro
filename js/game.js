@@ -30,6 +30,10 @@ const Game = {
     this.baseSpeed = 16;
     this.lane = 1;
     this.laneX = 0;
+    this.yaw = 0;
+    this.steer = 0;
+    this.keys = this.keys || { left: false, right: false };
+    this.pointerSteer = null;
     this.jump = 0;
     this.jumpVel = 0;
     this.cameraZ = 0;
@@ -79,46 +83,61 @@ const Game = {
   },
 
   bindInput() {
-    const onKey = (e) => {
+    this.keys = this.keys || { left: false, right: false };
+    const isLeft = (key) => ["ArrowLeft", "a", "A"].includes(key);
+    const isRight = (key) => ["ArrowRight", "d", "D"].includes(key);
+    const isJump = (key) => ["ArrowUp", "w", "W", " "].includes(key);
+
+    window.addEventListener("keydown", (e) => {
+      if (isLeft(e.key) || isRight(e.key) || isJump(e.key)) e.preventDefault();
       if (!this.running || this.paused || this.dead) return;
-      if (["ArrowLeft", "a", "A"].includes(e.key)) this.changeLane(-1);
-      if (["ArrowRight", "d", "D"].includes(e.key)) this.changeLane(1);
-      if (["ArrowUp", "w", "W", " "].includes(e.key)) this.doJump();
-    };
-    window.addEventListener("keydown", onKey);
+      if (isLeft(e.key)) this.keys.left = true;
+      if (isRight(e.key)) this.keys.right = true;
+      if (isJump(e.key) && !e.repeat) this.doJump();
+    });
+    window.addEventListener("keyup", (e) => {
+      if (isLeft(e.key)) this.keys.left = false;
+      if (isRight(e.key)) this.keys.right = false;
+    });
 
     let sx = 0;
     let sy = 0;
     let tracking = false;
-    const start = (x, y) => {
-      tracking = true;
-      sx = x;
-      sy = y;
+    const steerFromX = (x) => {
+      const n = (x / Math.max(1, this.w) - 0.5) * 2.2;
+      if (Math.abs(n) < 0.12) return 0;
+      return Math.max(-1, Math.min(1, n));
     };
-    const end = (x, y) => {
+    this.canvas.addEventListener("pointerdown", (e) => {
+      tracking = true;
+      sx = e.clientX;
+      sy = e.clientY;
+      if (this.running && !this.paused && !this.dead) this.pointerSteer = steerFromX(e.clientX);
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (!tracking) return;
+      if (this.running && !this.paused && !this.dead) this.pointerSteer = steerFromX(e.clientX);
+    });
+    window.addEventListener("pointerup", (e) => {
       if (!tracking) return;
       tracking = false;
+      this.pointerSteer = null;
       if (!this.running || this.paused || this.dead) return;
-      const dx = x - sx;
-      const dy = y - sy;
-      if (Math.abs(dx) < 18 && Math.abs(dy) < 18) {
-        this.changeLane(x < this.w / 2 ? -1 : 1);
-        return;
-      }
-      if (Math.abs(dx) > Math.abs(dy)) this.changeLane(dx > 0 ? 1 : -1);
-      else if (dy < 0) this.doJump();
-    };
-
-    this.canvas.addEventListener("pointerdown", (e) => start(e.clientX, e.clientY));
-    window.addEventListener("pointerup", (e) => end(e.clientX, e.clientY));
+      const dy = e.clientY - sy;
+      const dx = e.clientX - sx;
+      if (dy < -40 && Math.abs(dy) > Math.abs(dx)) this.doJump();
+    });
+    window.addEventListener("pointercancel", () => {
+      tracking = false;
+      this.pointerSteer = null;
+    });
   },
 
-  changeLane(dir) {
-    const next = Math.max(0, Math.min(LANES - 1, this.lane + dir));
-    if (next !== this.lane) {
-      this.lane = next;
-      Sfx.lane();
-    }
+  readSteer() {
+    if (this.keys.left && !this.keys.right) return -1;
+    if (this.keys.right && !this.keys.left) return 1;
+    if (this.pointerSteer != null) return this.pointerSteer;
+    return 0;
   },
 
   doJump() {
@@ -152,6 +171,8 @@ const Game = {
   stop() {
     this.running = false;
     this.paused = false;
+    this.keys = { left: false, right: false };
+    this.pointerSteer = null;
   },
 
   loop(now) {
@@ -304,15 +325,23 @@ const Game = {
     this.cameraZ += this.speed * dt;
     this.distance = this.cameraZ;
 
-    const targetX = this.laneWorldX(this.lane);
-    const handle = 5 + 18 * this.car.stats.handling;
-    this.laneX += (targetX - this.laneX) * Math.min(1, handle * dt);
-    const kappa = this.roadBend(this.playerZ() + 10) - this.roadBend(this.playerZ() - 2);
     const grip = Math.max(0.2, this.car.stats.handling);
-    this.laneX -= kappa * dt * (2.6 / grip);
+    const input = this.readSteer();
+    if (Math.abs(input) > 0.35 && Math.abs(this.steer) <= 0.35) Sfx.lane();
+    this.steer = input;
+    const maxYaw = 0.38 + 0.16 * grip;
+    const yawRate = 3.4 + 4.2 * grip;
+    const wantYaw = input * maxYaw;
+    this.yaw += (wantYaw - this.yaw) * Math.min(1, yawRate * dt);
+    const slide = 8.5 + 11 * grip + this.speed * 0.05;
+    this.laneX += Math.sin(this.yaw) * slide * dt;
+    const kappa = this.roadBend(this.playerZ() + 10) - this.roadBend(this.playerZ() - 2);
+    this.laneX -= kappa * dt * (2.2 / grip);
+    this.lane = Math.max(0, Math.min(LANES - 1, Math.round(this.laneX / LANE_GAP + 1)));
     const limit = LANE_GAP * 1.55;
     if (Math.abs(this.laneX) > limit) {
       this.laneX = Math.sign(this.laneX) * limit;
+      this.yaw *= 0.4;
       this.shake = Math.max(this.shake, 5);
     }
 
@@ -573,6 +602,7 @@ const Game = {
         u: p.u,
         nitro: this.powers.nitro,
         flash: this.flash % 0.4 < 0.2,
+        yaw: this.yaw,
       });
     };
 
@@ -628,7 +658,7 @@ const Game = {
     const p = this.toScreen(this.cop.laneX, this.cop.z);
     if (p.y < -20 || p.y > this.gh + 28) return;
     const flash = this.flash % 0.4 < 0.2;
-    drawCarTop(ctx, p.x, p.y, p.u, getCar("policia"), { u: p.u, flash });
+    drawCarTop(ctx, p.x, p.y, p.u, getCar("policia"), { u: p.u, flash, yaw: this.yaw * 0.65 });
   },
 
   draw() {

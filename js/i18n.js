@@ -17,7 +17,7 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, no asfalto",
     controls: "Controles",
     controlsText:
-      "Troque de faixa com as setas ou A/D. Pule obstáculos baixos com ↑ ou W. No celular, deslize para os lados e para cima. A pista faz curvas: carros com curva melhor seguram melhor a faixa.",
+      "Segure ← → ou A/D para virar o volante. O carro gira e vai atravessando a pista, sem pular de faixa. Pule obstáculos baixos com ↑ ou W. No celular, segure o lado da tela para virar e deslize para cima para pular. Nas curvas, contra-esterce.",
     goal: "Objetivo",
     goalText:
       "Corra o máximo possível sem bater e sem deixar a polícia te alcançar. Moedas compram carros. Cada modelo tem velocidade e curva diferentes.",
@@ -38,7 +38,7 @@ const I18N = {
     best: "Recorde",
     coins: "Moedas",
     newRecord: "Novo recorde!",
-    hint: "← → faixas · ↑ pular · toque ou setas",
+    hint: "← → virar · ↑ pular · segure o lado",
     all: "Todos",
     owned: "Meus",
     comum: "Comum",
@@ -78,7 +78,7 @@ const I18N = {
     howtoSub: "Subway Surfers style, on the road",
     controls: "Controls",
     controlsText:
-      "Change lanes with arrows or A/D. Jump low obstacles with ↑ or W. On mobile, swipe sideways and up. The road bends: cars with better cornering hold the lane.",
+      "Hold ← → or A/D to steer. The car turns and slides across the road instead of jumping lanes. Jump low obstacles with ↑ or W. On mobile, hold a side of the screen to turn and swipe up to jump.",
     goal: "Goal",
     goalText:
       "Run as far as you can without crashing or getting caught by the police. Coins buy cars. Each model has different speed and cornering.",
@@ -99,7 +99,7 @@ const I18N = {
     best: "Best",
     coins: "Coins",
     newRecord: "New record!",
-    hint: "← → lanes · ↑ jump · tap or arrows",
+    hint: "← → steer · ↑ jump · hold a side",
     all: "All",
     owned: "Mine",
     comum: "Common",
@@ -139,7 +139,7 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, en el asfalto",
     controls: "Controles",
     controlsText:
-      "Cambia de carril con las flechas o A/D. Salta obstáculos bajos con ↑ o W. En el celular, desliza a los lados y hacia arriba. La pista tiene curvas: autos con mejor curva sostienen el carril.",
+      "Mantén ← → o A/D para girar el volante. El auto vira y cruza la pista, sin saltar de carril. Salta obstáculos bajos con ↑ o W. En el celular, mantén un lado de la pantalla para virar y desliza hacia arriba para saltar.",
     goal: "Objetivo",
     goalText:
       "Corre lo más lejos posible sin chocar y sin que te alcance la policía. Las monedas compran autos. Cada modelo tiene velocidad y curva distintas.",
@@ -160,7 +160,7 @@ const I18N = {
     best: "Récord",
     coins: "Monedas",
     newRecord: "¡Nuevo récord!",
-    hint: "← → carriles · ↑ saltar · toca o flechas",
+    hint: "← → virar · ↑ saltar · mantén el lado",
     all: "Todos",
     owned: "Míos",
     comum: "Común",

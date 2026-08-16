@@ -14,15 +14,18 @@ DESKTOP="${DESKTOP:-$HOME/Desktop}"
 mkdir -p "$DESKTOP"
 
 cp -f "$ROOT/Nitro-Surf.html" "$DESKTOP/Nitro Surf.html"
+cp -f "$ROOT/Nitro-Surf.html" "$DESKTOP/Nitro Surf 4 faixas.html"
+chmod +x "$DESKTOP/Nitro Surf.html" "$DESKTOP/Nitro Surf 4 faixas.html"
 
 ICON="$ROOT/icons/nitro-surf.png"
-LAUNCHER="$DESKTOP/Nitro Surf.desktop"
+rm -f "$DESKTOP/Nitro Surf.desktop"
+LAUNCHER="$DESKTOP/Nitro Surf 4 faixas.desktop"
 cat > "$LAUNCHER" <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Nitro Surf
-Comment=Corrida infinita de carro
+Name=Nitro Surf 4 faixas
+Comment=Corrida pixel art vista de cima
 Exec=$ROOT/jogar.sh
 Path=$ROOT
 Icon=$ICON
@@ -34,5 +37,5 @@ chmod +x "$LAUNCHER"
 if command -v gio >/dev/null 2>&1; then
   gio set "$LAUNCHER" metadata::trusted true 2>/dev/null || true
 fi
-echo "$DESKTOP/Nitro Surf.html"
+echo "$DESKTOP/Nitro Surf 4 faixas.html"
 echo "$LAUNCHER"

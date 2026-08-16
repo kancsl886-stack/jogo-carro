@@ -2,7 +2,8 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 
-set "PAGE=%~dp0index.html"
+set "PAGE=%~dp0Nitro-Surf.html"
+if not exist "%PAGE%" set "PAGE=%~dp0index.html"
 set "CHROME=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
 set "CHROME86=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
 set "EDGE=%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"

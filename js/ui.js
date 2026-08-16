@@ -46,7 +46,7 @@ function setVolume(value) {
 }
 
 function refreshMenu() {
-  $("menu-coins").textContent = `${Save.data.coins} ${t("coins").toLowerCase()}`;
+  $("menu-coins").textContent = String(Save.data.coins);
   $("menu-best").textContent = `${t("best")} ${formatMeters(Save.data.best)}`;
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = `${Save.data.coins} ⬤`;

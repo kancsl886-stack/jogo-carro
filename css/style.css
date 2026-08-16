@@ -68,6 +68,7 @@ canvas {
 
 .screen.menu-home {
   justify-content: space-between;
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: linear-gradient(
     180deg,
     rgba(7, 11, 20, 0.5) 0%,
@@ -75,6 +76,49 @@ canvas {
     rgba(7, 11, 20, 0) 74%,
     rgba(7, 11, 20, 0.5) 100%
   );
+}
+
+.menu-coin-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.coin-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 168px;
+  background: rgba(10, 16, 28, 0.9);
+  border: 2px solid rgba(255, 209, 102, 0.55);
+  border-radius: 20px;
+  padding: 8px 18px 8px 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.coin-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff4c2 0%, #ffd166 42%, #e0a020 100%);
+  border: 3px solid #f3c14a;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), 0 3px 0 #b8860b;
+}
+
+.coin-copy small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.coin-copy strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  color: #fff8e8;
 }
 
 .menu-top,

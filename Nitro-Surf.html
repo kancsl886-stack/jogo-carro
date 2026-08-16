@@ -86,6 +86,7 @@ canvas {
 
 .screen.menu-home {
   justify-content: space-between;
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: linear-gradient(
     180deg,
     rgba(7, 11, 20, 0.5) 0%,
@@ -93,6 +94,49 @@ canvas {
     rgba(7, 11, 20, 0) 74%,
     rgba(7, 11, 20, 0.5) 100%
   );
+}
+
+.menu-coin-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.coin-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 168px;
+  background: rgba(10, 16, 28, 0.9);
+  border: 2px solid rgba(255, 209, 102, 0.55);
+  border-radius: 20px;
+  padding: 8px 18px 8px 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.coin-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff4c2 0%, #ffd166 42%, #e0a020 100%);
+  border: 3px solid #f3c14a;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), 0 3px 0 #b8860b;
+}
+
+.coin-copy small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.coin-copy strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  color: #fff8e8;
 }
 
 .menu-top,
@@ -678,6 +722,15 @@ canvas {
     </div>
 
     <div id="screen-menu" class="screen menu-home">
+      <div class="menu-coin-bar">
+        <div class="coin-badge">
+          <span class="coin-icon" aria-hidden="true"></span>
+          <div class="coin-copy">
+            <small data-i18n="coins">Moedas</small>
+            <strong id="menu-coins">0</strong>
+          </div>
+        </div>
+      </div>
       <div class="menu-top">
         <div class="brand">
           <p class="brand-kicker" data-i18n="kicker">Avenida infinita</p>
@@ -685,7 +738,6 @@ canvas {
           <p class="brand-sub" data-i18n="subtitle">Desvie. Colete. Troque de carro.</p>
         </div>
         <div class="menu-stats">
-          <div class="chip gold" id="menu-coins">0 moedas</div>
           <div class="chip" id="menu-best">Recorde 0 m</div>
           <div class="chip" id="menu-car">Fusca Flash</div>
         </div>
@@ -1117,10 +1169,10 @@ const SPRITES = {
     ".....Y.Y.....",
     "....HHHHH....",
     "...HBBBBBN...",
-    ".W.HBKKKBN.W.",
+    "...HBKKKBN...",
     "...HGKKKGN...",
     "...HBBBBBN...",
-    ".W.HBSS.SBNW.",
+    "...HBSS.SBN..",
     "...HBBBBBN...",
     "...NR.M.RN...",
     "....NNNNN....",
@@ -1129,10 +1181,10 @@ const SPRITES = {
     ".....Y.Y.....",
     "...HHHHHHHN..",
     "...HBTTTBN...",
-    ".W.HBKKKBN.W.",
+    "...HBKKKBN...",
     "...HBKKKBN...",
     "...HBTTTBN...",
-    ".W.H.SS.SSNW.",
+    "...H.SS.SSN..",
     "...HBBBBBN...",
     "...NR...RN...",
     "...NNNNNNN...",
@@ -1141,11 +1193,11 @@ const SPRITES = {
     ".....Y.Y.....",
     "...MHHHHHHN..",
     "..HHBBBBBBN..",
-    ".W.HBKKKBN.W.",
+    "...HBKKKBN...",
     "...HGKKKGN...",
     "...HBBBBBN...",
     "...HBSS.SBN..",
-    ".W.HBBBBBN.W.",
+    "...HBBBBBN...",
     "...HBBBBBN...",
     "...NR...RN...",
     "...NNNNNNN...",
@@ -1154,11 +1206,11 @@ const SPRITES = {
     ".....Y.Y.....",
     "....CAAAC....",
     "...HHHHHHN...",
-    ".W.HBKKKBN.W.",
+    "...HBKKKBN...",
     "...HBKKKBN...",
     "...TBTBTBT...",
     "...HBSS.SBN..",
-    ".W.TBTBTBT.W.",
+    "...TBTBTBT...",
     "...HBBBBBN...",
     "...NR...RN...",
     "...NNNNNNN...",
@@ -1166,10 +1218,10 @@ const SPRITES = {
   pickup: [
     ".....Y.Y.....",
     "...HHHHHHN...",
-    ".W.HBKKKBN.W.",
+    "...HBKKKBN...",
     "...HBKKKBN...",
     "...HBBBBBN...",
-    ".W.HBSS.SBNW.",
+    "...HBSS.SBN..",
     "...MMMMMMM...",
     "...DDDDDDD...",
     "...DR.M.RD...",
@@ -1179,10 +1231,10 @@ const SPRITES = {
     ".....Y.Y.....",
     "...C.....C...",
     "..HHHHHHHHN..",
-    ".WHBKKKKKBNW.",
+    "..HBKKKKKBN..",
     "..HBKKKKKBN..",
     "..HBBBBBBBN..",
-    ".W.HBSS.SBNW.",
+    "...HBSS.SBN..",
     "..HBBBBBBBN..",
     "..NR.....RN..",
     "...NNNNNNN...",
@@ -1191,12 +1243,12 @@ const SPRITES = {
     ".....Y.Y.....",
     "...HHTTHHN...",
     "..HHTTBTTNN..",
-    ".W.HTKTKTH.W.",
+    "...HTKTKTH...",
     "...HTTKTTH...",
     "..HHTTBTTNN..",
-    ".W.HTSS.STNW.",
+    "...HTSS.STN..",
     "..HHTTBTTNN..",
-    ".W.HHTTHHN.W.",
+    "...HHTTHHN...",
     "...NR.T.RN...",
     "...NNNNNNN...",
   ],
@@ -1204,11 +1256,11 @@ const SPRITES = {
     ".....Y.Y.....",
     "...HHHHHHN...",
     "..HHBBBBBBN..",
-    ".W.HBKKKBN.W.",
+    "...HBKKKBN...",
     "...HBKKKBN...",
     "...PPBBBPP...",
     "...HBSS.SBN..",
-    ".W.PPBBBPP.W.",
+    "...PPBBBPP...",
     "...HBBBBBN...",
     "...NR...RN...",
     "...NNNNNNN...",
@@ -1217,11 +1269,11 @@ const SPRITES = {
     "....Y...Y....",
     "...HHHHHHHN..",
     "..HTTBBBTTN..",
-    ".WHTTKKKTTNW.",
+    "..HTTKKKTTN..",
     "..HTTKKKTTN..",
     "..HTTBBBTTN..",
     ".HTTSS.SSTTN.",
-    ".WHTTBBBTTNW.",
+    "..HTTBBBTTN..",
     "..NR.TTT.RN..",
     "...NNNNNNN...",
   ],
@@ -1230,13 +1282,13 @@ const SPRITES = {
     "...HHHHHHN...",
     "..HTTBBBTTN..",
     "..HTTBBBTTN..",
-    ".WHTTKKKTTNW.",
+    "..HTTKKKTTN..",
     "..HTTKKKTTN..",
     "..HTTBBBTTN..",
     ".HTTSS.SSTTN.",
     ".HTTSS.SSTTN.",
     "..HTTBBBTTN..",
-    ".WHTTBBBTTNW.",
+    "..HTTBBBTTN..",
     "..HTTBBBTTN..",
     "..NR.TTT.RN..",
     "...NNNNNNN...",
@@ -1246,10 +1298,10 @@ const SPRITES = {
     "....HHHHN....",
     "...HTTBTTN...",
     "..HTTKKKTTN..",
-    ".WHTTKKKTTNW.",
+    "..HTTKKKTTN..",
     "..HTTDDDTTN..",
     ".HTTSS.SSTTN.",
-    ".WHTTBBBTTNW.",
+    "..HTTBBBTTN..",
     "..HTTBBBTTN..",
     "..NR.TTT.RN..",
     "...NNNNNNN...",
@@ -1259,9 +1311,9 @@ const SPRITES = {
     "......C......",
     ".....HAH.....",
     "....HAKAH....",
-    "..W.HAKAH.W..",
+    "....HAKAH....",
     "....HHHHN....",
-    "..WHBSS.SBNW.",
+    "...HBSS.SBN..",
     "....HBBBN....",
     ".....NRN.....",
     "......C......",
@@ -1270,10 +1322,10 @@ const SPRITES = {
     "....Y...Y....",
     "...HTTBTTN...",
     "..HTTKKKTTN..",
-    ".WHTTKKKTTNW.",
+    "..HTTKKKTTN..",
     "..HTTBBBTTN..",
     ".HTTSS.SSTTN.",
-    ".WHTTCCCCTNW.",
+    "..HTTCCCCTN..",
     "..HTTAAAATT..",
     "..NR.TTT.RN..",
     "...NNNNNNN...",
@@ -1298,7 +1350,7 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     G: "#24344c",
     I: "#2a2a2a",
     S: "#1a1a1a",
-    W: "#111111",
+    W: "#5e5e5e",
     Y: "#ffe14a",
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
     T: c.stripe || "#ffffff",
@@ -2659,7 +2711,7 @@ function setVolume(value) {
 }
 
 function refreshMenu() {
-  $("menu-coins").textContent = `${Save.data.coins} ${t("coins").toLowerCase()}`;
+  $("menu-coins").textContent = String(Save.data.coins);
   $("menu-best").textContent = `${t("best")} ${formatMeters(Save.data.best)}`;
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = `${Save.data.coins} ⬤`;

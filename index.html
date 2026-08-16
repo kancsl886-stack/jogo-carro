@@ -17,7 +17,7 @@
     <link rel="icon" href="icons/nitro-surf.png" />
     <link rel="apple-touch-icon" href="icons/nitro-surf-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/style.css?v=ref8" />
+    <link rel="stylesheet" href="css/style.css?v=ref9" />
   </head>
   <body>
     <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
@@ -56,6 +56,15 @@
     </div>
 
     <div id="screen-menu" class="screen menu-home">
+      <div class="menu-coin-bar">
+        <div class="coin-badge">
+          <span class="coin-icon" aria-hidden="true"></span>
+          <div class="coin-copy">
+            <small data-i18n="coins">Moedas</small>
+            <strong id="menu-coins">0</strong>
+          </div>
+        </div>
+      </div>
       <div class="menu-top">
         <div class="brand">
           <p class="brand-kicker" data-i18n="kicker">Avenida infinita</p>
@@ -63,7 +72,6 @@
           <p class="brand-sub" data-i18n="subtitle">Desvie. Colete. Troque de carro.</p>
         </div>
         <div class="menu-stats">
-          <div class="chip gold" id="menu-coins">0 moedas</div>
           <div class="chip" id="menu-best">Recorde 0 m</div>
           <div class="chip" id="menu-car">Fusca Flash</div>
         </div>
@@ -179,11 +187,11 @@
 
     <div id="toast" class="toast hidden" role="status"></div>
 
-    <script src="js/cars.js?v=ref8"></script>
-    <script src="js/storage.js?v=ref8"></script>
-    <script src="js/i18n.js?v=ref8"></script>
-    <script src="js/audio.js?v=ref8"></script>
-    <script src="js/game.js?v=ref8"></script>
-    <script src="js/ui.js?v=ref8"></script>
+    <script src="js/cars.js?v=ref9"></script>
+    <script src="js/storage.js?v=ref9"></script>
+    <script src="js/i18n.js?v=ref9"></script>
+    <script src="js/audio.js?v=ref9"></script>
+    <script src="js/game.js?v=ref9"></script>
+    <script src="js/ui.js?v=ref9"></script>
   </body>
 </html>

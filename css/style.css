@@ -23,7 +23,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--bg);
+  background: #58dc48;
   color: var(--text);
   font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   touch-action: none;
@@ -34,6 +34,8 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .vignette {

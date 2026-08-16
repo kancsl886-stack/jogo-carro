@@ -298,61 +298,61 @@ function blitSprite(ctx, ox, oy, u, rows, palette) {
 }
 
 const CONVERTIBLE = [
-  ".....Y.Y.....",
-  "....BBBBB....",
-  "...BBBBBBB...",
-  ".W.BBBBBBB.W.",
-  "..BBKKKKKBB..",
-  "..BBKKKKKBB..",
-  "..BBKKKKKBB..",
-  "..BBBBBBBBB..",
-  "..BISS..SSIB.",
-  "..BISS..SSIB.",
-  "..BISS..SSIB.",
-  "..BBBBBBBBB..",
-  ".W.BBBBBBB.W.",
-  "..BBBBBBBBB..",
-  "..BBR...RBB..",
-  "...BBBBBBB...",
-  "....BBBBB....",
+  "......Y.Y......",
+  ".....BBBBB.....",
+  "....BBBBBBB....",
+  "...BBBBBBBBB...",
+  ".W.BBBBBBBBB.W.",
+  "..BBKKKKKKKBB..",
+  "..BBKKKKKKKBB..",
+  "..BBBBBBBBBBB..",
+  "..BBISS.SSIBB..",
+  "..BBISS.SSIBB..",
+  "..BBISS.SSIBB..",
+  "..BBBBBBBBBBB..",
+  ".W.BBBBBBBBB.W.",
+  "...BBBBBBBBB...",
+  "...BBR...RBB...",
+  "....BBBBBBB....",
+  ".....BBBBB.....",
 ];
 
 const CONVERTIBLE_STRIPE = [
-  ".....Y.Y.....",
-  "....TTBTT....",
-  "...BTTBTTB...",
-  ".W.BTTBTTB.W.",
-  "..BBKKKKKBB..",
-  "..BBKKKKKBB..",
-  "..BBKKKKKBB..",
-  "..BBTTBTTBB..",
-  "..BISS..SSIB.",
-  "..BISS..SSIB.",
-  "..BISS..SSIB.",
-  "..BBTTBTTBB..",
-  ".W.BTTBTTB.W.",
-  "..BBTTBTTBB..",
-  "..BTR...RTB..",
-  "...BTTBTTB...",
-  "....TTBTT....",
+  "......Y.Y......",
+  ".....TTBTT.....",
+  "....BTTBTTB....",
+  "...BBTTBTTBB...",
+  ".W.BBTTBTTBB.W.",
+  "..BBKKKKKKKBB..",
+  "..BBKKKKKKKBB..",
+  "..BBTTBBBTTBB..",
+  "..BBISS.SSIBB..",
+  "..BBISS.SSIBB..",
+  "..BBISS.SSIBB..",
+  "..BBTTBBBTTBB..",
+  ".W.BBTTBTTBB.W.",
+  "...BBTTBTTBB...",
+  "...BTR...RTB...",
+  "....BTTBTTB....",
+  ".....TTBTT.....",
 ];
 
 const VAN = [
-  ".....Y.Y.....",
-  "....BBBBB....",
-  "...BBBBBBB...",
-  ".WBBBBBBBBBW.",
-  "..BBKKKKKBB..",
-  "..BBKKKKKBB..",
-  "..BBBBBBBBB..",
-  "..BBBBBBBBB..",
-  "..BBBBBBBBB..",
-  "..BBBBBBBBB..",
-  "..BBBBBBBBB..",
-  ".WBBBBBBBBBW.",
-  "..BBBBBBBBB..",
-  "..BBR...RBB..",
-  "...BBBBBBB...",
+  "......Y.Y......",
+  ".....BBBBB.....",
+  "....BBBBBBB....",
+  "...BBBBBBBBB...",
+  ".WBBBBBBBBBBBW.",
+  "..BBKKKKKKKBB..",
+  "..BBKKKKKKKBB..",
+  "..BBBBBBBBBBB..",
+  "..BBBBBBBBBBB..",
+  "..BBBBBBBBBBB..",
+  "..BBBBBBBBBBB..",
+  ".WBBBBBBBBBBBW.",
+  "...BBBBBBBBB...",
+  "...BBR...RBB...",
+  "....BBBBBBB....",
 ];
 
 function hasRacingStripes(car) {
@@ -412,9 +412,9 @@ function fillDisk(ctx, ox, oy, r, color) {
 function drawPixelTree(ctx, x, y, size) {
   const ox = Math.round(x);
   const oy = Math.round(y);
-  const r = size > 1 ? 6 : 4;
-  fillDisk(ctx, ox, oy, r, "#166422");
-  fillDisk(ctx, ox - 1, oy - 1, Math.max(2, r - 2), "#1f8c2e");
+  const r = size > 1 ? 8 : 6;
+  fillDisk(ctx, ox, oy, r, "#14601e");
+  fillDisk(ctx, ox - 1, oy - 1, Math.max(3, r - 2), "#1e8a2c");
 }
 
 function drawPixelDude(ctx, x, y, u) {

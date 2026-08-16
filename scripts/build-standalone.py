@@ -23,16 +23,16 @@ html = html.replace(
     "",
 )
 html = html.replace(
-    '    <link rel="stylesheet" href="css/style.css" />\n',
+    '    <link rel="stylesheet" href="css/style.css?v=4faixas" />\n',
     "    <style>\n" + css + "\n    </style>\n",
 )
 html = html.replace(
-    """    <script src="js/cars.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/ui.js"></script>
+    """    <script src="js/cars.js?v=4faixas"></script>
+    <script src="js/storage.js?v=4faixas"></script>
+    <script src="js/i18n.js?v=4faixas"></script>
+    <script src="js/audio.js?v=4faixas"></script>
+    <script src="js/game.js?v=4faixas"></script>
+    <script src="js/ui.js?v=4faixas"></script>
 """,
     "    <script>\n" + scripts + "\n    </script>\n",
 )

@@ -1,3 +1,14 @@
+const LANES = 4;
+const LANE_GAP = 1.9;
+const GRASS = "#58dc48";
+
+function crisp(ctx) {
+  ctx.imageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+}
+
 const Game = {
   canvas: null,
   ctx: null,
@@ -55,15 +66,15 @@ const Game = {
     this.canvas.width = Math.floor(this.w * this.dpr);
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    this.ctx.imageSmoothingEnabled = false;
-    this.pixel = Math.max(4, Math.floor(Math.min(this.w, this.h) / 150));
-    this.gw = Math.max(96, Math.ceil(this.w / this.pixel));
-    this.gh = Math.max(160, Math.ceil(this.h / this.pixel));
+    crisp(this.ctx);
+    this.pixel = Math.max(6, Math.floor(Math.min(this.w, this.h) / 92));
+    this.gw = Math.max(80, Math.ceil(this.w / this.pixel));
+    this.gh = Math.max(140, Math.ceil(this.h / this.pixel));
     if (!this.pix) this.pix = document.createElement("canvas");
     this.pix.width = this.gw;
     this.pix.height = this.gh;
     this.pctx = this.pix.getContext("2d");
-    this.pctx.imageSmoothingEnabled = false;
+    crisp(this.pctx);
     if (this._idle && !this.running) this.drawMenuScene();
   },
 
@@ -103,7 +114,7 @@ const Game = {
   },
 
   changeLane(dir) {
-    const next = Math.max(0, Math.min(2, this.lane + dir));
+    const next = Math.max(0, Math.min(LANES - 1, this.lane + dir));
     if (next !== this.lane) {
       this.lane = next;
       Sfx.lane();
@@ -153,7 +164,7 @@ const Game = {
   },
 
   laneWorldX(lane) {
-    return (lane - 1) * 2.15;
+    return (lane - (LANES - 1) / 2) * LANE_GAP;
   },
 
   playerZ() {
@@ -163,13 +174,15 @@ const Game = {
   toScreen(worldX, z) {
     const W = this.gw || this.w;
     const H = this.gh || this.h;
-    const xScale = W * 0.09;
-    const zScale = H / 58;
+    const xScale = W * 0.08;
+    const zScale = H / 52;
+    const lanePx = xScale * LANE_GAP;
+    const u = Math.max(1, Math.floor(lanePx / 16));
     return {
       x: W / 2 + worldX * xScale,
-      y: H * 0.76 - (z - this.playerZ()) * zScale,
-      s: Math.max(1, Math.round(xScale / 9)),
-      u: Math.max(1, Math.round(xScale / 9)),
+      y: H * 0.74 - (z - this.playerZ()) * zScale,
+      s: u,
+      u,
       xScale,
       zScale,
     };
@@ -202,22 +215,22 @@ const Game = {
       const z = this.spawnZ;
       const twoLaneChance = Math.min(0.28, this.distance / 2800);
       if (pattern < 0.62 - twoLaneChance) {
-        const blocked = Math.floor(Math.random() * 3);
+        const blocked = Math.floor(Math.random() * LANES);
         this.entities.push(this.makeTraffic(blocked, z));
         if (Math.random() < 0.22 + Math.min(0.2, this.distance / 4000)) {
-          const other = (blocked + 1 + Math.floor(Math.random() * 2)) % 3;
+          const other = (blocked + 1 + Math.floor(Math.random() * (LANES - 1))) % LANES;
           this.entities.push({ kind: "barrier", lane: other, z, w: 1.4, h: 0.7, low: true });
         }
       } else if (pattern < 0.62 + twoLaneChance) {
-        const free = Math.floor(Math.random() * 3);
-        for (let lane = 0; lane < 3; lane++) {
-          if (lane === free) continue;
-          this.entities.push(this.makeTraffic(lane, z + lane * 4));
-        }
+        const a = Math.floor(Math.random() * LANES);
+        let b = Math.floor(Math.random() * (LANES - 1));
+        if (b >= a) b += 1;
+        this.entities.push(this.makeTraffic(a, z));
+        this.entities.push(this.makeTraffic(b, z + 5));
       } else {
         this.entities.push({
           kind: "truck",
-          lane: Math.floor(Math.random() * 3),
+          lane: Math.floor(Math.random() * LANES),
           z,
           w: 1.6,
           h: 1.6,
@@ -230,7 +243,7 @@ const Game = {
     }
 
     while (this.coinZ < this.cameraZ + 200) {
-      const lane = Math.floor(Math.random() * 3);
+      const lane = Math.floor(Math.random() * LANES);
       const count = 5 + Math.floor(Math.random() * 5);
       for (let i = 0; i < count; i++) {
         this.entities.push({ kind: "coin", lane, z: this.coinZ + i * 3.2, taken: false });
@@ -243,7 +256,7 @@ const Game = {
       this.entities.push({
         kind: "power",
         power: kinds[Math.floor(Math.random() * kinds.length)],
-        lane: Math.floor(Math.random() * 3),
+        lane: Math.floor(Math.random() * LANES),
         z: this.powerZ,
         taken: false,
       });
@@ -417,7 +430,7 @@ const Game = {
   blit(ctx) {
     const out = this.ctx;
     out.imageSmoothingEnabled = false;
-    out.fillStyle = "#4ed34a";
+    out.fillStyle = GRASS;
     out.fillRect(0, 0, this.w, this.h);
     let ox = 0;
     let oy = 0;
@@ -425,20 +438,21 @@ const Game = {
       ox = (Math.random() - 0.5) * this.shake;
       oy = (Math.random() - 0.5) * this.shake;
     }
+    crisp(out);
     out.drawImage(this.pix, ox, oy, this.w, this.h);
   },
 
   drawSky(ctx) {
-    ctx.fillStyle = "#4ed34a";
+    ctx.fillStyle = GRASS;
     ctx.fillRect(0, 0, this.gw, this.gh);
   },
 
   paintRoad(ctx, cameraZ) {
     const mid = this.toScreen(0, this.playerZ());
-    const laneW = Math.round(mid.xScale * 2.15);
-    const roadW = laneW * 3;
+    const laneW = Math.round(mid.xScale * LANE_GAP);
+    const roadW = laneW * LANES;
     const left = Math.round(this.gw / 2 - roadW / 2);
-    const rumble = Math.max(4, Math.round(laneW * 0.18));
+    const rumble = Math.max(5, Math.round(laneW * 0.22));
     const zScale = mid.zScale;
     const scroll = cameraZ == null ? this.cameraZ : cameraZ;
 
@@ -460,7 +474,7 @@ const Game = {
     const period = dashH + gap;
     const dashOff = Math.round(((scroll * zScale) % period + period) % period);
     ctx.fillStyle = "#ffffff";
-    for (const lane of [1, 2]) {
+    for (let lane = 1; lane < LANES; lane++) {
       const x = left + lane * laneW - Math.floor(dashW / 2);
       for (let y = -dashOff; y < this.gh + period; y += period) {
         ctx.fillRect(x, y, dashW, dashH);
@@ -483,7 +497,7 @@ const Game = {
       .sort((a, b) => b.z - a.z);
 
     for (const item of items) {
-      const dist = 4.35 + (item.row || 0) * 1.35;
+      const dist = 3.95 + (item.row || 0) * 1.25;
       const x = item.side * dist;
       const p = this.toScreen(x, item.z);
       if (p.y < -12 || p.y > this.gh + 12) continue;
@@ -501,7 +515,7 @@ const Game = {
       if (this.powers.shield > 0) {
         ctx.fillStyle = "#7dffb8";
         ctx.fillRect(Math.round(p.x) - p.u * 8, Math.round(p.y) - hop - p.u * 13, p.u * 16, p.u * 26);
-        ctx.fillStyle = "#4ed34a";
+        ctx.fillStyle = GRASS;
         ctx.fillRect(Math.round(p.x) - p.u * 7, Math.round(p.y) - hop - p.u * 12, p.u * 14, p.u * 24);
       }
       drawCarTop(ctx, p.x, p.y - hop, p.u, this.car, {
@@ -588,30 +602,30 @@ const Game = {
     const ctx = this.pctx;
     const W = this.gw;
     const H = this.gh;
-    ctx.fillStyle = "#4ed34a";
+    ctx.fillStyle = GRASS;
     ctx.fillRect(0, 0, W, H);
 
     const road = this.paintRoad(ctx, 0);
 
     for (let i = 0; i < 22; i++) {
-      drawPixelTree(ctx, road.left - 14 - (i % 3) * 9, 12 + i * 16, 1 + (i % 2));
-      drawPixelTree(ctx, road.left + road.roadW + 14 + (i % 3) * 9, 8 + i * 16, 1 + ((i + 1) % 2));
+      drawPixelTree(ctx, road.left - 16 - (i % 3) * 10, 10 + i * 15, 1 + (i % 2));
+      drawPixelTree(ctx, road.left + road.roadW + 16 + (i % 3) * 10, 6 + i * 15, 1 + ((i + 1) % 2));
     }
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(2, Math.round(W / 90));
+    const u = Math.max(1, Math.floor(road.laneW / 16));
     const cx = Math.round(W / 2);
-    const cy = Math.round(H * 0.62);
+    const cy = Math.round(H * 0.64);
     const lane = road.laneW;
     const demo = [
-      { x: cx - lane, y: H * 0.28, car: { shape: "convertible", colors: { body: "#ff8a2b", stripe: "#1b1b1b" } } },
-      { x: cx + lane, y: H * 0.24, car: { shape: "muscle", colors: { body: "#1e3a6e", stripe: "#ffffff" } } },
-      { x: cx - lane, y: H * 0.44, car: { shape: "convertible", colors: { body: "#c4451c", stripe: "#1b1b1b" } } },
-      { x: cx + lane, y: H * 0.40, car: { shape: "convertible", colors: { body: "#8fd14a", stripe: "#1b1b1b" } } },
+      { x: cx - lane * 1.5, y: H * 0.26, car: { shape: "convertible", colors: { body: "#ff8a2b", stripe: "#1b1b1b" } } },
+      { x: cx - lane * 0.5, y: H * 0.22, car: { shape: "muscle", colors: { body: "#1e3a6e", stripe: "#ffffff" } } },
+      { x: cx + lane * 0.5, y: H * 0.30, car: { shape: "convertible", colors: { body: "#c4451c", stripe: "#1b1b1b" } } },
+      { x: cx + lane * 1.5, y: H * 0.38, car: { shape: "convertible", colors: { body: "#8fd14a", stripe: "#1b1b1b" } } },
     ];
     for (const d of demo) drawCarTop(ctx, d.x, d.y, u, d.car, { u });
-    drawCarTop(ctx, cx, cy, u, car, { u });
-    drawPixelDude(ctx, cx - 12 * u, cy + 2, Math.max(1, Math.round(u * 0.5)));
+    drawCarTop(ctx, cx - lane * 0.5, cy, u, car, { u });
+    drawPixelDude(ctx, cx - lane * 0.5 - 11 * u, cy + 2, Math.max(1, Math.round(u * 0.45)));
     this.blit();
   },
 

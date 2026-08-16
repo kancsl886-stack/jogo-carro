@@ -99,12 +99,16 @@ function renderShop() {
     const canvas = card.querySelector("canvas");
     const c2d = canvas.getContext("2d");
     c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#4ed34a";
+    c2d.imageSmoothingEnabled = false;
+    c2d.fillStyle = "#58dc48";
     c2d.fillRect(0, 0, 280, 140);
     c2d.fillStyle = "#9a9a9a";
-    c2d.fillRect(108, 0, 64, 140);
+    c2d.fillRect(90, 0, 100, 140);
     c2d.fillStyle = "#ffffff";
-    for (let y = 6; y < 140; y += 18) c2d.fillRect(138, y, 3, 10);
+    for (let y = 6; y < 140; y += 18) {
+      c2d.fillRect(122, y, 3, 10);
+      c2d.fillRect(155, y, 3, 10);
+    }
     drawCarTop(c2d, 140, 72, 6, car, { u: 6, flash: true });
     const btn = card.querySelector("button");
     if (equipped) {

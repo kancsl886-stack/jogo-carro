@@ -11,6 +11,6 @@ fi
 
 CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium-browser || true)"
 if [[ -n "$CHROME" ]]; then
-  exec "$CHROME" --no-sandbox --disable-dev-shm-usage --app="http://127.0.0.1:${PORT}/" --start-maximized
+  exec "$CHROME" --no-sandbox --disable-dev-shm-usage --app="http://127.0.0.1:${PORT}/index.html?v=4faixas" --start-maximized
 fi
-xdg-open "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || open "http://127.0.0.1:${PORT}/"
+xdg-open "http://127.0.0.1:${PORT}/index.html?v=4faixas" >/dev/null 2>&1 || open "http://127.0.0.1:${PORT}/index.html?v=4faixas"

@@ -539,9 +539,10 @@ function carScratch(w, h) {
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
   const dest = Math.max(2, extras.u || Math.round(scale) || 3);
-  const c = car.colors || {};
+  const c = (car && car.colors) || {};
   const body = c.body || "#6ec4f0";
   const rows = spriteFor(car);
+  if (!rows || !rows.length || !rows[0]) return;
   const w = rows[0].length;
   const h = rows.length;
   const palette = {
@@ -557,7 +558,7 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
     T: c.stripe || "#f4f7fb",
     C: c.trim || "#222222",
-    A: car.shape === "taxi" ? "#f1c40f" : c.trim || "#3cf0ff",
+    A: car && car.shape === "taxi" ? "#f1c40f" : c.trim || "#3cf0ff",
     D: "#2a2a2a",
     M: "#c5ccd6",
     P: "#f2f2f2",
@@ -571,7 +572,8 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   if (extras.yaw) ctx.rotate(extras.yaw);
   ctx.fillStyle = "rgba(0,0,0,0.28)";
   ctx.beginPath();
-  ctx.ellipse(0, dest * 0.7, (w * dest) / 2.15, h * dest * 0.12, 0, 0, Math.PI * 2);
+  if (ctx.ellipse) ctx.ellipse(0, dest * 0.7, (w * dest) / 2.15, h * dest * 0.12, 0, 0, Math.PI * 2);
+  else ctx.rect((-w * dest) / 2, dest * 0.5, w * dest, dest);
   ctx.fill();
   if (extras.nitro) {
     ctx.fillStyle = "#7fe7ff";
@@ -581,9 +583,9 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   }
   ctx.imageSmoothingEnabled = true;
   if (ctx.imageSmoothingQuality) ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(sctx, (-w * dest) / 2, (-h * dest) / 2, w * dest, h * dest);
+  ctx.drawImage(_carScratch, (-w * dest) / 2, (-h * dest) / 2, w * dest, h * dest);
   ctx.imageSmoothingEnabled = false;
-  if (car.shape === "police") {
+  if (car && car.shape === "police") {
     const oy = -h * dest * 0.32;
     ctx.fillStyle = extras.flash ? "#ff3030" : "#3d8bff";
     ctx.fillRect(-1.6 * dest, oy, 1.6 * dest, dest * 0.7);

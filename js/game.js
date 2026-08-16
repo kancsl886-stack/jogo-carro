@@ -18,13 +18,6 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-function crisp(ctx) {
-  ctx.imageSmoothingEnabled = false;
-  ctx.webkitImageSmoothingEnabled = false;
-  ctx.mozImageSmoothingEnabled = false;
-  ctx.msImageSmoothingEnabled = false;
-}
-
 const Game = {
   canvas: null,
   ctx: null,
@@ -216,7 +209,11 @@ const Game = {
       this.acc -= STEP;
       steps += 1;
     }
-    this.draw(this.acc / STEP);
+    try {
+      this.draw(this.acc / STEP);
+    } catch (err) {
+      console.error(err);
+    }
     requestAnimationFrame((t) => this.loop(t));
   },
 
@@ -725,23 +722,26 @@ const Game = {
 
   drawCarsHiRes() {
     const out = this.ctx;
-    const k = this.w / this.gw;
+    const kx = this.w / this.gw;
+    const ky = this.h / this.gh;
     const cars = (this._carsToDraw || []).slice().sort((a, b) => a.p.y - b.p.y);
     for (const item of cars) {
-      const x = item.p.x * k;
-      const y = (item.p.y - (item.hop || 0)) * k;
+      if (!item || !item.p || !item.car) continue;
+      const x = item.p.x * kx;
+      const y = (item.p.y - (item.hop || 0)) * ky;
       if (y < -90 || y > this.h + 90) continue;
-      const lanePx = item.p.xScale * LANE_GAP * k;
+      const lanePx = item.p.xScale * LANE_GAP * kx;
       const u = Math.max(3, Math.round(lanePx / 26));
       if (item.shield) {
         out.save();
         out.fillStyle = "rgba(125, 255, 184, 0.28)";
         out.beginPath();
-        out.ellipse(x, y, u * 8, u * 11, 0, 0, Math.PI * 2);
+        if (out.ellipse) out.ellipse(x, y, u * 8, u * 11, 0, 0, Math.PI * 2);
+        else out.rect(x - u * 8, y - u * 11, u * 16, u * 22);
         out.fill();
         out.restore();
       }
-      drawCarTop(out, x, y, u, item.car, Object.assign({ u }, item.extras));
+      drawCarTop(out, x, y, u, item.car, Object.assign({ u }, item.extras || {}));
     }
   },
 
@@ -789,10 +789,11 @@ const Game = {
     ];
     drawPixelDude(ctx, cx - 18, cy + 2, 2);
     this.blit();
-    const k = this.w / this.gw;
-    const u = Math.max(4, Math.round(road.laneW * k / 26));
-    for (const d of demo) drawCarTop(this.ctx, d.x * k, d.y * k, u, d.car, { u });
-    drawCarTop(this.ctx, cx * k, cy * k, u, car, { u });
+    const kx = this.w / this.gw;
+    const ky = this.h / this.gh;
+    const u = Math.max(4, Math.round(road.laneW * kx / 26));
+    for (const d of demo) drawCarTop(this.ctx, d.x * kx, d.y * ky, u, d.car, { u });
+    drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
   },
 
   idle() {

@@ -15,8 +15,8 @@ const Game = {
     this.distance = 0;
     this.runCoins = 0;
     this.combo = 0;
-    this.speed = 28;
-    this.baseSpeed = 28;
+    this.speed = 12;
+    this.baseSpeed = 12;
     this.lane = 1;
     this.laneX = 0;
     this.jump = 0;
@@ -24,9 +24,9 @@ const Game = {
     this.cameraZ = 0;
     this.time = 0;
     this.shake = 0;
-    this.spawnZ = 40;
-    this.coinZ = 20;
-    this.powerZ = 80;
+    this.spawnZ = 90;
+    this.coinZ = 30;
+    this.powerZ = 140;
     this.entities = [];
     this.particles = [];
     this.roadside = [];
@@ -199,23 +199,33 @@ const Game = {
     while (this.spawnZ < this.cameraZ + 220) {
       const pattern = Math.random();
       const z = this.spawnZ;
-      if (pattern < 0.45) {
+      const twoLaneChance = Math.min(0.28, this.distance / 2800);
+      if (pattern < 0.62 - twoLaneChance) {
         const blocked = Math.floor(Math.random() * 3);
         this.entities.push(this.makeTraffic(blocked, z));
-        if (Math.random() < 0.35) {
+        if (Math.random() < 0.22 + Math.min(0.2, this.distance / 4000)) {
           const other = (blocked + 1 + Math.floor(Math.random() * 2)) % 3;
           this.entities.push({ kind: "barrier", lane: other, z, w: 1.4, h: 0.7, low: true });
         }
-      } else if (pattern < 0.7) {
+      } else if (pattern < 0.62 + twoLaneChance) {
         const free = Math.floor(Math.random() * 3);
         for (let lane = 0; lane < 3; lane++) {
           if (lane === free) continue;
           this.entities.push(this.makeTraffic(lane, z + lane * 4));
         }
       } else {
-        this.entities.push({ kind: "truck", lane: Math.floor(Math.random() * 3), z, w: 1.6, h: 1.6, low: false });
+        this.entities.push({
+          kind: "truck",
+          lane: Math.floor(Math.random() * 3),
+          z,
+          w: 1.6,
+          h: 1.6,
+          low: false,
+          speed: Math.max(3, this.speed * 0.22),
+        });
       }
-      this.spawnZ += 28 + Math.random() * 18 - Math.min(12, this.distance / 400);
+      const gap = 50 + Math.random() * 18 - Math.min(26, this.distance / 260);
+      this.spawnZ += Math.max(20, gap);
     }
 
     while (this.coinZ < this.cameraZ + 200) {
@@ -249,7 +259,7 @@ const Game = {
       w: 1.35,
       h: 1.15,
       low: false,
-      speed: 10 + Math.random() * 8,
+      speed: Math.max(3, this.speed * (0.28 + Math.random() * 0.18)),
       car: {
         shape: shapes[Math.floor(Math.random() * shapes.length)],
         colors: trafficPalette(),
@@ -262,8 +272,9 @@ const Game = {
     this.flash += dt;
     this.spawnAhead();
 
-    const nitro = this.powers.nitro > 0 ? 1.45 : 1;
-    this.baseSpeed = 30 + Math.min(48, this.distance * 0.018);
+    const nitro = this.powers.nitro > 0 ? 1.35 : 1;
+    const ramp = Math.min(1, this.distance / 4800);
+    this.baseSpeed = 11 + 50 * ramp;
     this.speed = this.baseSpeed * this.car.stats.speed * nitro;
     this.cameraZ += this.speed * dt;
     this.distance = this.cameraZ;

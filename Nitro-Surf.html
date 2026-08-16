@@ -1955,6 +1955,22 @@ const Sfx = {
 const LANES = 3;
 const LANE_GAP = 2.2;
 const GRASS = "#48d048";
+const STEP = 1 / 60;
+
+function crisp(ctx) {
+  ctx.imageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+}
+
+function expDamp(current, target, rate, dt) {
+  return current + (target - current) * (1 - Math.exp(-rate * dt));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
 
 function crisp(ctx) {
   ctx.imageSmoothingEnabled = false;
@@ -1984,10 +2000,16 @@ const Game = {
     this.baseSpeed = 16;
     this.lane = 1;
     this.laneX = 0;
+    this.vx = 0;
     this.yaw = 0;
     this.steer = 0;
+    this.acc = 0;
     this.keys = this.keys || { left: false, right: false };
     this.pointerSteer = null;
+    this.prevCameraZ = 0;
+    this.prevLaneX = 0;
+    this.prevYaw = 0;
+    this.prevJump = 0;
     this.jump = 0;
     this.jumpVel = 0;
     this.cameraZ = 0;
@@ -2025,7 +2047,7 @@ const Game = {
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     crisp(this.ctx);
-    this.pixel = Math.max(6, Math.floor(Math.min(this.w, this.h) / 92));
+    this.pixel = Math.max(4, Math.floor(Math.min(this.w, this.h) / 128));
     this.gw = Math.max(80, Math.ceil(this.w / this.pixel));
     this.gh = Math.max(140, Math.ceil(this.h / this.pixel));
     if (!this.pix) this.pix = document.createElement("canvas");
@@ -2107,6 +2129,7 @@ const Game = {
     this.running = true;
     this._idle = false;
     this.paused = false;
+    this.acc = 0;
     this.last = performance.now();
     this.loop(this.last);
   },
@@ -2118,6 +2141,7 @@ const Game = {
   resume() {
     if (!this.running) return;
     this.paused = false;
+    this.acc = 0;
     this.last = performance.now();
     this.loop(this.last);
   },
@@ -2131,10 +2155,22 @@ const Game = {
 
   loop(now) {
     if (!this.running || this.paused) return;
-    const dt = Math.min(0.033, (now - this.last) / 1000);
+    let frame = (now - this.last) / 1000;
     this.last = now;
-    this.update(dt);
-    this.draw();
+    if (frame > 0.08) frame = 0.08;
+    if (frame < 0) frame = 0;
+    this.acc += frame;
+    let steps = 0;
+    while (this.acc >= STEP && steps < 5) {
+      this.prevCameraZ = this.cameraZ;
+      this.prevLaneX = this.laneX;
+      this.prevYaw = this.yaw;
+      this.prevJump = this.jump;
+      this.update(STEP);
+      this.acc -= STEP;
+      steps += 1;
+    }
+    this.draw(this.acc / STEP);
     requestAnimationFrame((t) => this.loop(t));
   },
 
@@ -2143,7 +2179,23 @@ const Game = {
   },
 
   playerZ() {
-    return this.cameraZ + 8;
+    return this.viewCameraZ() + 8;
+  },
+
+  viewCameraZ() {
+    return this._drawCam != null ? this._drawCam : this.cameraZ;
+  },
+
+  viewLaneX() {
+    return this._drawLaneX != null ? this._drawLaneX : this.laneX;
+  },
+
+  viewYaw() {
+    return this._drawYaw != null ? this._drawYaw : this.yaw;
+  },
+
+  viewJump() {
+    return this._drawJump != null ? this._drawJump : this.jump;
   },
 
   roadBend(z) {
@@ -2275,27 +2327,30 @@ const Game = {
     const nitro = this.powers.nitro > 0 ? 1.35 : 1;
     const ramp = Math.min(1, this.distance / 4200);
     this.baseSpeed = 13 + 40 * ramp;
-    this.speed = this.baseSpeed * this.car.stats.speed * nitro;
+    const targetSpeed = this.baseSpeed * this.car.stats.speed * nitro;
+    this.speed = expDamp(this.speed, targetSpeed, 2.6, dt);
     this.cameraZ += this.speed * dt;
     this.distance = this.cameraZ;
 
     const grip = Math.max(0.2, this.car.stats.handling);
     const input = this.readSteer();
     if (Math.abs(input) > 0.35 && Math.abs(this.steer) <= 0.35) Sfx.lane();
-    this.steer = input;
-    const maxYaw = 0.2 + 0.08 * grip;
-    const yawRate = 1.4 + 1.6 * grip;
-    const wantYaw = input * maxYaw;
-    this.yaw += (wantYaw - this.yaw) * Math.min(1, yawRate * dt);
-    const slide = 3.2 + 3.6 * grip + this.speed * 0.018;
-    this.laneX += Math.sin(this.yaw) * slide * dt;
-    const kappa = this.roadBend(this.playerZ() + 10) - this.roadBend(this.playerZ() - 2);
-    this.laneX -= kappa * dt * (2.2 / grip);
+    this.steer = expDamp(this.steer, input, 9, dt);
+    const maxYaw = 0.18 + 0.07 * grip;
+    const wantYaw = this.steer * maxYaw;
+    this.yaw = expDamp(this.yaw, wantYaw, 4.2 + 2.2 * grip, dt);
+    const slide = 2.6 + 3.0 * grip + this.speed * 0.014;
+    const desiredVx = Math.sin(this.yaw) * slide;
+    const kappa = this.roadBend(this.cameraZ + 18) - this.roadBend(this.cameraZ + 6);
+    const curve = -kappa * (1.5 / grip);
+    this.vx = expDamp(this.vx, desiredVx + curve, 5.5 + 2.8 * grip, dt);
+    this.laneX += this.vx * dt;
     this.lane = Math.max(0, Math.min(LANES - 1, Math.round(this.laneX / LANE_GAP + 1)));
     const limit = LANE_GAP * 1.55;
     if (Math.abs(this.laneX) > limit) {
       this.laneX = Math.sign(this.laneX) * limit;
-      this.yaw *= 0.4;
+      this.vx *= -0.2;
+      this.yaw *= 0.72;
       this.shake = Math.max(this.shake, 5);
     }
 
@@ -2347,7 +2402,7 @@ const Game = {
       p.z += p.vz * dt;
     }
     this.particles = this.particles.filter((p) => p.life > 0);
-    this.shake *= 0.9;
+    this.shake *= 0.88;
 
     if (this.onHud) {
       this.onHud({
@@ -2386,7 +2441,7 @@ const Game = {
   updateCop(dt, playerZ) {
     if (!this.cop) return;
     const targetX = this.laneX;
-    this.cop.laneX += (targetX - this.cop.laneX) * Math.min(1, 2.4 * dt);
+    this.cop.laneX = expDamp(this.cop.laneX, targetX, 3.2, dt);
     this.cop.lane = this.lane;
     if (this.powers.nitro > 0) this.cop.gap += 3.2 * dt;
     else this.cop.gap -= 0.08 * dt;
@@ -2496,7 +2551,7 @@ const Game = {
   },
 
   drawRoad(ctx) {
-    this._road = this.paintRoad(ctx, this.cameraZ);
+    this._road = this.paintRoad(ctx, this.viewCameraZ());
   },
 
   drawGrassDecor(ctx, left, roadW, rumble, scroll) {
@@ -2534,9 +2589,9 @@ const Game = {
   },
 
   drawRoadside(ctx) {
-    const road = this._road || this.paintRoad(ctx, this.cameraZ);
+    const road = this._road || this.paintRoad(ctx, this.viewCameraZ());
     const mid = this.toScreen(0, this.playerZ());
-    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, this.cameraZ * mid.zScale);
+    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, this.viewCameraZ() * mid.zScale);
   },
 
   drawEntities(ctx) {
@@ -2544,8 +2599,8 @@ const Game = {
     const list = this.entities.filter((e) => !e.taken).sort((a, b) => b.z - a.z);
     let playerDrawn = false;
     const drawPlayer = () => {
-      const p = this.toScreen(this.laneX, playerZ);
-      const hop = Math.round(this.jump * 1.4);
+      const p = this.toScreen(this.viewLaneX(), playerZ);
+      const hop = Math.round(this.viewJump() * 1.4);
       if (this.powers.shield > 0) {
         ctx.fillStyle = "#7dffb8";
         ctx.fillRect(Math.round(p.x) - p.u * 8, Math.round(p.y) - hop - p.u * 13, p.u * 16, p.u * 26);
@@ -2556,7 +2611,7 @@ const Game = {
         u: p.u,
         nitro: this.powers.nitro,
         flash: this.flash % 0.4 < 0.2,
-        yaw: this.yaw,
+        yaw: this.viewYaw(),
       });
     };
 
@@ -2612,17 +2667,26 @@ const Game = {
     const p = this.toScreen(this.cop.laneX, this.cop.z);
     if (p.y < -20 || p.y > this.gh + 28) return;
     const flash = this.flash % 0.4 < 0.2;
-    drawCarTop(ctx, p.x, p.y, p.u, getCar("policia"), { u: p.u, flash, yaw: this.yaw * 0.65 });
+    drawCarTop(ctx, p.x, p.y, p.u, getCar("policia"), { u: p.u, flash, yaw: this.viewYaw() * 0.65 });
   },
 
-  draw() {
+  draw(alpha) {
     if (!this.pctx) this.resize();
+    const a = Math.max(0, Math.min(1, alpha == null ? 1 : alpha));
+    this._drawCam = lerp(this.prevCameraZ ?? this.cameraZ, this.cameraZ, a);
+    this._drawLaneX = lerp(this.prevLaneX ?? this.laneX, this.laneX, a);
+    this._drawYaw = lerp(this.prevYaw ?? this.yaw, this.yaw, a);
+    this._drawJump = lerp(this.prevJump ?? this.jump, this.jump, a);
     const ctx = this.pctx;
     this.drawSky(ctx);
     this.drawRoad(ctx);
     this.drawRoadside(ctx);
     this.drawEntities(ctx);
     this.blit();
+    this._drawCam = null;
+    this._drawLaneX = null;
+    this._drawYaw = null;
+    this._drawJump = null;
   },
 
   drawMenuScene() {

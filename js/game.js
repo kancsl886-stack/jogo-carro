@@ -177,7 +177,7 @@ const Game = {
     const xScale = W * 0.09;
     const zScale = H / 52;
     const lanePx = xScale * LANE_GAP;
-    const u = Math.max(1, Math.floor(lanePx / 14));
+    const u = Math.max(1, Math.floor(lanePx / 13));
     return {
       x: W / 2 + worldX * xScale,
       y: H * 0.78 - (z - this.playerZ()) * zScale,
@@ -485,26 +485,40 @@ const Game = {
   },
 
   drawRoad(ctx) {
-    this.paintRoad(ctx, this.cameraZ);
+    this._road = this.paintRoad(ctx, this.cameraZ);
+  },
+
+  drawGrassDecor(ctx, left, roadW, rumble, scroll) {
+    const period = 15;
+    const off = ((scroll % period) + period) % period;
+    const count = Math.ceil(this.gh / period) + 4;
+    const inGrass = (x) => x > 3 && x < this.gw - 3;
+    for (let i = -2; i < count; i++) {
+      const col = ((i % 3) + 3) % 3;
+      const yL = Math.round(i * period + off);
+      const yR = Math.round(i * period + off + 4);
+      const size = 1 + (Math.abs(i) % 2);
+      const xl = left - rumble - 10 - col * 10;
+      const xr = left + roadW + rumble + 10 + col * 10;
+      const xl2 = left - rumble - 32;
+      const xr2 = left + roadW + rumble + 32;
+      if (inGrass(xl)) {
+        if (i % 4 === 0) drawPixelBush(ctx, xl, yL);
+        else drawPixelTree(ctx, xl, yL, size);
+      }
+      if (inGrass(xr)) {
+        if (i % 3 === 0) drawPixelBush(ctx, xr, yR);
+        else drawPixelTree(ctx, xr, yR, 1 + ((Math.abs(i) + 1) % 2));
+      }
+      if (i % 2 === 1 && inGrass(xl2)) drawPixelTree(ctx, xl2 + (i % 5), yL + 6, 1);
+      if (i % 2 === 0 && inGrass(xr2)) drawPixelTree(ctx, xr2 - (i % 5), yR + 5, 1);
+    }
   },
 
   drawRoadside(ctx) {
-    const items = this.roadside
-      .map((item) => {
-        const span = 960;
-        const rel = ((item.z - this.cameraZ) % span + span) % span;
-        return { ...item, z: this.cameraZ + rel };
-      })
-      .sort((a, b) => b.z - a.z);
-
-    for (const item of items) {
-      const dist = 3.95 + (item.row || 0) * 1.25;
-      const x = item.side * dist;
-      const p = this.toScreen(x, item.z);
-      if (p.y < -12 || p.y > this.gh + 12) continue;
-      if (item.kind === "bush") drawPixelBush(ctx, p.x, p.y);
-      else drawPixelTree(ctx, p.x, p.y, Math.max(1, item.size || 1));
-    }
+    const road = this._road || this.paintRoad(ctx, this.cameraZ);
+    const mid = this.toScreen(0, this.playerZ());
+    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, this.cameraZ * mid.zScale);
   },
 
   drawEntities(ctx) {
@@ -601,20 +615,10 @@ const Game = {
     ctx.fillRect(0, 0, W, H);
 
     const road = this.paintRoad(ctx, 0);
-
-    for (let i = 0; i < 22; i++) {
-      const treeFn = i % 4 === 0 ? drawPixelBush : drawPixelTree;
-      treeFn(ctx, road.left - 16 - (i % 3) * 10, 10 + i * 15, 1 + (i % 2));
-      (i % 3 === 0 ? drawPixelBush : drawPixelTree)(
-        ctx,
-        road.left + road.roadW + 16 + (i % 3) * 10,
-        6 + i * 15,
-        1 + ((i + 1) % 2)
-      );
-    }
+    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, 0);
 
     const car = getCar(Save.data.selected);
-    const u = Math.max(1, Math.floor(road.laneW / 14));
+    const u = Math.max(2, Math.floor(road.laneW / 13));
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.66);
     const lane = road.laneW;

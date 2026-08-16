@@ -297,68 +297,22 @@ function blitSprite(ctx, ox, oy, u, rows, palette) {
   }
 }
 
-const CONVERTIBLE = [
-  ".....Y...Y.....",
-  "....BBBBBBB....",
-  "...BBBBBBBBB...",
-  "...BBBBBBBBB...",
-  ".W.BBBBBBBBB.W.",
-  "...BBKKKKKBB...",
-  "...BBKKKKKBB...",
-  "...BBBBBBBBB...",
-  "...BBI.SS.SSIB.",
-  "...BBI.SS.SSIB.",
-  "...BBBBBBBBB...",
-  ".W.BBBBBBBBB.W.",
-  "...BBBBBBBBB...",
-  "...BBR...RBB...",
-  "....BBBBBBB....",
-];
-
 const CONVERTIBLE_STRIPE = [
   ".....Y.Y.....",
   "...BBBBBBB...",
-  "..BBTTBTTBB..",
-  ".WBBTTBTTBBW.",
-  "..BBKKKKKBB..",
-  "..BBKKKKKBB..",
-  "..BBTTBTTBB..",
-  "..BI.SS.SSIB.",
-  "..BI.SS.SSIB.",
-  "..BBTTBTTBB..",
-  ".WBBTTBTTBBW.",
-  "..BBTTBTTBB..",
-  "..BR.TT.RB...",
+  "..BTTBBBTTB..",
+  "..BTTBBBTTB..",
+  ".WBTTKKKTTBW.",
+  "..BTTKKKTTB..",
+  "..BTTBBBTTB..",
+  ".BTTSS.SSTTB.",
+  ".BTTSS.SSTTB.",
+  "..BTTBBBTTB..",
+  ".WBTTBBBTTBW.",
+  "..BTTBBBTTB..",
+  "..BR.TTT.RB..",
   "...BBBBBBB...",
 ];
-
-const VAN = [
-  ".....Y...Y.....",
-  "....BBBBBBB....",
-  "...BBBBBBBBB...",
-  ".W.BBBBBBBBB.W.",
-  "...BBKKKKKBB...",
-  "...BBKKKKKBB...",
-  "...BBBBBBBBB...",
-  "...BBBBBBBBB...",
-  "...BBBBBBBBB...",
-  "...BBBBBBBBB...",
-  ".W.BBBBBBBBB.W.",
-  "...BBBBBBBBB...",
-  "...BBR...RBB...",
-  "....BBBBBBB....",
-];
-
-function hasRacingStripes(car) {
-  const stripe = car.colors && car.colors.stripe;
-  return (
-    car.shape === "police" ||
-    car.shape === "muscle" ||
-    car.shape === "hyper" ||
-    car.shape === "formula" ||
-    stripe === "#ffffff"
-  );
-}
 
 function drawCarTop(ctx, x, y, scale, car, extras) {
   extras = extras || {};
@@ -366,13 +320,13 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   const c = car.colors;
   const palette = {
     B: c.body,
-    K: "#0a0a0a",
+    K: "#111111",
     I: "#2a2a2a",
-    S: "#141414",
+    S: "#1a1a1a",
     W: "#111111",
     Y: "#ffe14a",
     R: extras.brake ? "#ff2a2a" : "#ff6a18",
-    T: "#f4f7ff",
+    T: "#ffffff",
   };
   if (extras.nitro) {
     ctx.fillStyle = "#7fe7ff";
@@ -404,15 +358,16 @@ function fillDisk(ctx, ox, oy, r, color) {
 function drawPixelTree(ctx, x, y, size) {
   const ox = Math.round(x);
   const oy = Math.round(y);
-  const r = size > 1 ? 7 : 5;
+  const r = size > 1 ? 8 : 6;
   ctx.fillStyle = "#7a3f18";
-  ctx.fillRect(ox - 1, oy + r - 1, 2, Math.max(3, Math.round(r * 0.65)));
-  fillDisk(ctx, ox, oy, r, "#157022");
-  fillDisk(ctx, ox - 1, oy - 1, Math.max(2, r - 2), "#1f8a2c");
+  ctx.fillRect(ox - 1, oy + r - 1, 2, Math.max(4, Math.round(r * 0.7)));
+  fillDisk(ctx, ox, oy, r, "#0f6b1c");
+  fillDisk(ctx, ox - 1, oy - 1, Math.max(2, r - 3), "#1a8a28");
 }
 
 function drawPixelBush(ctx, x, y) {
-  fillDisk(ctx, Math.round(x), Math.round(y), 3, "#166a24");
+  fillDisk(ctx, Math.round(x), Math.round(y), 4, "#166a24");
+  fillDisk(ctx, Math.round(x) + 2, Math.round(y) + 1, 3, "#0f6b1c");
 }
 
 function drawPixelDude(ctx, x, y, u) {

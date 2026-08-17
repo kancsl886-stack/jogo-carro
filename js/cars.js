@@ -279,11 +279,30 @@ function drawVehicle(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
-function blitSprite(ctx, ox, oy, u, rows, palette) {
+function blitSprite(ctx, ox, oy, u, rows, palette, outline) {
   const h = rows.length;
   const w = rows[0].length;
-  const x0 = Math.round(ox) - Math.floor((w * u) / 2);
-  const y0 = Math.round(oy) - Math.floor((h * u) / 2);
+  const x0 = Math.round(ox);
+  const y0 = Math.round(oy);
+  const filled = (x, y) => {
+    if (x < 0 || y < 0 || x >= w || y >= h) return false;
+    const ch = rows[y][x];
+    return Boolean(ch && ch !== "." && ch !== " " && palette[ch]);
+  };
+  if (outline) {
+    ctx.fillStyle = outline;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (!filled(x, y)) continue;
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            if (!filled(x + dx, y + dy)) ctx.fillRect(x0 + (x + dx) * u, y0 + (y + dy) * u, u, u);
+          }
+        }
+      }
+    }
+  }
   for (let y = 0; y < h; y++) {
     const row = rows[y];
     for (let x = 0; x < w; x++) {
@@ -293,6 +312,18 @@ function blitSprite(ctx, ox, oy, u, rows, palette) {
       if (!color) continue;
       ctx.fillStyle = color;
       ctx.fillRect(x0 + x * u, y0 + y * u, u, u);
+    }
+  }
+  for (let y = 0; y < h; y++) {
+    const row = rows[y];
+    for (let x = w - 1; x >= 0; x--) {
+      const ch = row[x];
+      if (!ch || ch === "." || ch === " ") continue;
+      if (ch === "N") {
+        ctx.fillStyle = palette.B || palette.H;
+        ctx.fillRect(x0 + x * u, y0 + y * u, u, u);
+      }
+      break;
     }
   }
 }
@@ -318,7 +349,7 @@ const SPRITES = {
     "...GKKKG...",
     "...HBBBN...",
     "...HBBBN...",
-    "...HSS.SN..",
+    "...HBSSBN..",
     "...HBBBN...",
     "...HBBBN...",
     "...HBBBN...",
@@ -334,7 +365,7 @@ const SPRITES = {
     "...HKKKN...",
     "...HKKKN...",
     "...HBTTBN..",
-    "...H.SS.N..",
+    "...HBSSBN..",
     "...HBBBN...",
     "...HBBBN...",
     "...HBBBN...",
@@ -352,7 +383,7 @@ const SPRITES = {
     "...GKKKG...",
     "...HBBBN...",
     "...HBBBN...",
-    "...HSS.SN..",
+    "...HBSSBN..",
     "...HBBBN...",
     "...HBBBN...",
     "...HBBBN...",
@@ -369,7 +400,7 @@ const SPRITES = {
     "...HKKKN...",
     "...HKKKN...",
     "...TBTBT...",
-    "...HSS.SN..",
+    "...HBSSBN..",
     "...TBTBT...",
     "...HBBBN...",
     "...HBBBN...",
@@ -385,7 +416,7 @@ const SPRITES = {
     "...HKKKN...",
     "...HKKKN...",
     "...HBBBN...",
-    "...HSS.SN..",
+    "...HBSSBN..",
     "...HBBBN...",
     "...MMMMM...",
     "...DDDDD...",
@@ -402,7 +433,7 @@ const SPRITES = {
     "..HKKKKKN..",
     "..HBBBBBN..",
     "..HBBBBBN..",
-    "...HSS.SN..",
+    "...HBSSBN..",
     "..HBBBBBN..",
     "..HBBBBBN..",
     "..HBBBBBN..",
@@ -433,7 +464,7 @@ const SPRITES = {
     "...HKKKN...",
     "...PPBPP...",
     "...HBBBN...",
-    "...HSS.SN..",
+    "...HBSSBN..",
     "...PPBPP...",
     "...HBBBN...",
     "...HBBBN...",
@@ -448,7 +479,7 @@ const SPRITES = {
     "..HTTKTTN..",
     "..HTTKTTN..",
     "..HTTBTTN..",
-    ".HTTSS.TTN.",
+    ".HTTSSBTTN.",
     "..HTTBTTN..",
     "..HTTBTTN..",
     "..HTTBTTN..",
@@ -464,8 +495,8 @@ const SPRITES = {
     "..HTTKTTN..",
     "..HTTKTTN..",
     "..HTTBTTN..",
-    ".HTTSS.TTN.",
-    ".HTTSS.TTN.",
+    ".HTTSSBTTN.",
+    ".HTTSSBTTN.",
     "..HTTBTTN..",
     "..HTTBTTN..",
     "..HTTBTTN..",
@@ -480,7 +511,7 @@ const SPRITES = {
     "..HTTKTTN..",
     "..HTTKTTN..",
     "..HTTDTTN..",
-    ".HTTSS.TTN.",
+    ".HTTSSBTTN.",
     "..HTTBTTN..",
     "..HTTBTTN..",
     "..HTTBTTN..",
@@ -508,7 +539,7 @@ const SPRITES = {
     "..HTTKTTN..",
     "..HTTKTTN..",
     "..HTTBTTN..",
-    ".HTTSS.TTN.",
+    ".HTTSSBTTN.",
     "..HTTCCCN..",
     "..HTTAAAN..",
     "..HTTBTTN..",
@@ -547,8 +578,8 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   const h = rows.length;
   const palette = {
     B: body,
-    H: shadeHex(body, 0.18),
-    N: shadeHex(body, -0.22),
+    H: shadeHex(body, 0.08),
+    N: shadeHex(body, -0.06),
     K: "#1a2838",
     G: "#5b7d9a",
     I: "#8eb4d4",
@@ -564,8 +595,9 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     P: "#f2f2f2",
   };
   const cell = 2;
-  const sctx = carScratch(w * cell, h * cell);
-  blitSprite(sctx, (w * cell) / 2, (h * cell) / 2, cell, rows, palette);
+  const pad = 1;
+  const sctx = carScratch((w + pad * 2) * cell, (h + pad * 2) * cell);
+  blitSprite(sctx, pad * cell, pad * cell, cell, rows, palette, "#1a1a22");
 
   ctx.save();
   ctx.translate(x, y);
@@ -583,7 +615,9 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   }
   ctx.imageSmoothingEnabled = true;
   if (ctx.imageSmoothingQuality) ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(_carScratch, (-w * dest) / 2, (-h * dest) / 2, w * dest, h * dest);
+  const dw = (w + pad * 2) * dest;
+  const dh = (h + pad * 2) * dest;
+  ctx.drawImage(_carScratch, -dw / 2, -dh / 2, dw, dh);
   ctx.imageSmoothingEnabled = false;
   if (car && car.shape === "police") {
     const oy = -h * dest * 0.32;

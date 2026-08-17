@@ -2,6 +2,21 @@
 
 Jogo de corrida infinita no estilo Subway Surfers, só que de carro: três faixas, pulo, moedas, power-ups e uma loja para comprar vários modelos.
 
+## Instalar no Android (APK)
+
+O arquivo pronto fica em **`dist/Nitro-Surf.apk`**.
+
+1. Copie o APK para o celular (Drive, cabo, WhatsApp).
+2. No Android, abra o arquivo. Se pedir, permita **instalar apps desta fonte**.
+3. Abra o app **Nitro Surf**. Segure o lado da tela para virar e deslize para cima para pular.
+
+Para gerar de novo (precisa do Android SDK):
+
+```bash
+chmod +x scripts/build-apk.sh
+./scripts/build-apk.sh
+```
+
 ## Jogar na área de trabalho
 
 O jeito mais fácil: copie o arquivo **`Nitro-Surf.html`** para a Área de Trabalho e clique duas vezes.

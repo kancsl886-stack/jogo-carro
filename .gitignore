@@ -4,3 +4,8 @@ Thumbs.db
 .idea/
 .vscode/
 node_modules/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/www/

@@ -59,6 +59,12 @@ const I18N = {
     nitroHud: "Nitro",
     copHud: "Polícia",
     pause: "Pausar",
+    entering: "Chegando:",
+    biomeCampo: "Interior",
+    biomeCidade: "Cidade",
+    biomePraia: "Orla",
+    biomeSerra: "Serra",
+    biomePorto: "Porto",
   },
   en: {
     kicker: "Endless avenue",
@@ -120,6 +126,12 @@ const I18N = {
     nitroHud: "Nitro",
     copHud: "Police",
     pause: "Pause",
+    entering: "Now entering:",
+    biomeCampo: "Countryside",
+    biomeCidade: "City",
+    biomePraia: "Waterfront",
+    biomeSerra: "Mountains",
+    biomePorto: "Docks",
   },
   es: {
     kicker: "Avenida infinita",
@@ -181,6 +193,12 @@ const I18N = {
     nitroHud: "Nitro",
     copHud: "Policía",
     pause: "Pausa",
+    entering: "Llegando:",
+    biomeCampo: "Interior",
+    biomeCidade: "Ciudad",
+    biomePraia: "Orla",
+    biomeSerra: "Sierra",
+    biomePorto: "Puerto",
   },
 };
 

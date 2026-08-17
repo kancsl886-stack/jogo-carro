@@ -156,7 +156,21 @@ function openShop(from) {
   showScreen("shop");
 }
 
+function biomeLabel(id) {
+  const keys = {
+    campo: "biomeCampo",
+    cidade: "biomeCidade",
+    praia: "biomePraia",
+    serra: "biomeSerra",
+    porto: "biomePorto",
+  };
+  return t(keys[id] || "biomeCampo");
+}
+
+let lastHudBiome = "";
+
 function play() {
+  lastHudBiome = "";
   Sfx.unlock();
   showScreen(null);
   Game.start();
@@ -182,6 +196,14 @@ window.addEventListener("DOMContentLoaded", () => {
     $("speed-fill").style.width = `${Math.min(100, (info.speed / 90) * 100)}%`;
     const danger = 1 - (info.copGap - 8.5) / 13.5;
     $("cop-fill").style.width = `${Math.max(8, Math.min(100, danger * 100))}%`;
+    if (info.biome) {
+      const name = biomeLabel(info.biome);
+      $("hud-place").textContent = name;
+      if (info.biome !== lastHudBiome) {
+        if (lastHudBiome) toast(`${t("entering")} ${name}`);
+        lastHudBiome = info.biome;
+      }
+    }
     setPowerHud(info.powers);
   };
   Game.onOver = (info) => {

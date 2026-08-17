@@ -17,7 +17,7 @@
     <link rel="icon" href="icons/nitro-surf.png" />
     <link rel="apple-touch-icon" href="icons/nitro-surf-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/style.css?v=ref15" />
+    <link rel="stylesheet" href="css/style.css?v=ref16" />
   </head>
   <body>
     <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
@@ -47,7 +47,10 @@
         </button>
       </div>
       <div class="hud-bottom">
-        <div id="powerups" class="powerups"></div>
+        <div class="hud-left">
+          <div id="hud-place" class="place-chip" data-i18n="biomeCampo">Interior</div>
+          <div id="powerups" class="powerups"></div>
+        </div>
         <div class="speed-wrap">
           <span id="hud-speed">0 km/h</span>
           <div class="speed-bar"><i id="speed-fill"></i></div>
@@ -187,11 +190,11 @@
 
     <div id="toast" class="toast hidden" role="status"></div>
 
-    <script src="js/cars.js?v=ref15"></script>
-    <script src="js/storage.js?v=ref15"></script>
-    <script src="js/i18n.js?v=ref15"></script>
-    <script src="js/audio.js?v=ref15"></script>
-    <script src="js/game.js?v=ref15"></script>
-    <script src="js/ui.js?v=ref15"></script>
+    <script src="js/cars.js?v=ref16"></script>
+    <script src="js/storage.js?v=ref16"></script>
+    <script src="js/i18n.js?v=ref16"></script>
+    <script src="js/audio.js?v=ref16"></script>
+    <script src="js/game.js?v=ref16"></script>
+    <script src="js/ui.js?v=ref16"></script>
   </body>
 </html>

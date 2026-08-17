@@ -2,6 +2,76 @@ const LANES = 3;
 const LANE_GAP = 2.2;
 const GRASS = "#48d048";
 const STEP = 1 / 60;
+const BIOME_INTRO = 150;
+const BIOME_LEN = 420;
+const BIOME_BLEND = 52;
+const BIOMES = [
+  {
+    id: "campo",
+    ground: "#48d048",
+    road: "#7a7a7a",
+    rumbleA: "#e53935",
+    rumbleB: "#ffffff",
+    dash: "#ffffff",
+    sidewalk: null,
+    decor: "trees",
+  },
+  {
+    id: "cidade",
+    ground: "#6e6e76",
+    road: "#4e4e54",
+    rumbleA: "#f0d000",
+    rumbleB: "#1a1a1a",
+    dash: "#d8d8d8",
+    sidewalk: "#b8b4ac",
+    decor: "city",
+  },
+  {
+    id: "praia",
+    ground: "#e2c86a",
+    road: "#8a8680",
+    rumbleA: "#ffffff",
+    rumbleB: "#3aa0d8",
+    dash: "#fff6d0",
+    sidewalk: "#d8b45a",
+    decor: "beach",
+  },
+  {
+    id: "serra",
+    ground: "#2f7a38",
+    road: "#5a5a5a",
+    rumbleA: "#ffffff",
+    rumbleB: "#2a2a2a",
+    dash: "#e0e0e0",
+    sidewalk: null,
+    decor: "forest",
+  },
+  {
+    id: "porto",
+    ground: "#7a7468",
+    road: "#4a453e",
+    rumbleA: "#f0a000",
+    rumbleB: "#2a2a2a",
+    dash: "#c8c0a8",
+    sidewalk: "#8a8478",
+    decor: "docks",
+  },
+];
+
+function mixHex(a, b, t) {
+  if (!a) return b;
+  if (!b || t <= 0) return a;
+  if (t >= 1) return b;
+  const parse = (hex) => {
+    const raw = String(hex || "#888888").replace("#", "");
+    const n = raw.length === 3 ? raw.split("").map((ch) => ch + ch).join("") : raw.padEnd(6, "0");
+    return [parseInt(n.slice(0, 2), 16) || 0, parseInt(n.slice(2, 4), 16) || 0, parseInt(n.slice(4, 6), 16) || 0];
+  };
+  const A = parse(a);
+  const B = parse(b);
+  const h = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  return `#${h(A[0] + (B[0] - A[0]) * t)}${h(A[1] + (B[1] - A[1]) * t)}${h(A[2] + (B[2] - A[2]) * t)}`;
+}
 
 function crisp(ctx) {
   ctx.imageSmoothingEnabled = false;
@@ -454,6 +524,7 @@ const Game = {
         speed: this.speed,
         powers: this.powers,
         copGap: this.cop.gap,
+        biome: this.biomeAt(this.cameraZ).id,
       });
     }
   },
@@ -528,10 +599,43 @@ const Game = {
     }
   },
 
+  biomeInfo(z) {
+    const pos = Math.max(0, z || 0);
+    if (pos < BIOME_INTRO) {
+      const start = Math.max(0, BIOME_INTRO - BIOME_BLEND);
+      const blend = pos <= start ? 0 : (pos - start) / (BIOME_INTRO - start);
+      return { index: 0, next: 1, blend };
+    }
+    const u = pos - BIOME_INTRO;
+    const index = (1 + Math.floor(u / BIOME_LEN)) % BIOMES.length;
+    const local = u % BIOME_LEN;
+    const blend = local > BIOME_LEN - BIOME_BLEND ? (local - (BIOME_LEN - BIOME_BLEND)) / BIOME_BLEND : 0;
+    const next = (index + 1) % BIOMES.length;
+    return { index, next, blend };
+  },
+
+  biomeAt(z) {
+    const info = this.biomeInfo(z);
+    const a = BIOMES[info.index];
+    const b = BIOMES[info.next];
+    const t = info.blend;
+    if (t <= 0) return a;
+    return {
+      id: t > 0.5 ? b.id : a.id,
+      ground: mixHex(a.ground, b.ground, t),
+      road: mixHex(a.road, b.road, t),
+      rumbleA: mixHex(a.rumbleA, b.rumbleA, t),
+      rumbleB: mixHex(a.rumbleB, b.rumbleB, t),
+      dash: mixHex(a.dash, b.dash, t),
+      sidewalk: a.sidewalk || b.sidewalk ? mixHex(a.sidewalk || a.ground, b.sidewalk || b.ground, t) : null,
+      decor: t > 0.42 ? b.decor : a.decor,
+    };
+  },
+
   blit(ctx) {
     const out = this.ctx;
     out.imageSmoothingEnabled = false;
-    out.fillStyle = GRASS;
+    out.fillStyle = (this.biomeAt(this.viewCameraZ()) || BIOMES[0]).ground;
     out.fillRect(0, 0, this.w, this.h);
     let ox = 0;
     let oy = 0;
@@ -544,7 +648,7 @@ const Game = {
   },
 
   drawSky(ctx) {
-    ctx.fillStyle = GRASS;
+    ctx.fillStyle = (this.biomeAt(this.viewCameraZ() + 36) || BIOMES[0]).ground;
     ctx.fillRect(0, 0, this.gw, this.gh);
   },
 
@@ -570,17 +674,25 @@ const Game = {
 
     for (let y = 0; y < H; y++) {
       const z = playerZ + (H * 0.78 - y) / zScale;
+      const scene = this.biomeAt(z);
       const left = Math.round(this.gw / 2 - roadW / 2 + (this.roadBend(z) - camBend) * xScale);
       leftAt[y] = left;
-      ctx.fillStyle = "#7a7a7a";
+      ctx.fillStyle = scene.ground;
+      ctx.fillRect(0, y, this.gw, 1);
+      if (scene.sidewalk) {
+        ctx.fillStyle = scene.sidewalk;
+        ctx.fillRect(left - rumble - 4, y, 4, 1);
+        ctx.fillRect(left + roadW + rumble, y, 4, 1);
+      }
+      ctx.fillStyle = scene.road;
       ctx.fillRect(left, y, roadW, 1);
-      const red = Math.floor((y - offset) / block) % 2 === 0;
-      ctx.fillStyle = red ? "#e53935" : "#ffffff";
+      const stripe = Math.floor((y - offset) / block) % 2 === 0;
+      ctx.fillStyle = stripe ? scene.rumbleA : scene.rumbleB;
       ctx.fillRect(left - rumble, y, rumble, 1);
       ctx.fillRect(left + roadW, y, rumble, 1);
       const dashPhase = ((y - dashOff) % period + period) % period;
       if (dashPhase < dashH) {
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = scene.dash;
         for (let lane = 1; lane < LANES; lane++) {
           ctx.fillRect(left + lane * laneW - Math.floor(dashW / 2), y, dashW, 1);
         }
@@ -607,6 +719,12 @@ const Game = {
       if (leftAt && y >= 0 && y < leftAt.length) return leftAt[y];
       return left;
     };
+    const cam = this.viewCameraZ();
+    const playerZ = cam + 8;
+    const zScale = this.toScreen(0, playerZ).zScale;
+    const zAt = (y) => playerZ + (this.gh * 0.78 - y) / zScale;
+    const seedOf = (n) => Math.abs((n * 1103515245 + 12345) | 0);
+
     for (let i = -2; i < count; i++) {
       const col = ((i % 3) + 3) % 3;
       const yL = Math.round(i * period + off);
@@ -618,16 +736,57 @@ const Game = {
       const xr = leftR + roadW + rumble + 10 + col * 10;
       const xl2 = leftL - rumble - 32;
       const xr2 = leftR + roadW + rumble + 32;
-      if (inGrass(xl)) {
-        if (i % 4 === 0) drawPixelBush(ctx, xl, yL);
-        else drawPixelTree(ctx, xl, yL, size);
+      const decor = this.biomeAt(zAt(yL)).decor;
+      const seed = seedOf(i + col * 17);
+
+      const placeLeft = (fn) => {
+        if (inGrass(xl)) fn(xl, yL, seed);
+        if (i % 2 === 1 && inGrass(xl2)) fn(xl2 + (i % 5), yL + 6, seed + 3);
+      };
+      const placeRight = (fn) => {
+        if (inGrass(xr)) fn(xr, yR, seed + 1);
+        if (i % 2 === 0 && inGrass(xr2)) fn(xr2 - (i % 5), yR + 5, seed + 5);
+      };
+
+      if (decor === "city") {
+        placeLeft((x, y, s) => {
+          if (s % 5 === 0) drawPixelLamp(ctx, x, y);
+          else drawPixelBuilding(ctx, x, y, s);
+        });
+        placeRight((x, y, s) => {
+          if (s % 4 === 0) drawPixelLamp(ctx, x, y);
+          else drawPixelBuilding(ctx, x, y, s);
+        });
+      } else if (decor === "beach") {
+        placeLeft((x, y, s) => {
+          if (s % 3 === 0) drawPixelBush(ctx, x, y);
+          else drawPixelPalm(ctx, x, y);
+        });
+        placeRight((x, y) => drawPixelPalm(ctx, x, y));
+      } else if (decor === "forest") {
+        placeLeft((x, y, s) => {
+          if (s % 4 === 0) drawPixelRock(ctx, x, y);
+          else drawPixelPine(ctx, x, y, size);
+        });
+        placeRight((x, y, s) => drawPixelPine(ctx, x, y, 1 + (s % 2)));
+      } else if (decor === "docks") {
+        placeLeft((x, y, s) => {
+          if (s % 3 === 0) drawPixelBuilding(ctx, x, y, s);
+          else drawPixelCrate(ctx, x, y, s);
+        });
+        placeRight((x, y, s) => drawPixelCrate(ctx, x, y, s));
+      } else {
+        if (inGrass(xl)) {
+          if (i % 4 === 0) drawPixelBush(ctx, xl, yL);
+          else drawPixelTree(ctx, xl, yL, size);
+        }
+        if (inGrass(xr)) {
+          if (i % 3 === 0) drawPixelBush(ctx, xr, yR);
+          else drawPixelTree(ctx, xr, yR, 1 + ((Math.abs(i) + 1) % 2));
+        }
+        if (i % 2 === 1 && inGrass(xl2)) drawPixelTree(ctx, xl2 + (i % 5), yL + 6, 1);
+        if (i % 2 === 0 && inGrass(xr2)) drawPixelTree(ctx, xr2 - (i % 5), yR + 5, 1);
       }
-      if (inGrass(xr)) {
-        if (i % 3 === 0) drawPixelBush(ctx, xr, yR);
-        else drawPixelTree(ctx, xr, yR, 1 + ((Math.abs(i) + 1) % 2));
-      }
-      if (i % 2 === 1 && inGrass(xl2)) drawPixelTree(ctx, xl2 + (i % 5), yL + 6, 1);
-      if (i % 2 === 0 && inGrass(xr2)) drawPixelTree(ctx, xr2 - (i % 5), yR + 5, 1);
     }
   },
 
@@ -770,7 +929,7 @@ const Game = {
     const ctx = this.pctx;
     const W = this.gw;
     const H = this.gh;
-    ctx.fillStyle = GRASS;
+    ctx.fillStyle = BIOMES[0].ground;
     ctx.fillRect(0, 0, W, H);
 
     const road = this.paintRoad(ctx, 0);

@@ -601,6 +601,84 @@ function drawPixelBush(ctx, x, y) {
   fillDisk(ctx, Math.round(x) + 2, Math.round(y) + 1, 3, "#0f6b1c");
 }
 
+function drawPixelPalm(ctx, x, y) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  ctx.fillStyle = "#8a5a28";
+  ctx.fillRect(ox, oy, 2, 7);
+  fillDisk(ctx, ox + 1, oy - 3, 5, "#1f8a3a");
+  fillDisk(ctx, ox + 4, oy - 1, 3, "#2aa84a");
+  fillDisk(ctx, ox - 3, oy - 1, 3, "#176b2c");
+}
+
+function drawPixelPine(ctx, x, y, size) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  const h = size > 1 ? 11 : 8;
+  ctx.fillStyle = "#4a3014";
+  ctx.fillRect(ox, oy + 1, 2, 4);
+  ctx.fillStyle = "#0c4a22";
+  for (let i = 0; i < 3; i++) {
+    const w = Math.max(3, h - i * 3);
+    ctx.fillRect(ox - Math.floor(w / 2) + 1, oy - 1 - i * 3, w, 4);
+  }
+  ctx.fillStyle = "#166a32";
+  ctx.fillRect(ox - 1, oy - 7, 4, 3);
+}
+
+function drawPixelRock(ctx, x, y) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  ctx.fillStyle = "#6a6e74";
+  ctx.fillRect(ox - 3, oy, 7, 4);
+  ctx.fillStyle = "#8a9098";
+  ctx.fillRect(ox - 2, oy - 2, 5, 3);
+}
+
+function drawPixelBuilding(ctx, x, y, seed) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  const w = 7 + (seed % 5);
+  const h = 7 + (seed % 6);
+  const walls = ["#6d7380", "#8a909c", "#5a6270", "#9aa3b0", "#7a6e68"];
+  const roofs = ["#3a3040", "#6a3a3a", "#2f4a6a", "#4a4a4a", "#5a4030"];
+  ctx.fillStyle = walls[seed % walls.length];
+  ctx.fillRect(ox - Math.floor(w / 2), oy - Math.floor(h / 2), w, h);
+  ctx.fillStyle = roofs[seed % roofs.length];
+  ctx.fillRect(ox - Math.floor(w / 2), oy - Math.floor(h / 2), w, 2);
+  ctx.fillStyle = (seed % 2 === 0) ? "#ffe08a" : "#c8e4ff";
+  for (let wy = 2; wy < h - 1; wy += 3) {
+    for (let wx = 1; wx < w - 1; wx += 2) {
+      if ((seed + wx + wy) % 3 !== 0) {
+        ctx.fillRect(ox - Math.floor(w / 2) + wx, oy - Math.floor(h / 2) + wy, 1, 1);
+      }
+    }
+  }
+}
+
+function drawPixelLamp(ctx, x, y) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  ctx.fillStyle = "#2a2a30";
+  ctx.fillRect(ox, oy - 5, 1, 8);
+  ctx.fillStyle = "#ffd966";
+  ctx.fillRect(ox - 1, oy - 7, 3, 2);
+}
+
+function drawPixelCrate(ctx, x, y, seed) {
+  const ox = Math.round(x);
+  const oy = Math.round(y);
+  const colors = ["#c0392b", "#2471a3", "#f1c40f", "#1e8449"];
+  const w = 6 + (seed % 4);
+  const h = 5 + (seed % 3);
+  ctx.fillStyle = colors[seed % colors.length];
+  ctx.fillRect(ox - Math.floor(w / 2), oy - Math.floor(h / 2), w, h);
+  ctx.fillStyle = "#2a2018";
+  ctx.fillRect(ox - Math.floor(w / 2), oy, w, 1);
+  ctx.fillStyle = "#f4f0e0";
+  ctx.fillRect(ox - 1, oy - Math.floor(h / 2) + 1, 2, 1);
+}
+
 function drawPixelDude(ctx, x, y, u) {
   const ox = Math.round(x);
   const oy = Math.round(y);

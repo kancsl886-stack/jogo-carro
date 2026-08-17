@@ -638,6 +638,25 @@ canvas {
   background: linear-gradient(90deg, var(--cyan), var(--gold), var(--magenta));
 }
 
+.hud-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.place-chip {
+  pointer-events: none;
+  background: rgba(7, 11, 20, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #eef4ff;
+}
+
 .powerups {
   display: flex;
   gap: 8px;

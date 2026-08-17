@@ -506,13 +506,16 @@ function carScratch(w, h) {
   return c;
 }
 
-function drawCarTop(ctx, x, y, scale, car, extras) {
-  extras = extras || {};
-  const dest = Math.max(2, extras.u || Math.round(scale) || 3);
+const _carBitmaps = new Map();
+
+function carBitmap(car, extras) {
   const c = (car && car.colors) || {};
   const body = c.body || "#6ec4f0";
+  const key = `${car && car.shape}|${body}|${c.stripe || ""}|${c.trim || ""}|${extras && extras.brake ? 1 : 0}`;
+  let bmp = _carBitmaps.get(key);
+  if (bmp) return bmp;
   const rows = spriteFor(car);
-  if (!rows || !rows.length || !rows[0]) return;
+  if (!rows || !rows.length || !rows[0]) return null;
   const w = rows[0].length;
   const h = rows.length;
   const palette = {
@@ -525,7 +528,7 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     S: "#1a1a1a",
     W: "#4a4a4a",
     Y: "#ffe14a",
-    R: extras.brake ? "#ff2a2a" : "#ff6a18",
+    R: extras && extras.brake ? "#ff2a2a" : "#ff6a18",
     T: c.stripe || "#f4f7fb",
     C: c.trim || "#222222",
     A: car && car.shape === "taxi" ? "#f1c40f" : c.trim || "#3cf0ff",
@@ -535,9 +538,29 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   };
   const cell = 2;
   const pad = 1;
-  const sctx = carScratch((w + pad * 2) * cell, (h + pad * 2) * cell);
+  const bw = (w + pad * 2) * cell;
+  const bh = (h + pad * 2) * cell;
+  const sctx = carScratch(bw, bh);
   blitSprite(sctx, pad * cell, pad * cell, cell, rows, palette, "#1a1a22");
+  bmp = document.createElement("canvas");
+  bmp.width = bw;
+  bmp.height = bh;
+  bmp.getContext("2d").drawImage(_carScratch, 0, 0);
+  if (_carBitmaps.size > 64) _carBitmaps.clear();
+  _carBitmaps.set(key, bmp);
+  return bmp;
+}
 
+function drawCarTop(ctx, x, y, scale, car, extras) {
+  extras = extras || {};
+  const dest = Math.max(2, extras.u || Math.round(scale) || 3);
+  const rows = spriteFor(car);
+  if (!rows || !rows.length || !rows[0]) return;
+  const w = rows[0].length;
+  const h = rows.length;
+  const bmp = carBitmap(car, extras);
+  if (!bmp) return;
+  const pad = 1;
   ctx.save();
   ctx.translate(x, y);
   if (extras.yaw) ctx.rotate(extras.yaw);
@@ -553,10 +576,10 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
     ctx.fillRect(-0.8 * dest, (h * dest) / 2 + dest, 1.6 * dest, 1.4 * dest);
   }
   ctx.imageSmoothingEnabled = true;
-  if (ctx.imageSmoothingQuality) ctx.imageSmoothingQuality = "high";
+  if (ctx.imageSmoothingQuality) ctx.imageSmoothingQuality = "low";
   const dw = (w + pad * 2) * dest;
   const dh = (h + pad * 2) * dest;
-  ctx.drawImage(_carScratch, -dw / 2, -dh / 2, dw, dh);
+  ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
   ctx.imageSmoothingEnabled = false;
   if (car && car.shape === "police") {
     const oy = -h * dest * 0.32;
@@ -568,6 +591,22 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
+function drawRoundCoin(ctx, x, y, r) {
+  const rr = Math.max(4, r);
+  ctx.beginPath();
+  ctx.arc(x, y, rr, 0, Math.PI * 2);
+  ctx.fillStyle = "#c98a00";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x, y, rr * 0.82, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffd24a";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x - rr * 0.22, y - rr * 0.24, rr * 0.28, 0, Math.PI * 2);
+  ctx.fillStyle = "#fff4b8";
+  ctx.fill();
+}
+
 function randomTrafficCar() {
   const shapes = ["beetle", "hatch", "sedan", "pickup", "suv", "sports", "convertible", "muscle"];
   return {
@@ -576,107 +615,130 @@ function randomTrafficCar() {
   };
 }
 
+const _stamps = Object.create(null);
+
+function getStamp(key, w, h, paint) {
+  let stamp = _stamps[key];
+  if (stamp) return stamp;
+  stamp = document.createElement("canvas");
+  stamp.width = w;
+  stamp.height = h;
+  const g = stamp.getContext("2d");
+  g.imageSmoothingEnabled = false;
+  paint(g, (w / 2) | 0, (h / 2) | 0);
+  _stamps[key] = stamp;
+  return stamp;
+}
+
+function blitStamp(ctx, key, x, y, w, h, paint) {
+  const stamp = getStamp(key, w, h, paint);
+  ctx.drawImage(stamp, Math.round(x) - ((w / 2) | 0), Math.round(y) - ((h / 2) | 0));
+}
+
 function fillDisk(ctx, ox, oy, r, color) {
   ctx.fillStyle = color;
-  const r2 = r * r;
-  for (let dy = -r; dy <= r; dy++) {
-    for (let dx = -r; dx <= r; dx++) {
-      if (dx * dx + dy * dy <= r2) ctx.fillRect(ox + dx, oy + dy, 1, 1);
-    }
-  }
+  ctx.beginPath();
+  ctx.arc(ox, oy, r, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawPixelTree(ctx, x, y, size) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  const r = size > 1 ? 8 : 6;
-  ctx.fillStyle = "#7a3f18";
-  ctx.fillRect(ox - 1, oy + r - 1, 2, Math.max(4, Math.round(r * 0.7)));
-  fillDisk(ctx, ox, oy, r, "#0f6b1c");
-  fillDisk(ctx, ox - 1, oy - 1, Math.max(2, r - 3), "#1a8a28");
+  const big = size > 1;
+  blitStamp(ctx, big ? "tree2" : "tree1", x, y, 22, 26, (g, cx, cy) => {
+    const r = big ? 8 : 6;
+    g.fillStyle = "#7a3f18";
+    g.fillRect(cx - 1, cy + r - 1, 2, Math.max(4, Math.round(r * 0.7)));
+    fillDisk(g, cx, cy, r, "#0f6b1c");
+    fillDisk(g, cx - 1, cy - 1, Math.max(2, r - 3), "#1a8a28");
+  });
 }
 
 function drawPixelBush(ctx, x, y) {
-  fillDisk(ctx, Math.round(x), Math.round(y), 4, "#166a24");
-  fillDisk(ctx, Math.round(x) + 2, Math.round(y) + 1, 3, "#0f6b1c");
+  blitStamp(ctx, "bush", x, y, 14, 12, (g, cx, cy) => {
+    fillDisk(g, cx, cy, 4, "#166a24");
+    fillDisk(g, cx + 2, cy + 1, 3, "#0f6b1c");
+  });
 }
 
 function drawPixelPalm(ctx, x, y) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  ctx.fillStyle = "#8a5a28";
-  ctx.fillRect(ox, oy, 2, 7);
-  fillDisk(ctx, ox + 1, oy - 3, 5, "#1f8a3a");
-  fillDisk(ctx, ox + 4, oy - 1, 3, "#2aa84a");
-  fillDisk(ctx, ox - 3, oy - 1, 3, "#176b2c");
+  blitStamp(ctx, "palm", x, y, 20, 22, (g, cx, cy) => {
+    g.fillStyle = "#8a5a28";
+    g.fillRect(cx, cy, 2, 7);
+    fillDisk(g, cx + 1, cy - 3, 5, "#1f8a3a");
+    fillDisk(g, cx + 4, cy - 1, 3, "#2aa84a");
+    fillDisk(g, cx - 3, cy - 1, 3, "#176b2c");
+  });
 }
 
 function drawPixelPine(ctx, x, y, size) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  const h = size > 1 ? 11 : 8;
-  ctx.fillStyle = "#4a3014";
-  ctx.fillRect(ox, oy + 1, 2, 4);
-  ctx.fillStyle = "#0c4a22";
-  for (let i = 0; i < 3; i++) {
-    const w = Math.max(3, h - i * 3);
-    ctx.fillRect(ox - Math.floor(w / 2) + 1, oy - 1 - i * 3, w, 4);
-  }
-  ctx.fillStyle = "#166a32";
-  ctx.fillRect(ox - 1, oy - 7, 4, 3);
+  const big = size > 1;
+  blitStamp(ctx, big ? "pine2" : "pine1", x, y, 18, 22, (g, cx, cy) => {
+    const hh = big ? 11 : 8;
+    g.fillStyle = "#4a3014";
+    g.fillRect(cx, cy + 1, 2, 4);
+    g.fillStyle = "#0c4a22";
+    for (let i = 0; i < 3; i++) {
+      const ww = Math.max(3, hh - i * 3);
+      g.fillRect(cx - Math.floor(ww / 2) + 1, cy - 1 - i * 3, ww, 4);
+    }
+    g.fillStyle = "#166a32";
+    g.fillRect(cx - 1, cy - 7, 4, 3);
+  });
 }
 
 function drawPixelRock(ctx, x, y) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  ctx.fillStyle = "#6a6e74";
-  ctx.fillRect(ox - 3, oy, 7, 4);
-  ctx.fillStyle = "#8a9098";
-  ctx.fillRect(ox - 2, oy - 2, 5, 3);
+  blitStamp(ctx, "rock", x, y, 12, 10, (g, cx, cy) => {
+    g.fillStyle = "#6a6e74";
+    g.fillRect(cx - 3, cy, 7, 4);
+    g.fillStyle = "#8a9098";
+    g.fillRect(cx - 2, cy - 2, 5, 3);
+  });
 }
 
 function drawPixelBuilding(ctx, x, y, seed) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  const w = 7 + (seed % 5);
-  const h = 7 + (seed % 6);
-  const walls = ["#6d7380", "#8a909c", "#5a6270", "#9aa3b0", "#7a6e68"];
-  const roofs = ["#3a3040", "#6a3a3a", "#2f4a6a", "#4a4a4a", "#5a4030"];
-  ctx.fillStyle = walls[seed % walls.length];
-  ctx.fillRect(ox - Math.floor(w / 2), oy - Math.floor(h / 2), w, h);
-  ctx.fillStyle = roofs[seed % roofs.length];
-  ctx.fillRect(ox - Math.floor(w / 2), oy - Math.floor(h / 2), w, 2);
-  ctx.fillStyle = (seed % 2 === 0) ? "#ffe08a" : "#c8e4ff";
-  for (let wy = 2; wy < h - 1; wy += 3) {
-    for (let wx = 1; wx < w - 1; wx += 2) {
-      if ((seed + wx + wy) % 3 !== 0) {
-        ctx.fillRect(ox - Math.floor(w / 2) + wx, oy - Math.floor(h / 2) + wy, 1, 1);
+  const s = Math.abs(seed) % 12;
+  blitStamp(ctx, `bldg${s}`, x, y, 18, 18, (g, cx, cy) => {
+    const w = 7 + (s % 5);
+    const h = 7 + (s % 6);
+    const walls = ["#6d7380", "#8a909c", "#5a6270", "#9aa3b0", "#7a6e68"];
+    const roofs = ["#3a3040", "#6a3a3a", "#2f4a6a", "#4a4a4a", "#5a4030"];
+    g.fillStyle = walls[s % walls.length];
+    g.fillRect(cx - Math.floor(w / 2), cy - Math.floor(h / 2), w, h);
+    g.fillStyle = roofs[s % roofs.length];
+    g.fillRect(cx - Math.floor(w / 2), cy - Math.floor(h / 2), w, 2);
+    g.fillStyle = s % 2 === 0 ? "#ffe08a" : "#c8e4ff";
+    for (let wy = 2; wy < h - 1; wy += 3) {
+      for (let wx = 1; wx < w - 1; wx += 2) {
+        if ((s + wx + wy) % 3 !== 0) {
+          g.fillRect(cx - Math.floor(w / 2) + wx, cy - Math.floor(h / 2) + wy, 1, 1);
+        }
       }
     }
-  }
+  });
 }
 
 function drawPixelLamp(ctx, x, y) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  ctx.fillStyle = "#2a2a30";
-  ctx.fillRect(ox, oy - 5, 1, 8);
-  ctx.fillStyle = "#ffd966";
-  ctx.fillRect(ox - 1, oy - 7, 3, 2);
+  blitStamp(ctx, "lamp", x, y, 8, 16, (g, cx, cy) => {
+    g.fillStyle = "#2a2a30";
+    g.fillRect(cx, cy - 5, 1, 8);
+    g.fillStyle = "#ffd966";
+    g.fillRect(cx - 1, cy - 7, 3, 2);
+  });
 }
 
 function drawPixelCrate(ctx, x, y, seed) {
-  const ox = Math.round(x);
-  const oy = Math.round(y);
-  const colors = ["#c0392b", "#2471a3", "#f1c40f", "#1e8449"];
-  const w = 6 + (seed % 4);
-  const h = 5 + (seed % 3);
-  ctx.fillStyle = colors[seed % colors.length];
-  ctx.fillRect(ox - Math.floor(w / 2), oy - Math.floor(h / 2), w, h);
-  ctx.fillStyle = "#2a2018";
-  ctx.fillRect(ox - Math.floor(w / 2), oy, w, 1);
-  ctx.fillStyle = "#f4f0e0";
-  ctx.fillRect(ox - 1, oy - Math.floor(h / 2) + 1, 2, 1);
+  const s = Math.abs(seed) % 8;
+  blitStamp(ctx, `crate${s}`, x, y, 14, 12, (g, cx, cy) => {
+    const colors = ["#c0392b", "#2471a3", "#f1c40f", "#1e8449"];
+    const w = 6 + (s % 4);
+    const h = 5 + (s % 3);
+    g.fillStyle = colors[s % colors.length];
+    g.fillRect(cx - Math.floor(w / 2), cy - Math.floor(h / 2), w, h);
+    g.fillStyle = "#2a2018";
+    g.fillRect(cx - Math.floor(w / 2), cy, w, 1);
+    g.fillStyle = "#f4f0e0";
+    g.fillRect(cx - 1, cy - Math.floor(h / 2) + 1, 2, 1);
+  });
 }
 
 function drawPixelDude(ctx, x, y, u) {

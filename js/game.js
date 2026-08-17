@@ -149,7 +149,7 @@ const Game = {
   },
 
   resize() {
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     this.w = window.innerWidth;
     this.h = window.innerHeight;
     this.canvas.width = Math.floor(this.w * this.dpr);
@@ -270,7 +270,7 @@ const Game = {
     if (frame < 0) frame = 0;
     this.acc += frame;
     let steps = 0;
-    while (this.acc >= STEP && steps < 5) {
+    while (this.acc >= STEP && steps < 3) {
       this.prevCameraZ = this.cameraZ;
       this.prevLaneX = this.laneX;
       this.prevYaw = this.yaw;
@@ -517,7 +517,10 @@ const Game = {
     this.particles = this.particles.filter((p) => p.life > 0);
     this.shake *= 0.88;
 
-    if (this.onHud) {
+    this._hudWait = (this._hudWait || 0) + dt;
+    if (this.onHud && (this._hudWait > 0.08 || this._hudCoins !== this.runCoins)) {
+      this._hudWait = 0;
+      this._hudCoins = this.runCoins;
       this.onHud({
         distance: this.distance,
         coins: this.runCoins,
@@ -616,11 +619,15 @@ const Game = {
 
   biomeAt(z) {
     const info = this.biomeInfo(z);
+    const q = info.blend <= 0 ? 0 : (info.blend * 8) | 0;
+    const key = info.index * 16 + q;
+    if (!this._biomeMemo) this._biomeMemo = new Map();
+    const hit = this._biomeMemo.get(key);
+    if (hit) return hit;
     const a = BIOMES[info.index];
     const b = BIOMES[info.next];
-    const t = info.blend;
-    if (t <= 0) return a;
-    return {
+    const t = q / 8;
+    const val = t <= 0 ? a : {
       id: t > 0.5 ? b.id : a.id,
       ground: mixHex(a.ground, b.ground, t),
       road: mixHex(a.road, b.road, t),
@@ -630,6 +637,9 @@ const Game = {
       sidewalk: a.sidewalk || b.sidewalk ? mixHex(a.sidewalk || a.ground, b.sidewalk || b.ground, t) : null,
       decor: t > 0.42 ? b.decor : a.decor,
     };
+    if (this._biomeMemo.size > 48) this._biomeMemo.clear();
+    this._biomeMemo.set(key, val);
+    return val;
   },
 
   blit(ctx) {
@@ -648,8 +658,16 @@ const Game = {
   },
 
   drawSky(ctx) {
-    ctx.fillStyle = (this.biomeAt(this.viewCameraZ() + 36) || BIOMES[0]).ground;
+    const near = this.biomeAt(this.viewCameraZ()) || BIOMES[0];
+    const far = this.biomeAt(this.viewCameraZ() + 40) || near;
+    ctx.fillStyle = near.ground;
     ctx.fillRect(0, 0, this.gw, this.gh);
+    if (far.ground !== near.ground) {
+      ctx.fillStyle = far.ground;
+      ctx.fillRect(0, 0, this.gw, Math.round(this.gh * 0.4));
+      ctx.fillStyle = mixHex(far.ground, near.ground, 0.5);
+      ctx.fillRect(0, Math.round(this.gh * 0.4), this.gw, Math.round(this.gh * 0.12));
+    }
   },
 
   paintRoad(ctx, cameraZ) {
@@ -677,8 +695,6 @@ const Game = {
       const scene = this.biomeAt(z);
       const left = Math.round(this.gw / 2 - roadW / 2 + (this.roadBend(z) - camBend) * xScale);
       leftAt[y] = left;
-      ctx.fillStyle = scene.ground;
-      ctx.fillRect(0, y, this.gw, 1);
       if (scene.sidewalk) {
         ctx.fillStyle = scene.sidewalk;
         ctx.fillRect(left - rumble - 4, y, 4, 1);
@@ -710,7 +726,7 @@ const Game = {
   },
 
   drawGrassDecor(ctx, left, roadW, rumble, scroll) {
-    const period = 15;
+    const period = 18;
     const off = ((scroll % period) + period) % period;
     const count = Math.ceil(this.gh / period) + 4;
     const inGrass = (x) => x > 3 && x < this.gw - 3;
@@ -729,6 +745,7 @@ const Game = {
       const col = ((i % 3) + 3) % 3;
       const yL = Math.round(i * period + off);
       const yR = Math.round(i * period + off + 4);
+      if ((yL < -18 && yR < -18) || (yL > this.gh + 18 && yR > this.gh + 18)) continue;
       const size = 1 + (Math.abs(i) % 2);
       const leftL = leftAtY(yL);
       const leftR = leftAtY(yR);
@@ -800,6 +817,7 @@ const Game = {
     const playerZ = this.playerZ();
     const list = this.entities.filter((e) => !e.taken).sort((a, b) => b.z - a.z);
     this._carsToDraw = [];
+    this._coinsToDraw = [];
     let playerDrawn = false;
     const drawPlayer = () => {
       const p = this.toScreen(this.viewLaneX(), playerZ);
@@ -826,10 +844,7 @@ const Game = {
       const p = this.toScreen(x, e.z);
       if (p.y < -20 || p.y > this.gh + 24) continue;
       if (e.kind === "coin") {
-        ctx.fillStyle = "#ffd000";
-        ctx.fillRect(Math.round(p.x) - 3, Math.round(p.y) - 3, 6, 6);
-        ctx.fillStyle = "#fff59a";
-        ctx.fillRect(Math.round(p.x) - 1, Math.round(p.y) - 1, 2, 2);
+        this._coinsToDraw.push(p);
       } else if (e.kind === "power") {
         const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
         ctx.fillStyle = color;
@@ -879,6 +894,23 @@ const Game = {
     });
   },
 
+  drawCoinsHiRes() {
+    const coins = this._coinsToDraw;
+    if (!coins || !coins.length) return;
+    const out = this.ctx;
+    const kx = this.w / this.gw;
+    const ky = this.h / this.gh;
+    out.save();
+    for (const p of coins) {
+      const x = p.x * kx;
+      const y = p.y * ky;
+      if (y < -20 || y > this.h + 20) continue;
+      const r = Math.max(5, p.xScale * kx * 0.2);
+      drawRoundCoin(out, x, y, r);
+    }
+    out.restore();
+  },
+
   drawCarsHiRes() {
     const out = this.ctx;
     const kx = this.w / this.gw;
@@ -917,6 +949,7 @@ const Game = {
     this.drawRoadside(ctx);
     this.drawEntities(ctx);
     this.blit();
+    this.drawCoinsHiRes();
     this.drawCarsHiRes();
     this._drawCam = null;
     this._drawLaneX = null;

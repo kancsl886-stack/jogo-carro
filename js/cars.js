@@ -592,19 +592,29 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
 }
 
 function drawRoundCoin(ctx, x, y, r) {
-  const rr = Math.max(4, r);
+  const rr = Math.max(5, r);
   ctx.beginPath();
   ctx.arc(x, y, rr, 0, Math.PI * 2);
   ctx.fillStyle = "#c98a00";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x, y, rr * 0.82, 0, Math.PI * 2);
+  ctx.arc(x, y, rr * 0.84, 0, Math.PI * 2);
   ctx.fillStyle = "#ffd24a";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x - rr * 0.22, y - rr * 0.24, rr * 0.28, 0, Math.PI * 2);
-  ctx.fillStyle = "#fff4b8";
+  ctx.arc(x, y, rr * 0.7, 0, Math.PI * 2);
+  ctx.strokeStyle = "#e0a020";
+  ctx.lineWidth = Math.max(1, rr * 0.08);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x - rr * 0.22, y - rr * 0.26, rr * 0.2, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255, 248, 200, 0.7)";
   ctx.fill();
+  ctx.fillStyle = "#8a4e00";
+  ctx.font = `bold ${Math.max(8, Math.round(rr * 1.15))}px Trebuchet MS, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("$", x, y + rr * 0.06);
 }
 
 function randomTrafficCar() {

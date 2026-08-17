@@ -122,6 +122,28 @@ canvas {
   background: radial-gradient(circle at 32% 28%, #fff4c2 0%, #ffd166 42%, #e0a020 100%);
   border: 3px solid #f3c14a;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), 0 3px 0 #b8860b;
+  display: grid;
+  place-items: center;
+  color: #8a4e00;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.coin-mini {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.28em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff4c2 0%, #ffd166 48%, #e0a020 100%);
+  border: 2px solid #f3c14a;
+  color: #8a4e00;
+  font-size: 0.62em;
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .coin-copy small {
@@ -209,6 +231,8 @@ canvas {
 .chip.gold {
   color: var(--gold);
   border-color: rgba(255, 209, 102, 0.35);
+  display: inline-flex;
+  align-items: center;
 }
 
 .menu-actions {
@@ -628,6 +652,8 @@ canvas {
 
 .hud-stat.gold strong {
   color: var(--gold);
+  display: inline-flex;
+  align-items: center;
 }
 
 .hud .icon-btn {
@@ -717,7 +743,7 @@ canvas {
         </div>
         <div class="hud-stat gold">
           <span class="hud-label" data-i18n="runCoins">Corrida</span>
-          <strong id="hud-run-coins">0</strong>
+          <strong><span class="coin-mini" aria-hidden="true">$</span><span id="hud-run-coins">0</span></strong>
         </div>
         <div class="hud-stat">
           <span class="hud-label" data-i18n="best">Recorde</span>
@@ -746,7 +772,7 @@ canvas {
     <div id="screen-menu" class="screen menu-home">
       <div class="menu-coin-bar">
         <div class="coin-badge">
-          <span class="coin-icon" aria-hidden="true"></span>
+          <span class="coin-icon" aria-hidden="true">$</span>
           <div class="coin-copy">
             <small data-i18n="coins">Moedas</small>
             <strong id="menu-coins">0</strong>
@@ -812,7 +838,7 @@ canvas {
           <h2 data-i18n="garage">Garagem</h2>
           <p data-i18n="garageSub">Compre e equipe um carro novo</p>
         </div>
-        <div class="chip gold" id="shop-coins">0</div>
+        <div class="chip gold"><span class="coin-mini" aria-hidden="true">$</span><span id="shop-coins">0</span></div>
       </header>
       <div class="shop-filters" id="shop-filters">
         <button class="filter on" data-filter="all" type="button" data-i18n="all">Todos</button>
@@ -863,7 +889,7 @@ canvas {
         <h2 id="over-title">Batida!</h2>
         <div class="over-stats">
           <div><span data-i18n="distance">Distância</span><strong id="over-distance">0 m</strong></div>
-          <div><span data-i18n="coins">Moedas</span><strong id="over-coins">0</strong></div>
+          <div><span data-i18n="coins">Moedas</span><strong><span class="coin-mini" aria-hidden="true">$</span><span id="over-coins">0</span></strong></div>
           <div><span data-i18n="best">Recorde</span><strong id="over-best">0 m</strong></div>
         </div>
         <p id="over-record" class="new-record hidden" data-i18n="newRecord">Novo recorde!</p>
@@ -1470,19 +1496,29 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
 }
 
 function drawRoundCoin(ctx, x, y, r) {
-  const rr = Math.max(4, r);
+  const rr = Math.max(5, r);
   ctx.beginPath();
   ctx.arc(x, y, rr, 0, Math.PI * 2);
   ctx.fillStyle = "#c98a00";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x, y, rr * 0.82, 0, Math.PI * 2);
+  ctx.arc(x, y, rr * 0.84, 0, Math.PI * 2);
   ctx.fillStyle = "#ffd24a";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x - rr * 0.22, y - rr * 0.24, rr * 0.28, 0, Math.PI * 2);
-  ctx.fillStyle = "#fff4b8";
+  ctx.arc(x, y, rr * 0.7, 0, Math.PI * 2);
+  ctx.strokeStyle = "#e0a020";
+  ctx.lineWidth = Math.max(1, rr * 0.08);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x - rr * 0.22, y - rr * 0.26, rr * 0.2, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255, 248, 200, 0.7)";
   ctx.fill();
+  ctx.fillStyle = "#8a4e00";
+  ctx.font = `bold ${Math.max(8, Math.round(rr * 1.15))}px Trebuchet MS, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("$", x, y + rr * 0.06);
 }
 
 function randomTrafficCar() {
@@ -3225,7 +3261,7 @@ function refreshMenu() {
   $("menu-coins").textContent = String(Save.data.coins);
   $("menu-best").textContent = `${t("best")} ${formatMeters(Save.data.best)}`;
   $("menu-car").textContent = getCar(Save.data.selected).name;
-  $("shop-coins").textContent = `${Save.data.coins} ⬤`;
+  $("shop-coins").textContent = String(Save.data.coins);
   $("hud-best").textContent = formatMeters(Save.data.best);
   if (!Game.running && Game.ctx) Game.drawMenuScene();
 }

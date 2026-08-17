@@ -49,7 +49,7 @@ function refreshMenu() {
   $("menu-coins").textContent = String(Save.data.coins);
   $("menu-best").textContent = `${t("best")} ${formatMeters(Save.data.best)}`;
   $("menu-car").textContent = getCar(Save.data.selected).name;
-  $("shop-coins").textContent = `${Save.data.coins} ⬤`;
+  $("shop-coins").textContent = String(Save.data.coins);
   $("hud-best").textContent = formatMeters(Save.data.best);
   if (!Game.running && Game.ctx) Game.drawMenuScene();
 }

@@ -17,7 +17,7 @@
     <link rel="icon" href="icons/nitro-surf.png" />
     <link rel="apple-touch-icon" href="icons/nitro-surf-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/style.css?v=ref17" />
+    <link rel="stylesheet" href="css/style.css?v=ref18" />
   </head>
   <body>
     <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
@@ -32,7 +32,7 @@
         </div>
         <div class="hud-stat gold">
           <span class="hud-label" data-i18n="runCoins">Corrida</span>
-          <strong id="hud-run-coins">0</strong>
+          <strong><span class="coin-mini" aria-hidden="true">$</span><span id="hud-run-coins">0</span></strong>
         </div>
         <div class="hud-stat">
           <span class="hud-label" data-i18n="best">Recorde</span>
@@ -61,7 +61,7 @@
     <div id="screen-menu" class="screen menu-home">
       <div class="menu-coin-bar">
         <div class="coin-badge">
-          <span class="coin-icon" aria-hidden="true"></span>
+          <span class="coin-icon" aria-hidden="true">$</span>
           <div class="coin-copy">
             <small data-i18n="coins">Moedas</small>
             <strong id="menu-coins">0</strong>
@@ -127,7 +127,7 @@
           <h2 data-i18n="garage">Garagem</h2>
           <p data-i18n="garageSub">Compre e equipe um carro novo</p>
         </div>
-        <div class="chip gold" id="shop-coins">0</div>
+        <div class="chip gold"><span class="coin-mini" aria-hidden="true">$</span><span id="shop-coins">0</span></div>
       </header>
       <div class="shop-filters" id="shop-filters">
         <button class="filter on" data-filter="all" type="button" data-i18n="all">Todos</button>
@@ -178,7 +178,7 @@
         <h2 id="over-title">Batida!</h2>
         <div class="over-stats">
           <div><span data-i18n="distance">Distância</span><strong id="over-distance">0 m</strong></div>
-          <div><span data-i18n="coins">Moedas</span><strong id="over-coins">0</strong></div>
+          <div><span data-i18n="coins">Moedas</span><strong><span class="coin-mini" aria-hidden="true">$</span><span id="over-coins">0</span></strong></div>
           <div><span data-i18n="best">Recorde</span><strong id="over-best">0 m</strong></div>
         </div>
         <p id="over-record" class="new-record hidden" data-i18n="newRecord">Novo recorde!</p>
@@ -190,11 +190,11 @@
 
     <div id="toast" class="toast hidden" role="status"></div>
 
-    <script src="js/cars.js?v=ref17"></script>
-    <script src="js/storage.js?v=ref17"></script>
-    <script src="js/i18n.js?v=ref17"></script>
-    <script src="js/audio.js?v=ref17"></script>
-    <script src="js/game.js?v=ref17"></script>
-    <script src="js/ui.js?v=ref17"></script>
+    <script src="js/cars.js?v=ref18"></script>
+    <script src="js/storage.js?v=ref18"></script>
+    <script src="js/i18n.js?v=ref18"></script>
+    <script src="js/audio.js?v=ref18"></script>
+    <script src="js/game.js?v=ref18"></script>
+    <script src="js/ui.js?v=ref18"></script>
   </body>
 </html>

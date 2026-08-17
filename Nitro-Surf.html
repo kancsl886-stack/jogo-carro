@@ -242,6 +242,13 @@ canvas {
   width: min(360px, 100%);
 }
 
+.menu-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
 .btn {
   appearance: none;
   border: 1px solid var(--line);
@@ -794,7 +801,11 @@ canvas {
       <div class="menu-bottom">
         <div class="menu-actions">
           <button id="btn-play" class="btn primary pulse" type="button" data-i18n="play">Jogar</button>
-          <button id="btn-menu" class="btn" type="button" data-i18n="menu">Menu</button>
+          <div class="menu-row">
+            <button id="btn-shop-home" class="btn" type="button" data-i18n="shop">Loja</button>
+            <button id="btn-inventory" class="btn" type="button" data-i18n="inventory">Meus carros</button>
+          </div>
+          <button id="btn-menu" class="btn ghost" type="button" data-i18n="menu">Menu</button>
         </div>
         <p class="hint" data-i18n="hint">← → virar · ↑ pular · segure o lado</p>
       </div>
@@ -835,8 +846,8 @@ canvas {
       <header class="sheet-head">
         <button id="btn-shop-back" class="icon-btn" type="button" aria-label="Voltar">←</button>
         <div>
-          <h2 data-i18n="garage">Garagem</h2>
-          <p data-i18n="garageSub">Compre e equipe um carro novo</p>
+          <h2 id="shop-title">Loja</h2>
+          <p id="shop-sub">Compre e equipe um carro novo</p>
         </div>
         <div class="chip gold"><span class="coin-mini" aria-hidden="true">$</span><span id="shop-coins">0</span></div>
       </header>
@@ -1936,7 +1947,9 @@ const I18N = {
     subtitle: "Desvie. Colete. Troque de carro.",
     play: "Jogar",
     menu: "Menu",
-    shop: "Comprar carros",
+    shop: "Loja",
+    inventory: "Meus carros",
+    inventorySub: "Equipe um carro que você já tem",
     howto: "Como jogar",
     volume: "Volume",
     language: "Idioma",
@@ -2003,7 +2016,9 @@ const I18N = {
     subtitle: "Dodge. Collect. Switch cars.",
     play: "Play",
     menu: "Menu",
-    shop: "Buy cars",
+    shop: "Shop",
+    inventory: "My cars",
+    inventorySub: "Equip a car you already own",
     howto: "How to play",
     volume: "Volume",
     language: "Language",
@@ -2070,7 +2085,9 @@ const I18N = {
     subtitle: "Esquiva. Junta. Cambia de auto.",
     play: "Jugar",
     menu: "Menú",
-    shop: "Comprar autos",
+    shop: "Tienda",
+    inventory: "Mis autos",
+    inventorySub: "Equipa un auto que ya tienes",
     howto: "Cómo jugar",
     volume: "Volumen",
     language: "Idioma",
@@ -3184,20 +3201,11 @@ const Game = {
     const car = getCar(Save.data.selected);
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.66);
-    const lane = road.laneW;
-    const stripe = "#ffffff";
-    const demo = [
-      { x: cx - lane, y: H * 0.22, car: { shape: "hatch", colors: { body: "#ff8c1a", stripe } } },
-      { x: cx, y: H * 0.18, car: { shape: "sedan", colors: { body: "#2d4ecf", stripe } } },
-      { x: cx + lane, y: H * 0.30, car: { shape: "pickup", colors: { body: "#c42a1a", stripe } } },
-      { x: cx - lane, y: H * 0.44, car: { shape: "sports", colors: { body: "#1fbf6a", stripe } } },
-    ];
     drawPixelDude(ctx, cx - 18, cy + 2, 2);
     this.blit();
     const kx = this.w / this.gw;
     const ky = this.h / this.gh;
-    const u = Math.max(4, Math.round(road.laneW * kx / 26));
-    for (const d of demo) drawCarTop(this.ctx, d.x * kx, d.y * ky, u, d.car, { u });
+    const u = Math.max(5, Math.round(road.laneW * kx / 22));
     drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
   },
 
@@ -3263,6 +3271,11 @@ function refreshMenu() {
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = String(Save.data.coins);
   $("hud-best").textContent = formatMeters(Save.data.best);
+  if (!$("screen-shop").classList.contains("hidden")) {
+    $("shop-title").textContent = t(shopMode === "inventory" ? "inventory" : "shop");
+    $("shop-sub").textContent = t(shopMode === "inventory" ? "inventorySub" : "garageSub");
+    renderShop();
+  }
   if (!Game.running && Game.ctx) Game.drawMenuScene();
 }
 
@@ -3275,6 +3288,12 @@ function toast(msg) {
 }
 
 let shopFilter = "all";
+let shopMode = "shop";
+
+function syncShopFilters() {
+  const bar = $("shop-filters");
+  [...bar.children].forEach((el) => el.classList.toggle("on", el.dataset.filter === shopFilter));
+}
 
 function renderShop() {
   const grid = $("shop-grid");
@@ -3362,10 +3381,20 @@ function setPowerHud(powers) {
   $("powerups").innerHTML = labels.map((text) => `<div class="power">${text}</div>`).join("");
 }
 
-function openShop(from) {
+function openGarage(from, mode) {
   shopFrom = from;
+  shopMode = mode === "inventory" ? "inventory" : "shop";
+  shopFilter = shopMode === "inventory" ? "owned" : "all";
+  $("shop-title").textContent = t(shopMode === "inventory" ? "inventory" : "shop");
+  $("shop-sub").textContent = t(shopMode === "inventory" ? "inventorySub" : "garageSub");
+  $("shop-filters").classList.toggle("hidden", shopMode === "inventory");
+  syncShopFilters();
   renderShop();
   showScreen("shop");
+}
+
+function openShop(from) {
+  openGarage(from, "shop");
 }
 
 function biomeLabel(id) {
@@ -3434,14 +3463,17 @@ window.addEventListener("DOMContentLoaded", () => {
   $("btn-retry").onclick = play;
   $("btn-menu").onclick = () => showScreen("settings");
   $("btn-settings-back").onclick = () => showScreen("menu");
-  $("btn-shop").onclick = () => openShop("settings");
+  $("btn-shop-home").onclick = () => openGarage("menu", "shop");
+  $("btn-inventory").onclick = () => openGarage("menu", "inventory");
+  $("btn-shop").onclick = () => openGarage("settings", "shop");
   $("btn-over-shop").onclick = () => {
     Game.stop();
-    openShop("over");
+    openGarage("over", "shop");
   };
   $("btn-howto").onclick = () => showScreen("howto");
   $("btn-shop-back").onclick = () => {
     if (shopFrom === "over") backToMenu();
+    else if (shopFrom === "menu") showScreen("menu");
     else showScreen("settings");
   };
   $("btn-howto-back").onclick = () => showScreen("settings");

@@ -51,6 +51,11 @@ function refreshMenu() {
   $("menu-car").textContent = getCar(Save.data.selected).name;
   $("shop-coins").textContent = String(Save.data.coins);
   $("hud-best").textContent = formatMeters(Save.data.best);
+  if (!$("screen-shop").classList.contains("hidden")) {
+    $("shop-title").textContent = t(shopMode === "inventory" ? "inventory" : "shop");
+    $("shop-sub").textContent = t(shopMode === "inventory" ? "inventorySub" : "garageSub");
+    renderShop();
+  }
   if (!Game.running && Game.ctx) Game.drawMenuScene();
 }
 
@@ -63,6 +68,12 @@ function toast(msg) {
 }
 
 let shopFilter = "all";
+let shopMode = "shop";
+
+function syncShopFilters() {
+  const bar = $("shop-filters");
+  [...bar.children].forEach((el) => el.classList.toggle("on", el.dataset.filter === shopFilter));
+}
 
 function renderShop() {
   const grid = $("shop-grid");
@@ -150,10 +161,20 @@ function setPowerHud(powers) {
   $("powerups").innerHTML = labels.map((text) => `<div class="power">${text}</div>`).join("");
 }
 
-function openShop(from) {
+function openGarage(from, mode) {
   shopFrom = from;
+  shopMode = mode === "inventory" ? "inventory" : "shop";
+  shopFilter = shopMode === "inventory" ? "owned" : "all";
+  $("shop-title").textContent = t(shopMode === "inventory" ? "inventory" : "shop");
+  $("shop-sub").textContent = t(shopMode === "inventory" ? "inventorySub" : "garageSub");
+  $("shop-filters").classList.toggle("hidden", shopMode === "inventory");
+  syncShopFilters();
   renderShop();
   showScreen("shop");
+}
+
+function openShop(from) {
+  openGarage(from, "shop");
 }
 
 function biomeLabel(id) {
@@ -222,14 +243,17 @@ window.addEventListener("DOMContentLoaded", () => {
   $("btn-retry").onclick = play;
   $("btn-menu").onclick = () => showScreen("settings");
   $("btn-settings-back").onclick = () => showScreen("menu");
-  $("btn-shop").onclick = () => openShop("settings");
+  $("btn-shop-home").onclick = () => openGarage("menu", "shop");
+  $("btn-inventory").onclick = () => openGarage("menu", "inventory");
+  $("btn-shop").onclick = () => openGarage("settings", "shop");
   $("btn-over-shop").onclick = () => {
     Game.stop();
-    openShop("over");
+    openGarage("over", "shop");
   };
   $("btn-howto").onclick = () => showScreen("howto");
   $("btn-shop-back").onclick = () => {
     if (shopFrom === "over") backToMenu();
+    else if (shopFrom === "menu") showScreen("menu");
     else showScreen("settings");
   };
   $("btn-howto-back").onclick = () => showScreen("settings");

@@ -224,6 +224,13 @@ canvas {
   width: min(360px, 100%);
 }
 
+.menu-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
 .btn {
   appearance: none;
   border: 1px solid var(--line);

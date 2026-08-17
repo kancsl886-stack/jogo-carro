@@ -17,7 +17,7 @@
     <link rel="icon" href="icons/nitro-surf.png" />
     <link rel="apple-touch-icon" href="icons/nitro-surf-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/style.css?v=ref18" />
+    <link rel="stylesheet" href="css/style.css?v=ref19" />
   </head>
   <body>
     <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
@@ -83,7 +83,11 @@
       <div class="menu-bottom">
         <div class="menu-actions">
           <button id="btn-play" class="btn primary pulse" type="button" data-i18n="play">Jogar</button>
-          <button id="btn-menu" class="btn" type="button" data-i18n="menu">Menu</button>
+          <div class="menu-row">
+            <button id="btn-shop-home" class="btn" type="button" data-i18n="shop">Loja</button>
+            <button id="btn-inventory" class="btn" type="button" data-i18n="inventory">Meus carros</button>
+          </div>
+          <button id="btn-menu" class="btn ghost" type="button" data-i18n="menu">Menu</button>
         </div>
         <p class="hint" data-i18n="hint">← → virar · ↑ pular · segure o lado</p>
       </div>
@@ -124,8 +128,8 @@
       <header class="sheet-head">
         <button id="btn-shop-back" class="icon-btn" type="button" aria-label="Voltar">←</button>
         <div>
-          <h2 data-i18n="garage">Garagem</h2>
-          <p data-i18n="garageSub">Compre e equipe um carro novo</p>
+          <h2 id="shop-title">Loja</h2>
+          <p id="shop-sub">Compre e equipe um carro novo</p>
         </div>
         <div class="chip gold"><span class="coin-mini" aria-hidden="true">$</span><span id="shop-coins">0</span></div>
       </header>
@@ -190,11 +194,11 @@
 
     <div id="toast" class="toast hidden" role="status"></div>
 
-    <script src="js/cars.js?v=ref18"></script>
-    <script src="js/storage.js?v=ref18"></script>
-    <script src="js/i18n.js?v=ref18"></script>
-    <script src="js/audio.js?v=ref18"></script>
-    <script src="js/game.js?v=ref18"></script>
-    <script src="js/ui.js?v=ref18"></script>
+    <script src="js/cars.js?v=ref19"></script>
+    <script src="js/storage.js?v=ref19"></script>
+    <script src="js/i18n.js?v=ref19"></script>
+    <script src="js/audio.js?v=ref19"></script>
+    <script src="js/game.js?v=ref19"></script>
+    <script src="js/ui.js?v=ref19"></script>
   </body>
 </html>

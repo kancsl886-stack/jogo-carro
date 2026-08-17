@@ -971,20 +971,11 @@ const Game = {
     const car = getCar(Save.data.selected);
     const cx = Math.round(W / 2);
     const cy = Math.round(H * 0.66);
-    const lane = road.laneW;
-    const stripe = "#ffffff";
-    const demo = [
-      { x: cx - lane, y: H * 0.22, car: { shape: "hatch", colors: { body: "#ff8c1a", stripe } } },
-      { x: cx, y: H * 0.18, car: { shape: "sedan", colors: { body: "#2d4ecf", stripe } } },
-      { x: cx + lane, y: H * 0.30, car: { shape: "pickup", colors: { body: "#c42a1a", stripe } } },
-      { x: cx - lane, y: H * 0.44, car: { shape: "sports", colors: { body: "#1fbf6a", stripe } } },
-    ];
     drawPixelDude(ctx, cx - 18, cy + 2, 2);
     this.blit();
     const kx = this.w / this.gw;
     const ky = this.h / this.gh;
-    const u = Math.max(4, Math.round(road.laneW * kx / 26));
-    for (const d of demo) drawCarTop(this.ctx, d.x * kx, d.y * ky, u, d.car, { u });
+    const u = Math.max(5, Math.round(road.laneW * kx / 22));
     drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
   },
 

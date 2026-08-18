@@ -970,12 +970,13 @@ const Game = {
 
     const car = getCar(Save.data.selected);
     const cx = Math.round(W / 2);
-    const cy = Math.round(H * 0.66);
-    drawPixelDude(ctx, cx - 18, cy + 2, 2);
+    const portrait = this.h >= this.w;
+    const cy = Math.round(H * (portrait ? 0.46 : 0.62));
+    drawPixelDude(ctx, cx - 16, cy + 2, portrait ? 1 : 2);
     this.blit();
     const kx = this.w / this.gw;
     const ky = this.h / this.gh;
-    const u = Math.max(5, Math.round(road.laneW * kx / 22));
+    const u = Math.max(portrait ? 4 : 5, Math.round(road.laneW * kx / (portrait ? 28 : 22)));
     drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
   },
 

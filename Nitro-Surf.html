@@ -82,6 +82,8 @@ canvas {
   justify-content: center;
   padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, rgba(7, 11, 20, 0.35), rgba(7, 11, 20, 0.78));
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
 }
 
 .screen.menu-home {
@@ -252,14 +254,23 @@ canvas {
 .btn {
   appearance: none;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(18, 26, 42, 0.92);
   color: var(--text);
   border-radius: 14px;
-  padding: 14px 18px;
+  padding: 14px 12px;
   font: inherit;
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  line-height: 1.15;
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
 }
 
@@ -279,7 +290,7 @@ canvas {
 }
 
 .btn.ghost {
-  background: transparent;
+  background: rgba(10, 16, 28, 0.78);
 }
 
 .btn:disabled {
@@ -303,9 +314,33 @@ canvas {
 }
 
 .hint {
-  margin-top: 18px;
+  margin-top: 12px;
   color: var(--muted);
   font-size: 13px;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.hint-touch {
+  display: none;
+}
+
+body.is-touch .hint-desktop,
+html:not(.is-touch) .hint-touch {
+  display: none;
+}
+
+body.is-touch .hint-touch {
+  display: block;
+}
+
+@media (pointer: coarse) {
+  .hint-desktop {
+    display: none;
+  }
+  .hint-touch {
+    display: block;
+  }
 }
 
 .settings {
@@ -414,6 +449,8 @@ canvas {
   color: var(--text);
   cursor: pointer;
   font-size: 18px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .shop-filters {
@@ -450,6 +487,7 @@ canvas {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
   padding-bottom: 20px;
+  touch-action: pan-y;
 }
 
 .car-card {
@@ -725,7 +763,7 @@ canvas {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 30;
   background: rgba(10, 16, 28, 0.92);
@@ -734,6 +772,196 @@ canvas {
   padding: 10px 16px;
   border-radius: 999px;
 }
+
+@media (max-width: 720px) {
+  .screen {
+    padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .screen.menu-home {
+    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+  }
+
+  .menu-coin-bar {
+    padding: 0 12px;
+  }
+
+  .coin-badge {
+    min-width: 0;
+    gap: 8px;
+    padding: 6px 14px 6px 8px;
+    border-radius: 16px;
+  }
+
+  .coin-icon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    font-size: 16px;
+    border-width: 2px;
+  }
+
+  .coin-copy small {
+    font-size: 10px;
+  }
+
+  .coin-copy strong {
+    font-size: 22px;
+  }
+
+  .menu-top {
+    width: 100%;
+    padding: 0 12px;
+  }
+
+  .brand {
+    margin-bottom: 8px;
+  }
+
+  .brand-kicker {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+  }
+
+  .brand h1 {
+    font-size: clamp(34px, 11vw, 52px);
+  }
+
+  .brand-sub {
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  .menu-stats {
+    margin-bottom: 0;
+    gap: 8px;
+  }
+
+  .chip {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .menu-spacer {
+    min-height: 88px;
+  }
+
+  .menu-bottom {
+    width: 100%;
+    max-width: none;
+    background: rgba(7, 11, 20, 0.94);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px 22px 0 0;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .menu-actions,
+  .menu-bottom .menu-actions {
+    width: 100%;
+    max-width: none;
+    gap: 8px;
+  }
+
+  .menu-row {
+    gap: 8px;
+  }
+
+  .menu-row .btn {
+    font-size: 15px;
+    padding: 12px 8px;
+    min-height: 46px;
+  }
+
+  .btn.primary {
+    min-height: 52px;
+    font-size: 18px;
+  }
+
+  .hint {
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .hud {
+    padding: calc(8px + env(safe-area-inset-top)) 8px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .hud-top {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 6px 8px;
+  }
+
+  .hud-stat {
+    min-width: 0;
+    flex: 1 1 28%;
+  }
+
+  .hud-stat.cop {
+    flex: 1 1 22%;
+  }
+
+  .hud-label {
+    font-size: 9px;
+  }
+
+  .hud-stat strong {
+    font-size: 15px;
+  }
+
+  .cop-bar {
+    width: 72px;
+  }
+
+  .hud .icon-btn {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .speed-wrap {
+    min-width: 0;
+  }
+
+  .speed-bar {
+    width: 96px;
+  }
+
+  .sheet-head {
+    margin-bottom: 10px;
+  }
+
+  .sheet-head h2 {
+    font-size: 22px;
+  }
+
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .over-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 700px) {
+  .brand-sub {
+    display: none;
+  }
+
+  .brand h1 {
+    font-size: clamp(30px, 9vw, 44px);
+  }
+
+  .menu-spacer {
+    min-height: 64px;
+  }
+}
+
 
     </style>
   </head>
@@ -807,7 +1035,8 @@ canvas {
           </div>
           <button id="btn-menu" class="btn ghost" type="button" data-i18n="menu">Menu</button>
         </div>
-        <p class="hint" data-i18n="hint">← → virar · ↑ pular · segure o lado</p>
+        <p class="hint hint-desktop" data-i18n="hint">← → virar · ↑ pular · segure o lado</p>
+        <p class="hint hint-touch" data-i18n="hintTouch">Segure os lados para virar · deslize para cima para pular</p>
       </div>
     </div>
 
@@ -1984,6 +2213,7 @@ const I18N = {
     coins: "Moedas",
     newRecord: "Novo recorde!",
     hint: "← → virar · ↑ pular · segure o lado",
+    hintTouch: "Segure os lados para virar · deslize para cima para pular",
     all: "Todos",
     owned: "Meus",
     comum: "Comum",
@@ -2053,6 +2283,7 @@ const I18N = {
     coins: "Coins",
     newRecord: "New record!",
     hint: "← → steer · ↑ jump · hold a side",
+    hintTouch: "Hold the sides to steer · swipe up to jump",
     all: "All",
     owned: "Mine",
     comum: "Common",
@@ -2122,6 +2353,7 @@ const I18N = {
     coins: "Monedas",
     newRecord: "¡Nuevo récord!",
     hint: "← → virar · ↑ saltar · mantén el lado",
+    hintTouch: "Mantén los lados para virar · desliza hacia arriba para saltar",
     all: "Todos",
     owned: "Míos",
     comum: "Común",
@@ -3200,12 +3432,13 @@ const Game = {
 
     const car = getCar(Save.data.selected);
     const cx = Math.round(W / 2);
-    const cy = Math.round(H * 0.66);
-    drawPixelDude(ctx, cx - 18, cy + 2, 2);
+    const portrait = this.h >= this.w;
+    const cy = Math.round(H * (portrait ? 0.46 : 0.62));
+    drawPixelDude(ctx, cx - 16, cy + 2, portrait ? 1 : 2);
     this.blit();
     const kx = this.w / this.gw;
     const ky = this.h / this.gh;
-    const u = Math.max(5, Math.round(road.laneW * kx / 22));
+    const u = Math.max(portrait ? 4 : 5, Math.round(road.laneW * kx / (portrait ? 28 : 22)));
     drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
   },
 
@@ -3425,6 +3658,9 @@ function backToMenu() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
+    document.body.classList.add("is-touch");
+  }
   Sfx.setVolume(Save.data.volume);
   Sfx.muted = Save.data.muted;
   syncVolume();

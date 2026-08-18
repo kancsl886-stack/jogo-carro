@@ -205,6 +205,9 @@ function backToMenu() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
+    document.body.classList.add("is-touch");
+  }
   Sfx.setVolume(Save.data.volume);
   Sfx.muted = Save.data.muted;
   syncVolume();

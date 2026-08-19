@@ -766,6 +766,43 @@ body.is-touch .hint-touch {
   border-radius: 12px;
   padding: 6px 10px;
   font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.power-ico {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #1b2a44;
+  flex: 0 0 18px;
+  position: relative;
+}
+
+.power-ico.shield::after {
+  content: "";
+  position: absolute;
+  inset: 3px 5px;
+  background: #5dffb0;
+  clip-path: polygon(50% 0, 100% 28%, 82% 100%, 18% 100%, 0 28%);
+}
+
+.power-ico.nitro::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 3px solid #3cf0ff;
+  border-radius: 50%;
+}
+
+.power-ico.magnet::after {
+  content: "";
+  position: absolute;
+  inset: 4px 3px;
+  border: 2px solid #ff9a3c;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
 }
 
 .toast {

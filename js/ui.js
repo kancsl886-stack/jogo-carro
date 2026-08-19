@@ -135,7 +135,7 @@ function renderShop() {
     c2d.fillStyle = "#ececec";
     c2d.fillRect(138, 86, 4, 12);
     c2d.fillRect(138, 108, 4, 14);
-    drawCar3D(c2d, 140, 108, 42, car, { yaw: -0.06, flash: true });
+    drawIsoCar(c2d, 140, 108, 42, car, { yaw: -0.06, flash: true, skid: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");
@@ -170,11 +170,13 @@ function renderShop() {
 }
 
 function setPowerHud(powers) {
-  const labels = [];
-  if (powers.magnet > 0) labels.push(`${t("magnetHud")} ${powers.magnet.toFixed(0)}s`);
-  if (powers.shield > 0) labels.push(`${t("shieldHud")} ${powers.shield.toFixed(0)}s`);
-  if (powers.nitro > 0) labels.push(`${t("nitroHud")} ${powers.nitro.toFixed(0)}s`);
-  $("powerups").innerHTML = labels.map((text) => `<div class="power">${text}</div>`).join("");
+  const items = [];
+  if (powers.magnet > 0) items.push({ kind: "magnet", label: `${t("magnetHud")} ${powers.magnet.toFixed(0)}s` });
+  if (powers.shield > 0) items.push({ kind: "shield", label: `${t("shieldHud")} ${powers.shield.toFixed(0)}s` });
+  if (powers.nitro > 0) items.push({ kind: "nitro", label: `${t("nitroHud")} ${powers.nitro.toFixed(0)}s` });
+  $("powerups").innerHTML = items
+    .map((it) => `<div class="power"><span class="power-ico ${it.kind}" aria-hidden="true"></span>${it.label}</div>`)
+    .join("");
 }
 
 function openGarage(from, mode) {

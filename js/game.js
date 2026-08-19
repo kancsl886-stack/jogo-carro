@@ -11,7 +11,7 @@ const BIOMES = [
     ground: "#4a9a3c",
     road: "#3e3e42",
     rumbleA: "#e6c200",
-    rumbleB: "#8d8d93",
+    rumbleB: "#151515",
     dash: "#ececec",
     sidewalk: "#6aaa4e",
     skyTop: "#5a9ad4",
@@ -23,7 +23,7 @@ const BIOMES = [
     ground: "#6a7348",
     road: "#3a3a3e",
     rumbleA: "#e6c200",
-    rumbleB: "#8d8d93",
+    rumbleB: "#151515",
     dash: "#ececec",
     sidewalk: "#c4bfb4",
     skyTop: "#6a8eae",
@@ -146,6 +146,7 @@ const Game = {
     this.flash = 0;
     this.caughtBy = null;
     this.cop = { lane: 1, laneX: 0, gap: 18, siren: 0 };
+    this.oil = 0;
   },
 
   init(canvas) {
@@ -420,7 +421,18 @@ const Game = {
         this.entities.push(this.makeTraffic(blocked, z));
         if (Math.random() < 0.22 + Math.min(0.2, this.distance / 4000)) {
           const other = (blocked + 1 + Math.floor(Math.random() * (LANES - 1))) % LANES;
-          this.entities.push({ kind: "barrier", lane: other, z, w: 1.4, h: 0.7, low: true });
+          const roll = Math.random();
+          if (roll < 0.26) {
+            this.entities.push({ kind: "cone", lane: other, z, w: 0.8, h: 0.55, low: true });
+          } else if (roll < 0.46) {
+            this.entities.push({ kind: "tires", lane: other, z, w: 1.15, h: 0.85, low: true });
+          } else if (roll < 0.6) {
+            this.entities.push({ kind: "oil", lane: other, z, w: 1.5, h: 0.2, low: true });
+          } else if (roll < 0.76) {
+            this.entities.push({ kind: "container", lane: other, z, w: 1.7, h: 1.55, low: false });
+          } else {
+            this.entities.push({ kind: "barrier", lane: other, z, w: 1.4, h: 0.7, low: true });
+          }
         }
       } else if (pattern < 0.62 + twoLaneChance) {
         const a = Math.floor(Math.random() * LANES);
@@ -492,7 +504,8 @@ const Game = {
     this.cameraZ += this.speed * dt;
     this.distance = this.cameraZ;
 
-    const grip = Math.max(0.2, this.car.stats.handling);
+    const grip = Math.max(0.2, this.car.stats.handling) * (this.oil > 0 ? 0.42 : 1);
+    this.oil = Math.max(0, (this.oil || 0) - dt);
     const input = this.readSteer();
     if (Math.abs(input) > 0.35 && Math.abs(this.steer) <= 0.35) Sfx.lane();
     this.steer = expDamp(this.steer, input, 9, dt);
@@ -504,6 +517,7 @@ const Game = {
     const kappa = this.roadBend(this.cameraZ + 18) - this.roadBend(this.cameraZ + 6);
     const curve = -kappa * (1.5 / grip);
     this.vx = expDamp(this.vx, desiredVx + curve, 5.5 + 2.8 * grip, dt);
+    if (this.oil > 0) this.yaw += Math.sin(this.time * 16) * 0.014;
     this.laneX += this.vx * dt;
     this.lane = Math.max(0, Math.min(LANES - 1, Math.round(this.laneX / LANE_GAP + 1)));
     const limit = LANE_GAP * 1.55;
@@ -548,7 +562,15 @@ const Game = {
           Sfx.power();
           this.burst(this.laneX, 0.6, playerZ, "#3cf0ff", 10);
         }
-      } else if (this.invuln <= 0 && Math.abs(dz) < (e.kind === "truck" ? 3.2 : 2.4) && Math.abs(dx) < 1.05) {
+      } else if (e.kind === "oil") {
+        if (Math.abs(dz) < 2.2 && Math.abs(dx) < 1.2 && this.jump < 0.35) {
+          if (!e.slicked) {
+            e.slicked = true;
+            this.oil = 1.5;
+            this.shake = Math.max(this.shake, 5);
+          }
+        }
+      } else if (this.invuln <= 0 && Math.abs(dz) < (e.kind === "truck" || e.kind === "container" ? 3.2 : 2.4) && Math.abs(dx) < 1.05) {
         const jumped = this.jump > 0.9 && e.low;
         if (!jumped) this.hit();
       }
@@ -760,6 +782,12 @@ const Game = {
       mark(-2.85, -2.58);
       mark(2.58, 2.85);
 
+      if (((zMid | 0) % 31) === 7) {
+        const mx = ((zMid | 0) % 3) - 1;
+        const mp = p(mx * LANE_GAP, 0.02, (za + zb) * 0.5);
+        drawManholeAsset(ctx, mp.x, mp.y, Math.max(6, mp.s * 0.1));
+      }
+
       if (Math.floor(zMid / 5.4) % 2 === 0) {
         for (const lx of [-LANE_GAP / 2, LANE_GAP / 2]) {
           this.fillQuad(
@@ -773,20 +801,20 @@ const Game = {
         }
       }
 
-      const stripe = Math.floor(zMid / 1.65) % 2 === 0;
-      const ja = stripe ? scene.rumbleA : scene.rumbleB;
-      const jb = stripe ? shadeHex(ja, 0.1) : shadeHex(ja, -0.08);
+      const wall = "#a8a8ae";
+      const wallDark = "#6c6c72";
+      const topCol = Math.floor(zMid / 1.15) % 2 === 0 ? "#e6c200" : "#151515";
       const wallH = 0.86;
       const leftInner = -half - 0.02;
       const leftOuter = -half - 0.42;
       const rightInner = half + 0.02;
       const rightOuter = half + 0.42;
-      this.fillQuad(ctx, p(leftInner, 0, za), p(leftInner, 0, zb), p(leftInner, wallH, zb), p(leftInner, wallH, za), ja);
-      this.fillQuad(ctx, p(leftInner, wallH, za), p(leftInner, wallH, zb), p(leftOuter, wallH, zb), p(leftOuter, wallH, za), jb);
-      this.fillQuad(ctx, p(leftOuter, 0, za), p(leftOuter, wallH, za), p(leftOuter, wallH, zb), p(leftOuter, 0, zb), shadeHex(ja, -0.28));
-      this.fillQuad(ctx, p(rightInner, 0, za), p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightInner, 0, zb), ja);
-      this.fillQuad(ctx, p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), jb);
-      this.fillQuad(ctx, p(rightOuter, 0, za), p(rightOuter, 0, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), shadeHex(ja, -0.32));
+      this.fillQuad(ctx, p(leftInner, 0, za), p(leftInner, 0, zb), p(leftInner, wallH, zb), p(leftInner, wallH, za), wall);
+      this.fillQuad(ctx, p(leftInner, wallH, za), p(leftInner, wallH, zb), p(leftOuter, wallH, zb), p(leftOuter, wallH, za), topCol);
+      this.fillQuad(ctx, p(leftOuter, 0, za), p(leftOuter, wallH, za), p(leftOuter, wallH, zb), p(leftOuter, 0, zb), wallDark);
+      this.fillQuad(ctx, p(rightInner, 0, za), p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightInner, 0, zb), wall);
+      this.fillQuad(ctx, p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), topCol);
+      this.fillQuad(ctx, p(rightOuter, 0, za), p(rightOuter, 0, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), wallDark);
     }
   },
 
@@ -821,12 +849,8 @@ const Game = {
     } else if (decor === "docks") {
       if (it.seed % 3 === 0) this.drawBuilding3D(ctx, x, it.z, it.seed);
       else {
-        this.drawBox3D(ctx, x, 0, it.z, 1.5, 1.3, 1.5, {
-          left: "#d35400",
-          right: "#7a2e00",
-          front: "#c0392b",
-          top: "#e67e22",
-        });
+        const p = this.project(x, 0, it.z);
+        if (p.visible) drawContainerAsset(ctx, p.x, p.y, p.s * 0.22);
       }
     } else if (it.seed % 4 === 0) {
       this.drawBush3D(ctx, x, it.z);
@@ -840,7 +864,7 @@ const Game = {
     const w = 1.7 + (seed % 4) * 0.18;
     const d = 1.35 + (seed % 3) * 0.18;
     const h = 2.3 + floors * 0.82;
-    const walls = ["#8a5a48", "#6d7380", "#9aa3b0", "#7a6e68", "#b07058", "#5c6570"];
+    const walls = ["#8a4a3a", "#a05640", "#7a4538", "#9a5a48"];
     const wall = walls[seed % walls.length];
     this.drawBox3D(ctx, x, 0, z, w, h, d, {
       left: shadeHex(wall, 0.18),
@@ -865,12 +889,33 @@ const Game = {
         );
       }
     }
+    const faceZ = z - d / 2 - 0.04;
+    for (let r = 0; r < rows; r++) {
+      const wy = 0.55 + r * (h / (rows + 0.4));
+      const x0 = x - w * 0.46;
+      this.fillQuad(
+        ctx,
+        this.project(x0, wy, faceZ),
+        this.project(x0 + 0.08, wy, faceZ),
+        this.project(x0 + 0.08, wy + 0.08, faceZ),
+        this.project(x0, wy + 0.08, faceZ),
+        "#1a1a1a"
+      );
+      this.fillQuad(
+        ctx,
+        this.project(x0, wy + 0.08, faceZ),
+        this.project(x0 + w * 0.42, wy + 0.08, faceZ),
+        this.project(x0 + w * 0.42, wy + 0.14, faceZ),
+        this.project(x0, wy + 0.14, faceZ),
+        "#111111"
+      );
+    }
   },
 
   drawLamp3D(ctx, x, z, side) {
     const base = this.project(x, 0, z);
-    const top = this.project(x, 3.5, z);
-    const arm = this.project(x - side * 0.75, 3.5, z);
+    const top = this.project(x, 4.2, z);
+    const arm = this.project(x - side * 1.05, 4.05, z);
     if (!base.visible) return;
     ctx.strokeStyle = "#2a2a32";
     ctx.lineWidth = Math.max(2, base.s * 0.028);
@@ -997,11 +1042,12 @@ const Game = {
       ctx.fill();
       ctx.restore();
     }
-    drawCar3D(ctx, p.x, p.y, p.s * 0.58, this.car, {
+    drawIsoCar(ctx, p.x, p.y, p.s * 0.58, this.car, {
       yaw: this.viewYaw(),
       nitro: this.powers.nitro,
       flash: this.flash % 0.4 < 0.2,
       jump: this.viewJump(),
+      skid: !menu,
     });
   },
 
@@ -1009,9 +1055,10 @@ const Game = {
     if (!this.cop || this.cop.z == null) return;
     const p = this.project(this.cop.laneX, 0, this.cop.z);
     if (!p.visible || p.y > this.h + 90) return;
-    drawCar3D(ctx, p.x, p.y, p.s * 0.56, getCar("policia"), {
+    drawIsoCar(ctx, p.x, p.y, p.s * 0.56, getCar("policia"), {
       flash: this.flash % 0.4 < 0.2,
       yaw: this.viewYaw() * 0.65,
+      skid: true,
     });
   },
 
@@ -1020,28 +1067,39 @@ const Game = {
     if (e.kind === "coin") {
       const p = this.project(x, 0.9, e.z);
       if (!p.visible) return;
-      drawRoundCoin(ctx, p.x, p.y, Math.max(6, p.s * 0.09));
+      drawAssetCoin(ctx, p.x, p.y, Math.max(6, p.s * 0.09));
     } else if (e.kind === "power") {
       const p = this.project(x, 0.95, e.z);
       if (!p.visible) return;
-      const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
-      const letter = e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M";
-      drawPowerOrb(ctx, p.x, p.y, Math.max(8, p.s * 0.1), color, letter);
+      drawPowerIcon(ctx, p.x, p.y, Math.max(8, p.s * 0.11), e.power);
     } else if (e.kind === "barrier") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawWoodCrate(ctx, p.x, p.y, p.s * 0.22, 4);
+      drawCrateAsset(ctx, p.x, p.y, p.s * 0.22, 3 + ((e.z | 0) % 3));
+    } else if (e.kind === "cone") {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawConeAsset(ctx, p.x, p.y, p.s * 0.2);
+    } else if (e.kind === "tires") {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawTireStackAsset(ctx, p.x, p.y, p.s * 0.2);
+    } else if (e.kind === "oil") {
+      const p = this.project(x, 0.02, e.z);
+      if (!p.visible) return;
+      drawOilAsset(ctx, p.x, p.y, p.s * 0.24);
+    } else if (e.kind === "container") {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawContainerAsset(ctx, p.x, p.y, p.s * 0.28);
     } else if (e.kind === "truck") {
-      this.drawBox3D(ctx, x, 0, e.z, 1.65, 1.75, 2.5, {
-        left: "#c0392b",
-        right: "#6a1a14",
-        front: "#a93226",
-        top: "#922b21",
-      });
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawDumpTruckAsset(ctx, p.x, p.y, p.s * 0.5, { brake: true });
     } else {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawCar3D(ctx, p.x, p.y, p.s * 0.54, e.car || randomTrafficCar(), { brake: true });
+      drawIsoCar(ctx, p.x, p.y, p.s * 0.54, e.car || randomTrafficCar(), { brake: true, skid: true });
     }
   },
 

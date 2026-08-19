@@ -7,7 +7,7 @@ html = (ROOT / "index.html").read_text(encoding="utf-8")
 css = (ROOT / "css" / "style.css").read_text(encoding="utf-8")
 scripts = "\n".join(
     (ROOT / "js" / name).read_text(encoding="utf-8")
-    for name in ("cars.js", "storage.js", "i18n.js", "audio.js", "game.js", "ui.js")
+    for name in ("cars.js", "sprites.js", "storage.js", "i18n.js", "audio.js", "game.js", "ui.js")
 )
 
 html = html.replace(
@@ -23,16 +23,17 @@ html = html.replace(
     "",
 )
 html = html.replace(
-    '    <link rel="stylesheet" href="css/style.css?v=ref21" />\n',
+    '    <link rel="stylesheet" href="css/style.css?v=ref22" />\n',
     "    <style>\n" + css + "\n    </style>\n",
 )
 html = html.replace(
-    """    <script src="js/cars.js?v=ref21"></script>
-    <script src="js/storage.js?v=ref21"></script>
-    <script src="js/i18n.js?v=ref21"></script>
-    <script src="js/audio.js?v=ref21"></script>
-    <script src="js/game.js?v=ref21"></script>
-    <script src="js/ui.js?v=ref21"></script>
+    """    <script src="js/cars.js?v=ref22"></script>
+    <script src="js/sprites.js?v=ref22"></script>
+    <script src="js/storage.js?v=ref22"></script>
+    <script src="js/i18n.js?v=ref22"></script>
+    <script src="js/audio.js?v=ref22"></script>
+    <script src="js/game.js?v=ref22"></script>
+    <script src="js/ui.js?v=ref22"></script>
 """,
     "    <script>\n" + scripts + "\n    </script>\n",
 )

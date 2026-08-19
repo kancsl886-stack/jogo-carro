@@ -115,8 +115,8 @@ const Game = {
     this.distance = 0;
     this.runCoins = 0;
     this.combo = 0;
-    this.speed = 13;
-    this.baseSpeed = 13;
+    this.speed = 8;
+    this.baseSpeed = 8;
     this.lane = 1;
     this.laneX = 0;
     this.vx = 0;
@@ -502,8 +502,8 @@ const Game = {
     this.spawnAhead();
 
     const nitro = this.powers.nitro > 0 ? 1.35 : 1;
-    const ramp = Math.min(1, this.distance / 4800);
-    this.baseSpeed = 11 + 32 * ramp;
+    const ramp = Math.min(1, this.distance / 6000);
+    this.baseSpeed = 7.5 + 18 * ramp;
     const targetSpeed = this.baseSpeed * this.car.stats.speed * nitro;
     this.speed = expDamp(this.speed, targetSpeed, 2.6, dt);
     this.cameraZ += this.speed * dt;
@@ -1047,7 +1047,7 @@ const Game = {
       ctx.fill();
       ctx.restore();
     }
-    drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 1.25), this.car, {
+    drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 0.82), this.car, {
       yaw: this.viewYaw(),
       nitro: this.powers.nitro,
       flash: this.flash % 0.4 < 0.2,
@@ -1060,7 +1060,7 @@ const Game = {
     if (!this.cop || this.cop.z == null) return;
     const p = this.project(this.cop.laneX, 0, this.cop.z);
     if (!p.visible || p.y > this.h + 90) return;
-    drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 1.22), getCar("policia"), {
+    drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 0.8), getCar("policia"), {
       flash: this.flash % 0.4 < 0.2,
       yaw: this.viewYaw() * 0.65,
       skid: true,
@@ -1100,11 +1100,11 @@ const Game = {
     } else if (e.kind === "truck") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawDumpTruckAsset(ctx, p.x, p.y, this.spriteSize(p, 1.25), { brake: true });
+      drawDumpTruckAsset(ctx, p.x, p.y, this.spriteSize(p, 0.92), { brake: true });
     } else {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 1.2), e.car || randomTrafficCar(), { brake: true, skid: true });
+      drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 0.78), e.car || randomTrafficCar(), { brake: true, skid: true });
     }
   },
 

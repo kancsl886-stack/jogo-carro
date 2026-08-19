@@ -135,7 +135,7 @@ function renderShop() {
     c2d.fillStyle = "#ececec";
     c2d.fillRect(138, 86, 4, 12);
     c2d.fillRect(138, 108, 4, 14);
-    drawIsoCar(c2d, 140, 108, 42, car, { yaw: -0.06, flash: true, skid: true });
+    drawIsoCar(c2d, 140, 108, 30, car, { yaw: -0.06, flash: true, skid: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");

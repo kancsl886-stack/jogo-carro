@@ -7,6 +7,18 @@ const BIOME_LEN = 420;
 const BIOME_BLEND = 52;
 const BIOMES = [
   {
+    id: "cidade",
+    ground: "#5C4A42",
+    road: "#363636",
+    rumbleA: "#E3C54A",
+    rumbleB: "#1A1A1A",
+    dash: "#F2F2F2",
+    sidewalk: "#C4B8A8",
+    skyTop: "#6BA8D9",
+    skyBot: "#D6E7F5",
+    decor: "city",
+  },
+  {
     id: "campo",
     ground: "#4a9a3c",
     road: "#3e3e42",
@@ -17,18 +29,6 @@ const BIOMES = [
     skyTop: "#5a9ad4",
     skyBot: "#c8e0f4",
     decor: "trees",
-  },
-  {
-    id: "cidade",
-    ground: "#6a7348",
-    road: "#3a3a3e",
-    rumbleA: "#e6c200",
-    rumbleB: "#151515",
-    dash: "#ececec",
-    sidewalk: "#c4bfb4",
-    skyTop: "#6a8eae",
-    skyBot: "#c5d4e0",
-    decor: "city",
   },
   {
     id: "praia",
@@ -491,6 +491,15 @@ const Game = {
     const blh = p(-w / 2, h, d / 2);
     const brh = p(w / 2, h, d / 2);
     if (!fl.visible && !fr.visible && !bl.visible && !br.visible) return;
+    const shadow = p(0.42, 0, 0.38);
+    if (shadow.visible && fl.visible) {
+      const rw = Math.max(6, Math.abs(fr.x - fl.x) * 0.58);
+      const rh = Math.max(3, Math.abs((br.y || fl.y) - fl.y) * 0.28 + 4);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.34)";
+      ctx.beginPath();
+      ctx.ellipse(shadow.x, shadow.y, rw, rh, 0.18, 0, Math.PI * 2);
+      ctx.fill();
+    }
     this.fillQuad(ctx, fr, br, brh, frh, colors.right || colors.front);
     this.fillQuad(ctx, fl, bl, blh, flh, colors.left || colors.front);
     this.fillQuad(ctx, fl, fr, frh, flh, colors.front);
@@ -523,13 +532,21 @@ const Game = {
       const pattern = Math.random();
       const z = this.spawnZ;
       const twoLaneChance = Math.min(0.28, this.distance / 2800);
-      if (pattern < 0.62 - twoLaneChance) {
+      const city = (this.biomeAt(z) || {}).decor === "city";
+      if (city && pattern < 0.2) {
+        const a = Math.floor(Math.random() * LANES);
+        const b = (a + 1 + Math.floor(Math.random() * (LANES - 1))) % LANES;
+        this.entities.push({ kind: "barrier", lane: a, z, w: 1.45, h: 0.85, low: true });
+        this.entities.push({ kind: "barrier", lane: b, z: z + 1.35, w: 1.45, h: 0.85, low: true });
+      } else if (pattern < 0.62 - twoLaneChance) {
         const blocked = Math.floor(Math.random() * LANES);
         this.entities.push(this.makeTraffic(blocked, z));
         if (Math.random() < 0.22 + Math.min(0.2, this.distance / 4000)) {
           const other = (blocked + 1 + Math.floor(Math.random() * (LANES - 1))) % LANES;
           const roll = Math.random();
-          if (roll < 0.26) {
+          if (city && roll < 0.58) {
+            this.entities.push({ kind: "barrier", lane: other, z, w: 1.4, h: 0.7, low: true });
+          } else if (roll < 0.26) {
             this.entities.push({ kind: "cone", lane: other, z, w: 0.8, h: 0.55, low: true });
           } else if (roll < 0.46) {
             this.entities.push({ kind: "tires", lane: other, z, w: 1.15, h: 0.85, low: true });
@@ -565,9 +582,11 @@ const Game = {
 
     while (this.coinZ < this.cameraZ + 200) {
       const lane = Math.floor(Math.random() * LANES);
-      const count = 5 + Math.floor(Math.random() * 5);
+      const cityCoins = (this.biomeAt(this.coinZ) || {}).decor === "city";
+      const count = cityCoins ? 4 : 5 + Math.floor(Math.random() * 5);
+      const gap = cityCoins ? 2.6 : 3.2;
       for (let i = 0; i < count; i++) {
-        this.entities.push({ kind: "coin", lane, z: this.coinZ + i * 3.2, taken: false });
+        this.entities.push({ kind: "coin", lane, z: this.coinZ + i * gap, taken: false });
       }
       this.coinZ += 36 + Math.random() * 24;
     }
@@ -864,8 +883,8 @@ const Game = {
       rumbleB: mixHex(a.rumbleB, b.rumbleB, t),
       dash: mixHex(a.dash, b.dash, t),
       sidewalk: a.sidewalk || b.sidewalk ? mixHex(a.sidewalk || a.ground, b.sidewalk || b.ground, t) : null,
-      skyTop: mixHex(a.skyTop || "#6a8eae", b.skyTop || "#6a8eae", t),
-      skyBot: mixHex(a.skyBot || "#c5d4e0", b.skyBot || "#c5d4e0", t),
+      skyTop: mixHex(a.skyTop || "#6BA8D9", b.skyTop || "#6BA8D9", t),
+      skyBot: mixHex(a.skyBot || "#D6E7F5", b.skyBot || "#D6E7F5", t),
       decor: t > 0.42 ? b.decor : a.decor,
     };
     if (this._biomeMemo.size > 48) this._biomeMemo.clear();
@@ -960,6 +979,21 @@ const Game = {
           );
         }
       }
+
+      const skidKey = Math.abs((zMid * 17) | 0) % 19;
+      if (skidKey === 4 || skidKey === 11) {
+        const lane = ((zMid | 0) % 3) - 1;
+        const wobble = Math.sin(zMid * 0.45) * 0.16;
+        const x = lane * LANE_GAP + wobble;
+        this.fillQuad(
+          ctx,
+          p(x - 0.07, 0.016, za),
+          p(x + 0.05, 0.016, za),
+          p(x + 0.2 + wobble, 0.016, zb),
+          p(x + 0.04, 0.016, zb),
+          "rgba(12, 12, 14, 0.4)"
+        );
+      }
     }
     this.drawSideWalls3D(ctx, playerZ);
   },
@@ -1044,6 +1078,60 @@ const Game = {
         this.fillQuad(ctx, prev.roC, cur.roC, cur.ro0, prev.ro0, outer);
       }
 
+      if (near) {
+        const stripeYellow = mixHex("#E3C54A", "#8A7A28", fog * 0.55);
+        const stripeBlack = mixHex("#1A1A1A", "#3A3A3A", fog * 0.4);
+        const band0 = wallH * 0.4;
+        const band1 = wallH * 0.78;
+        if (leftOn) {
+          this.fillQuad(
+            ctx,
+            p(-half - 0.012, band0, prev.zOff),
+            p(-half - 0.012, band0, cur.zOff),
+            p(-half - 0.012, band1, cur.zOff),
+            p(-half - 0.012, band1, prev.zOff),
+            stripeYellow
+          );
+        }
+        if (rightOn) {
+          this.fillQuad(
+            ctx,
+            p(half + 0.012, band0, prev.zOff),
+            p(half + 0.012, band0, cur.zOff),
+            p(half + 0.012, band1, cur.zOff),
+            p(half + 0.012, band1, prev.zOff),
+            stripeYellow
+          );
+        }
+        const period = 0.62;
+        const zMin = Math.min(prev.z, cur.z);
+        const zMax = Math.max(prev.z, cur.z);
+        for (let sz = Math.floor(zMin / period) * period; sz <= zMax + period * 0.01; sz += period) {
+          if ((((sz / period) | 0) & 1) === 0) continue;
+          const jz = sz - playerZ;
+          if (leftOn) {
+            this.fillQuad(
+              ctx,
+              p(-half - 0.02, band0, jz - 0.06),
+              p(-half - 0.02, band0, jz + 0.14),
+              p(-half - 0.02, band1, jz + 0.34),
+              p(-half - 0.02, band1, jz + 0.12),
+              stripeBlack
+            );
+          }
+          if (rightOn) {
+            this.fillQuad(
+              ctx,
+              p(half + 0.02, band0, jz - 0.06),
+              p(half + 0.02, band0, jz + 0.14),
+              p(half + 0.02, band1, jz + 0.34),
+              p(half + 0.02, band1, jz + 0.12),
+              stripeBlack
+            );
+          }
+        }
+      }
+
       const a = Math.floor(prev.z / jointEvery);
       const b = Math.floor(cur.z / jointEvery);
       if (near && a !== b && cur.liT.s > 12) {
@@ -1078,8 +1166,8 @@ const Game = {
     if (!p.visible || p.s < 5 || p.y > this.h + 50) return;
     const decor = it.decor;
     if (decor === "city") {
-      if (it.seed % 5 === 0) this.drawLamp3D(ctx, x, it.z, it.side);
-      else this.drawBuilding3D(ctx, x, it.z, it.seed);
+      if (it.side < 0 && it.seed % 4 === 0) this.drawLamp3D(ctx, x, it.z, it.side);
+      else this.drawBuilding3D(ctx, x, it.z, it.seed, it.side);
     } else if (decor === "beach") {
       this.drawPalm3D(ctx, x, it.z);
     } else if (decor === "forest") {
@@ -1098,35 +1186,36 @@ const Game = {
     }
   },
 
-  drawBuilding3D(ctx, x, z, seed) {
-    const floors = 3 + (seed % 6);
-    const w = 1.7 + (seed % 4) * 0.18;
-    const d = 1.35 + (seed % 3) * 0.18;
-    const h = 2.3 + floors * 0.82;
-    const walls = ["#8a4a3a", "#a05640", "#7a4538", "#9a5a48"];
+  drawBuilding3D(ctx, x, z, seed, side) {
+    const tall = side == null || side > 0;
+    const floors = (tall ? 5 : 3) + (seed % (tall ? 7 : 4));
+    const w = 1.85 + (seed % 4) * 0.16;
+    const d = 1.4 + (seed % 3) * 0.16;
+    const h = 2.6 + floors * 0.86;
+    const walls = ["#8D5545", "#7A4A3C", "#9A6352", "#6E4338"];
     const wall = walls[seed % walls.length];
     this.drawBox3D(ctx, x, 0, z, w, h, d, {
-      left: shadeHex(wall, 0.18),
-      right: shadeHex(wall, -0.34),
+      left: shadeHex(wall, 0.2),
+      right: shadeHex(wall, -0.36),
       front: wall,
-      top: shadeHex(wall, -0.16),
+      top: shadeHex(wall, -0.18),
     });
     const probe = this.project(x, 0, z);
     if (!probe.visible || probe.s < 14) return;
     const cols = 3 + (seed % 2);
-    const rows = Math.max(2, floors - 1);
+    const rows = Math.max(3, floors - 1);
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const wx = x - w * 0.3 + c * (w * 0.3);
-        const wy = 0.65 + r * (h / (rows + 0.55));
+        const wy = 0.7 + r * (h / (rows + 0.7));
         const faceZ = z - d / 2 - 0.02;
         this.fillQuad(
           ctx,
-          this.project(wx - 0.12, wy, faceZ),
-          this.project(wx + 0.12, wy, faceZ),
-          this.project(wx + 0.12, wy + 0.3, faceZ),
-          this.project(wx - 0.12, wy + 0.3, faceZ),
-          (seed + r + c) % 3 === 0 ? "#ffe08a" : "#c8e4ff"
+          this.project(wx - 0.11, wy, faceZ),
+          this.project(wx + 0.11, wy, faceZ),
+          this.project(wx + 0.11, wy + 0.28, faceZ),
+          this.project(wx - 0.11, wy + 0.28, faceZ),
+          (seed + r + c) % 11 === 0 ? "#d8c48a" : "#2A3238"
         );
       }
     }

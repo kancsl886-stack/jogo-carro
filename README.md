@@ -62,6 +62,10 @@ Cada carro muda três atributos:
 
 O progresso (moedas, recorde e garagem) fica salvo no `localStorage` do navegador.
 
+## Identidade visual
+
+A direção de arte (paleta HEX, assets, level design e notas de engine) está em **`docs/ART_BIBLE.md`**, extraída da referência urbana da Cidade.
+
 ## Power-ups
 
 - **Ímã (M)** — puxa moedas das faixas próximas

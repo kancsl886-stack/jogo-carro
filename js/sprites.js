@@ -25,31 +25,38 @@ function drawIsoCar(ctx, x, y, scale, car, extras) {
 
 function drawAssetCoin(ctx, x, y, r) {
   const rr = Math.max(5, r);
+  const spin = typeof Game !== "undefined" && Game.time != null ? Math.abs(Math.cos(Game.time * 4.2 + x * 0.03)) : 0.92;
+  const rx = rr * (0.28 + 0.72 * spin);
   if (rr > 9) {
-    const glow = ctx.createRadialGradient(x, y, rr * 0.2, x, y, rr * 2.0);
-    glow.addColorStop(0, "rgba(255, 214, 64, 0.85)");
-    glow.addColorStop(1, "rgba(255, 160, 0, 0)");
+    const glow = ctx.createRadialGradient(x, y, rr * 0.15, x, y, rr * 2.15);
+    glow.addColorStop(0, "rgba(241, 196, 15, 0.9)");
+    glow.addColorStop(0.45, "rgba(241, 196, 15, 0.28)");
+    glow.addColorStop(1, "rgba(241, 160, 0, 0)");
     ctx.beginPath();
-    ctx.arc(x, y, rr * 2.0, 0, Math.PI * 2);
+    ctx.ellipse(x, y, rx * 2.05, rr * 2.05, 0, 0, Math.PI * 2);
     ctx.fillStyle = glow;
     ctx.fill();
   }
   ctx.beginPath();
-  ctx.arc(x, y, rr, 0, Math.PI * 2);
-  ctx.fillStyle = "#ffd24a";
+  ctx.ellipse(x, y, rx, rr, 0, 0, Math.PI * 2);
+  const metal = ctx.createLinearGradient(x - rx, y - rr, x + rx, y + rr);
+  metal.addColorStop(0, "#FFE566");
+  metal.addColorStop(0.42, "#F1C40F");
+  metal.addColorStop(1, "#B8860B");
+  ctx.fillStyle = metal;
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x, y, rr * 0.72, 0, Math.PI * 2);
-  ctx.strokeStyle = "#d9a020";
+  ctx.ellipse(x, y, rx * 0.72, rr * 0.72, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = "#C9A227";
   ctx.lineWidth = Math.max(1, rr * 0.08);
   ctx.stroke();
-  if (rr > 7) {
+  if (rr > 7 && spin > 0.35) {
     ctx.beginPath();
     ctx.moveTo(x, y - rr * 0.42);
-    ctx.lineTo(x + rr * 0.34, y - rr * 0.12);
-    ctx.lineTo(x + rr * 0.22, y + rr * 0.36);
-    ctx.lineTo(x - rr * 0.22, y + rr * 0.36);
-    ctx.lineTo(x - rr * 0.34, y - rr * 0.12);
+    ctx.lineTo(x + rx * 0.42, y - rr * 0.12);
+    ctx.lineTo(x + rx * 0.28, y + rr * 0.36);
+    ctx.lineTo(x - rx * 0.28, y + rr * 0.36);
+    ctx.lineTo(x - rx * 0.42, y - rr * 0.12);
     ctx.closePath();
     ctx.fillStyle = "#8a4e00";
     ctx.fill();

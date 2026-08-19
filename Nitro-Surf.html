@@ -814,6 +814,105 @@ body.is-touch .hint-touch {
   border-radius: 50%;
 }
 
+.touch-controls {
+  display: none;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 9;
+}
+
+body.is-touch .touch-controls {
+  display: flex;
+}
+
+body.is-touch .hud {
+  padding-bottom: calc(136px + env(safe-area-inset-bottom));
+}
+
+.joystick {
+  pointer-events: auto;
+  width: 128px;
+  height: 128px;
+  position: relative;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.joystick-ring {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.38);
+  background: radial-gradient(circle at 34% 28%, rgba(60, 240, 255, 0.22), rgba(8, 12, 20, 0.58));
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.4), 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+.joystick.on .joystick-ring {
+  border-color: rgba(60, 240, 255, 0.7);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.4), 0 0 18px rgba(60, 240, 255, 0.28);
+}
+
+.joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 32% 28%, #f7fdff, #6fd3e4 46%, #185e6c);
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.jump-btn {
+  pointer-events: auto;
+  width: 76px;
+  height: 76px;
+  margin: 0 6px 10px 0;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  background: radial-gradient(circle at 35% 28%, rgba(255, 209, 102, 0.5), rgba(28, 18, 6, 0.72));
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+  color: #fff;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jump-btn:active {
+  transform: scale(0.94);
+  border-color: var(--gold);
+}
+
+.jump-arrow {
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 0 auto;
+  border-left: 4px solid #fff;
+  border-top: 4px solid #fff;
+  transform: rotate(45deg) translate(4px, 4px);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
+}
+
+@media (pointer: coarse) {
+  .touch-controls {
+    display: flex;
+  }
+
+  .hud {
+    padding-bottom: calc(136px + env(safe-area-inset-bottom));
+  }
+}
+
 .power-ico.magnet::after {
   content: "";
   position: absolute;
@@ -1069,6 +1168,15 @@ body.is-touch .hint-touch {
           <div class="speed-bar"><i id="speed-fill"></i></div>
         </div>
       </div>
+      <div id="touch-controls" class="touch-controls">
+        <div id="joystick" class="joystick" role="slider" aria-label="Volante" aria-valuemin="-1" aria-valuemax="1">
+          <div class="joystick-ring"></div>
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+        <button id="btn-jump" class="jump-btn" type="button" data-i18n-aria="jump" aria-label="Pular">
+          <span class="jump-arrow" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
 
     <div id="screen-menu" class="screen menu-home">
@@ -1102,8 +1210,8 @@ body.is-touch .hint-touch {
           </div>
           <button id="btn-menu" class="btn ghost" type="button" data-i18n="menu">Menu</button>
         </div>
-        <p class="hint hint-desktop" data-i18n="hint">← → virar · ↑ pular · segure o lado</p>
-        <p class="hint hint-touch" data-i18n="hintTouch">Segure os lados para virar · deslize para cima para pular</p>
+        <p class="hint hint-desktop" data-i18n="hint">← → virar · ↑ pular</p>
+        <p class="hint hint-touch" data-i18n="hintTouch">Joystick para virar · botão para pular</p>
       </div>
     </div>
 
@@ -2846,7 +2954,7 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, no asfalto",
     controls: "Controles",
     controlsText:
-      "Segure ← → ou A/D para virar o volante. O carro gira e vai atravessando a pista, sem pular de faixa. Pule obstáculos baixos com ↑ ou W. No celular, segure o lado da tela para virar e deslize para cima para pular. Nas curvas, contra-esterce.",
+      "Segure ← → ou A/D para virar o volante. O carro gira e vai atravessando a pista, sem pular de faixa. Pule obstáculos baixos com ↑ ou W. No celular, use o joystick para virar e o botão da direita para pular. Nas curvas, contra-esterce.",
     goal: "Objetivo",
     goalText:
       "Corra o máximo possível sem bater e sem deixar a polícia te alcançar. Moedas compram carros. Cada modelo tem velocidade e curva diferentes.",
@@ -2867,8 +2975,9 @@ const I18N = {
     best: "Recorde",
     coins: "Moedas",
     newRecord: "Novo recorde!",
-    hint: "← → virar · ↑ pular · segure o lado",
-    hintTouch: "Segure os lados para virar · deslize para cima para pular",
+    hint: "← → virar · ↑ pular",
+    hintTouch: "Joystick para virar · botão para pular",
+    jump: "Pular",
     all: "Todos",
     owned: "Meus",
     comum: "Comum",
@@ -2916,7 +3025,7 @@ const I18N = {
     howtoSub: "Subway Surfers style, on the road",
     controls: "Controls",
     controlsText:
-      "Hold ← → or A/D to steer. The car turns and slides across the road instead of jumping lanes. Jump low obstacles with ↑ or W. On mobile, hold a side of the screen to turn and swipe up to jump.",
+      "Hold ← → or A/D to steer. The car turns and slides across the road instead of jumping lanes. Jump low obstacles with ↑ or W. On mobile, use the joystick to steer and the right button to jump.",
     goal: "Goal",
     goalText:
       "Run as far as you can without crashing or getting caught by the police. Coins buy cars. Each model has different speed and cornering.",
@@ -2938,7 +3047,8 @@ const I18N = {
     coins: "Coins",
     newRecord: "New record!",
     hint: "← → steer · ↑ jump · hold a side",
-    hintTouch: "Hold the sides to steer · swipe up to jump",
+    hintTouch: "Joystick to steer · button to jump",
+    jump: "Jump",
     all: "All",
     owned: "Mine",
     comum: "Common",
@@ -2986,7 +3096,7 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, en el asfalto",
     controls: "Controles",
     controlsText:
-      "Mantén ← → o A/D para girar el volante. El auto vira y cruza la pista, sin saltar de carril. Salta obstáculos bajos con ↑ o W. En el celular, mantén un lado de la pantalla para virar y desliza hacia arriba para saltar.",
+      "Mantén ← → o A/D para girar el volante. El auto vira y cruza la pista, sin saltar de carril. Salta obstáculos bajos con ↑ o W. En el celular, usa el joystick para virar y el botón de la derecha para saltar.",
     goal: "Objetivo",
     goalText:
       "Corre lo más lejos posible sin chocar y sin que te alcance la policía. Las monedas compran autos. Cada modelo tiene velocidad y curva distintas.",
@@ -3008,7 +3118,8 @@ const I18N = {
     coins: "Monedas",
     newRecord: "¡Nuevo récord!",
     hint: "← → virar · ↑ saltar · mantén el lado",
-    hintTouch: "Mantén los lados para virar · desliza hacia arriba para saltar",
+    hintTouch: "Joystick para virar · botón para saltar",
+    jump: "Saltar",
     all: "Todos",
     owned: "Míos",
     comum: "Común",
@@ -3242,6 +3353,7 @@ const Game = {
     this.acc = 0;
     this.keys = this.keys || { left: false, right: false };
     this.pointerSteer = null;
+    this.resetJoystick();
     this.prevCameraZ = 0;
     this.prevLaneX = 0;
     this.prevYaw = 0;
@@ -3292,6 +3404,20 @@ const Game = {
     if (this._idle && !this.running) this.drawMenuScene();
   },
 
+  isTouch() {
+    return typeof document !== "undefined" && document.body.classList.contains("is-touch");
+  },
+
+  resetJoystick() {
+    this.joyActive = false;
+    this.joyId = null;
+    this._joyNy = 0;
+    const knob = typeof document !== "undefined" ? document.getElementById("joystick-knob") : null;
+    const stick = typeof document !== "undefined" ? document.getElementById("joystick") : null;
+    if (knob) knob.style.transform = "translate(-50%, -50%)";
+    if (stick) stick.classList.remove("on");
+  },
+
   bindInput() {
     this.keys = this.keys || { left: false, right: false };
     const isLeft = (key) => ["ArrowLeft", "a", "A"].includes(key);
@@ -3310,6 +3436,68 @@ const Game = {
       if (isRight(e.key)) this.keys.right = false;
     });
 
+    const stick = document.getElementById("joystick");
+    const knob = document.getElementById("joystick-knob");
+    const jumpBtn = document.getElementById("btn-jump");
+
+    const joyOrigin = () => {
+      const r = stick.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, max: r.width * 0.36 };
+    };
+
+    const applyJoy = (clientX, clientY) => {
+      if (!stick || !this.running || this.paused || this.dead) return;
+      const o = joyOrigin();
+      let dx = clientX - o.x;
+      let dy = clientY - o.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > o.max && dist > 0) {
+        dx = (dx / dist) * o.max;
+        dy = (dy / dist) * o.max;
+      }
+      const nx = o.max > 0 ? dx / o.max : 0;
+      const ny = o.max > 0 ? dy / o.max : 0;
+      if (knob) knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      const dead = 0.08;
+      const shaped = Math.abs(nx) < dead ? 0 : Math.sign(nx) * Math.pow(Math.abs(nx), 0.72);
+      this.pointerSteer = Math.max(-1, Math.min(1, shaped));
+      this._joyNy = ny;
+    };
+
+    if (stick) {
+      stick.addEventListener("pointerdown", (e) => {
+        if (!this.running || this.paused || this.dead) return;
+        e.preventDefault();
+        e.stopPropagation();
+        stick.setPointerCapture(e.pointerId);
+        this.joyActive = true;
+        this.joyId = e.pointerId;
+        stick.classList.add("on");
+        applyJoy(e.clientX, e.clientY);
+      });
+      stick.addEventListener("pointermove", (e) => {
+        if (!this.joyActive || e.pointerId !== this.joyId) return;
+        e.preventDefault();
+        applyJoy(e.clientX, e.clientY);
+      });
+      const endJoy = (e) => {
+        if (e && this.joyId != null && e.pointerId !== this.joyId) return;
+        if (this.joyActive && this._joyNy < -0.62 && this.running && !this.paused && !this.dead) this.doJump();
+        this.pointerSteer = null;
+        this.resetJoystick();
+      };
+      stick.addEventListener("pointerup", endJoy);
+      stick.addEventListener("pointercancel", endJoy);
+    }
+
+    if (jumpBtn) {
+      jumpBtn.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.running && !this.paused && !this.dead) this.doJump();
+      });
+    }
+
     let sx = 0;
     let sy = 0;
     let tracking = false;
@@ -3322,15 +3510,23 @@ const Game = {
       tracking = true;
       sx = e.clientX;
       sy = e.clientY;
+      if (this.isTouch()) return;
       if (this.running && !this.paused && !this.dead) this.pointerSteer = steerFromX(e.clientX);
     });
     window.addEventListener("pointermove", (e) => {
-      if (!tracking) return;
+      if (!tracking || this.isTouch()) return;
       if (this.running && !this.paused && !this.dead) this.pointerSteer = steerFromX(e.clientX);
     });
     window.addEventListener("pointerup", (e) => {
       if (!tracking) return;
       tracking = false;
+      if (this.isTouch()) {
+        if (!this.running || this.paused || this.dead) return;
+        const dy = e.clientY - sy;
+        const dx = e.clientX - sx;
+        if (dy < -48 && Math.abs(dy) > Math.abs(dx) * 1.1) this.doJump();
+        return;
+      }
       this.pointerSteer = null;
       if (!this.running || this.paused || this.dead) return;
       const dy = e.clientY - sy;
@@ -3339,7 +3535,7 @@ const Game = {
     });
     window.addEventListener("pointercancel", () => {
       tracking = false;
-      this.pointerSteer = null;
+      if (!this.isTouch()) this.pointerSteer = null;
     });
   },
 
@@ -3370,6 +3566,8 @@ const Game = {
 
   pause() {
     this.paused = true;
+    this.pointerSteer = null;
+    this.resetJoystick();
   },
 
   resume() {
@@ -3385,6 +3583,7 @@ const Game = {
     this.paused = false;
     this.keys = { left: false, right: false };
     this.pointerSteer = null;
+    this.resetJoystick();
   },
 
   loop(now) {
@@ -3678,17 +3877,18 @@ const Game = {
     this.oil = Math.max(0, (this.oil || 0) - dt);
     const input = this.readSteer();
     if (Math.abs(input) > 0.35 && Math.abs(this.steer) <= 0.35) Sfx.lane();
-    this.steer = expDamp(this.steer, input, 9, dt);
-    const maxYaw = 0.18 + 0.07 * grip;
+    const touch = this.isTouch();
+    this.steer = expDamp(this.steer, input, touch ? 13 : 9, dt);
+    const maxYaw = (0.18 + 0.07 * grip) * (touch ? 1.14 : 1);
     const wantYaw = this.steer * maxYaw;
-    this.yaw = expDamp(this.yaw, wantYaw, 4.2 + 2.2 * grip, dt);
-    const slide = 2.6 + 3.0 * grip + this.speed * 0.014;
+    this.yaw = expDamp(this.yaw, wantYaw, (4.2 + 2.2 * grip) * (touch ? 1.22 : 1), dt);
+    const slide = (2.6 + 3.0 * grip + this.speed * 0.014) * (touch ? 1.28 : 1);
     const desiredVx = Math.sin(this.yaw) * slide;
     const kappa = this.roadBend(this.cameraZ + 18) - this.roadBend(this.cameraZ + 6);
     let curve = -kappa * 1.15;
     if (curve > 1.6) curve = 1.6;
     if (curve < -1.6) curve = -1.6;
-    this.vx = expDamp(this.vx, desiredVx + curve, 5.5 + 2.8 * grip, dt);
+    this.vx = expDamp(this.vx, desiredVx + curve, (5.5 + 2.8 * grip) * (touch ? 1.2 : 1), dt);
     if (this.oil > 0) this.yaw += Math.sin(this.time * 16) * 0.014;
     this.laneX += this.vx * dt;
     this.lane = Math.max(0, Math.min(LANES - 1, Math.round(this.laneX / LANE_GAP + 1)));

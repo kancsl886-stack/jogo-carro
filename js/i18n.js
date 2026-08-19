@@ -19,7 +19,7 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, no asfalto",
     controls: "Controles",
     controlsText:
-      "Segure ← → ou A/D para virar o volante. O carro gira e vai atravessando a pista, sem pular de faixa. Pule obstáculos baixos com ↑ ou W. No celular, segure o lado da tela para virar e deslize para cima para pular. Nas curvas, contra-esterce.",
+      "Segure ← → ou A/D para virar o volante. O carro gira e vai atravessando a pista, sem pular de faixa. Pule obstáculos baixos com ↑ ou W. No celular, use o joystick para virar e o botão da direita para pular. Nas curvas, contra-esterce.",
     goal: "Objetivo",
     goalText:
       "Corra o máximo possível sem bater e sem deixar a polícia te alcançar. Moedas compram carros. Cada modelo tem velocidade e curva diferentes.",
@@ -40,8 +40,9 @@ const I18N = {
     best: "Recorde",
     coins: "Moedas",
     newRecord: "Novo recorde!",
-    hint: "← → virar · ↑ pular · segure o lado",
-    hintTouch: "Segure os lados para virar · deslize para cima para pular",
+    hint: "← → virar · ↑ pular",
+    hintTouch: "Joystick para virar · botão para pular",
+    jump: "Pular",
     all: "Todos",
     owned: "Meus",
     comum: "Comum",
@@ -89,7 +90,7 @@ const I18N = {
     howtoSub: "Subway Surfers style, on the road",
     controls: "Controls",
     controlsText:
-      "Hold ← → or A/D to steer. The car turns and slides across the road instead of jumping lanes. Jump low obstacles with ↑ or W. On mobile, hold a side of the screen to turn and swipe up to jump.",
+      "Hold ← → or A/D to steer. The car turns and slides across the road instead of jumping lanes. Jump low obstacles with ↑ or W. On mobile, use the joystick to steer and the right button to jump.",
     goal: "Goal",
     goalText:
       "Run as far as you can without crashing or getting caught by the police. Coins buy cars. Each model has different speed and cornering.",
@@ -111,7 +112,8 @@ const I18N = {
     coins: "Coins",
     newRecord: "New record!",
     hint: "← → steer · ↑ jump · hold a side",
-    hintTouch: "Hold the sides to steer · swipe up to jump",
+    hintTouch: "Joystick to steer · button to jump",
+    jump: "Jump",
     all: "All",
     owned: "Mine",
     comum: "Common",
@@ -159,7 +161,7 @@ const I18N = {
     howtoSub: "Estilo Subway Surfers, en el asfalto",
     controls: "Controles",
     controlsText:
-      "Mantén ← → o A/D para girar el volante. El auto vira y cruza la pista, sin saltar de carril. Salta obstáculos bajos con ↑ o W. En el celular, mantén un lado de la pantalla para virar y desliza hacia arriba para saltar.",
+      "Mantén ← → o A/D para girar el volante. El auto vira y cruza la pista, sin saltar de carril. Salta obstáculos bajos con ↑ o W. En el celular, usa el joystick para virar y el botón de la derecha para saltar.",
     goal: "Objetivo",
     goalText:
       "Corre lo más lejos posible sin chocar y sin que te alcance la policía. Las monedas compran autos. Cada modelo tiene velocidad y curva distintas.",
@@ -181,7 +183,8 @@ const I18N = {
     coins: "Monedas",
     newRecord: "¡Nuevo récord!",
     hint: "← → virar · ↑ saltar · mantén el lado",
-    hintTouch: "Mantén los lados para virar · desliza hacia arriba para saltar",
+    hintTouch: "Joystick para virar · botón para saltar",
+    jump: "Saltar",
     all: "Todos",
     owned: "Míos",
     comum: "Común",

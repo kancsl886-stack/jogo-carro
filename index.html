@@ -17,7 +17,7 @@
     <link rel="icon" href="icons/nitro-surf.png" />
     <link rel="apple-touch-icon" href="icons/nitro-surf-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/style.css?v=ref28" />
+    <link rel="stylesheet" href="css/style.css?v=ref29" />
   </head>
   <body>
     <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
@@ -60,6 +60,15 @@
           <div class="speed-bar"><i id="speed-fill"></i></div>
         </div>
       </div>
+      <div id="touch-controls" class="touch-controls">
+        <div id="joystick" class="joystick" role="slider" aria-label="Volante" aria-valuemin="-1" aria-valuemax="1">
+          <div class="joystick-ring"></div>
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+        <button id="btn-jump" class="jump-btn" type="button" data-i18n-aria="jump" aria-label="Pular">
+          <span class="jump-arrow" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
 
     <div id="screen-menu" class="screen menu-home">
@@ -93,8 +102,8 @@
           </div>
           <button id="btn-menu" class="btn ghost" type="button" data-i18n="menu">Menu</button>
         </div>
-        <p class="hint hint-desktop" data-i18n="hint">← → virar · ↑ pular · segure o lado</p>
-        <p class="hint hint-touch" data-i18n="hintTouch">Segure os lados para virar · deslize para cima para pular</p>
+        <p class="hint hint-desktop" data-i18n="hint">← → virar · ↑ pular</p>
+        <p class="hint hint-touch" data-i18n="hintTouch">Joystick para virar · botão para pular</p>
       </div>
     </div>
 
@@ -199,12 +208,12 @@
 
     <div id="toast" class="toast hidden" role="status"></div>
 
-    <script src="js/cars.js?v=ref28"></script>
-    <script src="js/sprites.js?v=ref28"></script>
-    <script src="js/storage.js?v=ref28"></script>
-    <script src="js/i18n.js?v=ref28"></script>
-    <script src="js/audio.js?v=ref28"></script>
-    <script src="js/game.js?v=ref28"></script>
-    <script src="js/ui.js?v=ref28"></script>
+    <script src="js/cars.js?v=ref29"></script>
+    <script src="js/sprites.js?v=ref29"></script>
+    <script src="js/storage.js?v=ref29"></script>
+    <script src="js/i18n.js?v=ref29"></script>
+    <script src="js/audio.js?v=ref29"></script>
+    <script src="js/game.js?v=ref29"></script>
+    <script src="js/ui.js?v=ref29"></script>
   </body>
 </html>

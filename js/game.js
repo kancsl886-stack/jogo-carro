@@ -125,6 +125,7 @@ const Game = {
     this.acc = 0;
     this.keys = this.keys || { left: false, right: false };
     this.pointerSteer = null;
+    this.resetJoystick();
     this.prevCameraZ = 0;
     this.prevLaneX = 0;
     this.prevYaw = 0;
@@ -175,6 +176,20 @@ const Game = {
     if (this._idle && !this.running) this.drawMenuScene();
   },
 
+  isTouch() {
+    return typeof document !== "undefined" && document.body.classList.contains("is-touch");
+  },
+
+  resetJoystick() {
+    this.joyActive = false;
+    this.joyId = null;
+    this._joyNy = 0;
+    const knob = typeof document !== "undefined" ? document.getElementById("joystick-knob") : null;
+    const stick = typeof document !== "undefined" ? document.getElementById("joystick") : null;
+    if (knob) knob.style.transform = "translate(-50%, -50%)";
+    if (stick) stick.classList.remove("on");
+  },
+
   bindInput() {
     this.keys = this.keys || { left: false, right: false };
     const isLeft = (key) => ["ArrowLeft", "a", "A"].includes(key);
@@ -193,6 +208,68 @@ const Game = {
       if (isRight(e.key)) this.keys.right = false;
     });
 
+    const stick = document.getElementById("joystick");
+    const knob = document.getElementById("joystick-knob");
+    const jumpBtn = document.getElementById("btn-jump");
+
+    const joyOrigin = () => {
+      const r = stick.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, max: r.width * 0.36 };
+    };
+
+    const applyJoy = (clientX, clientY) => {
+      if (!stick || !this.running || this.paused || this.dead) return;
+      const o = joyOrigin();
+      let dx = clientX - o.x;
+      let dy = clientY - o.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > o.max && dist > 0) {
+        dx = (dx / dist) * o.max;
+        dy = (dy / dist) * o.max;
+      }
+      const nx = o.max > 0 ? dx / o.max : 0;
+      const ny = o.max > 0 ? dy / o.max : 0;
+      if (knob) knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      const dead = 0.08;
+      const shaped = Math.abs(nx) < dead ? 0 : Math.sign(nx) * Math.pow(Math.abs(nx), 0.72);
+      this.pointerSteer = Math.max(-1, Math.min(1, shaped));
+      this._joyNy = ny;
+    };
+
+    if (stick) {
+      stick.addEventListener("pointerdown", (e) => {
+        if (!this.running || this.paused || this.dead) return;
+        e.preventDefault();
+        e.stopPropagation();
+        stick.setPointerCapture(e.pointerId);
+        this.joyActive = true;
+        this.joyId = e.pointerId;
+        stick.classList.add("on");
+        applyJoy(e.clientX, e.clientY);
+      });
+      stick.addEventListener("pointermove", (e) => {
+        if (!this.joyActive || e.pointerId !== this.joyId) return;
+        e.preventDefault();
+        applyJoy(e.clientX, e.clientY);
+      });
+      const endJoy = (e) => {
+        if (e && this.joyId != null && e.pointerId !== this.joyId) return;
+        if (this.joyActive && this._joyNy < -0.62 && this.running && !this.paused && !this.dead) this.doJump();
+        this.pointerSteer = null;
+        this.resetJoystick();
+      };
+      stick.addEventListener("pointerup", endJoy);
+      stick.addEventListener("pointercancel", endJoy);
+    }
+
+    if (jumpBtn) {
+      jumpBtn.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.running && !this.paused && !this.dead) this.doJump();
+      });
+    }
+
     let sx = 0;
     let sy = 0;
     let tracking = false;
@@ -205,15 +282,23 @@ const Game = {
       tracking = true;
       sx = e.clientX;
       sy = e.clientY;
+      if (this.isTouch()) return;
       if (this.running && !this.paused && !this.dead) this.pointerSteer = steerFromX(e.clientX);
     });
     window.addEventListener("pointermove", (e) => {
-      if (!tracking) return;
+      if (!tracking || this.isTouch()) return;
       if (this.running && !this.paused && !this.dead) this.pointerSteer = steerFromX(e.clientX);
     });
     window.addEventListener("pointerup", (e) => {
       if (!tracking) return;
       tracking = false;
+      if (this.isTouch()) {
+        if (!this.running || this.paused || this.dead) return;
+        const dy = e.clientY - sy;
+        const dx = e.clientX - sx;
+        if (dy < -48 && Math.abs(dy) > Math.abs(dx) * 1.1) this.doJump();
+        return;
+      }
       this.pointerSteer = null;
       if (!this.running || this.paused || this.dead) return;
       const dy = e.clientY - sy;
@@ -222,7 +307,7 @@ const Game = {
     });
     window.addEventListener("pointercancel", () => {
       tracking = false;
-      this.pointerSteer = null;
+      if (!this.isTouch()) this.pointerSteer = null;
     });
   },
 
@@ -253,6 +338,8 @@ const Game = {
 
   pause() {
     this.paused = true;
+    this.pointerSteer = null;
+    this.resetJoystick();
   },
 
   resume() {
@@ -268,6 +355,7 @@ const Game = {
     this.paused = false;
     this.keys = { left: false, right: false };
     this.pointerSteer = null;
+    this.resetJoystick();
   },
 
   loop(now) {
@@ -561,17 +649,18 @@ const Game = {
     this.oil = Math.max(0, (this.oil || 0) - dt);
     const input = this.readSteer();
     if (Math.abs(input) > 0.35 && Math.abs(this.steer) <= 0.35) Sfx.lane();
-    this.steer = expDamp(this.steer, input, 9, dt);
-    const maxYaw = 0.18 + 0.07 * grip;
+    const touch = this.isTouch();
+    this.steer = expDamp(this.steer, input, touch ? 13 : 9, dt);
+    const maxYaw = (0.18 + 0.07 * grip) * (touch ? 1.14 : 1);
     const wantYaw = this.steer * maxYaw;
-    this.yaw = expDamp(this.yaw, wantYaw, 4.2 + 2.2 * grip, dt);
-    const slide = 2.6 + 3.0 * grip + this.speed * 0.014;
+    this.yaw = expDamp(this.yaw, wantYaw, (4.2 + 2.2 * grip) * (touch ? 1.22 : 1), dt);
+    const slide = (2.6 + 3.0 * grip + this.speed * 0.014) * (touch ? 1.28 : 1);
     const desiredVx = Math.sin(this.yaw) * slide;
     const kappa = this.roadBend(this.cameraZ + 18) - this.roadBend(this.cameraZ + 6);
     let curve = -kappa * 1.15;
     if (curve > 1.6) curve = 1.6;
     if (curve < -1.6) curve = -1.6;
-    this.vx = expDamp(this.vx, desiredVx + curve, 5.5 + 2.8 * grip, dt);
+    this.vx = expDamp(this.vx, desiredVx + curve, (5.5 + 2.8 * grip) * (touch ? 1.2 : 1), dt);
     if (this.oil > 0) this.yaw += Math.sin(this.time * 16) * 0.014;
     this.laneX += this.vx * dt;
     this.lane = Math.max(0, Math.min(LANES - 1, Math.round(this.laneX / LANE_GAP + 1)));

@@ -346,10 +346,10 @@ const Game = {
     }
     const s = 268 / dz;
     const k = Math.min(W, H * 1.08);
-    const xScale = s * (k / 980);
+    const xScale = s * (k / 860);
     return {
       x: W * 0.5 + dx * xScale,
-      y: H * 0.155 + dy * s * (H / 520),
+      y: H * 0.155 + dy * s * (H / 560),
       s,
       scale: s,
       z: dz,
@@ -701,12 +701,18 @@ const Game = {
     sky.addColorStop(1, scene.skyBot || "#c5d4e0");
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
-    const sun = ctx.createRadialGradient(W * 0.1, H * 0.1, 8, W * 0.1, H * 0.1, W * 0.62);
-    sun.addColorStop(0, "rgba(255, 244, 210, 0.72)");
-    sun.addColorStop(0.32, "rgba(255, 220, 160, 0.2)");
+    const sunX = W * 0.12;
+    const sunY = H * 0.1;
+    const sun = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, W * 0.7);
+    sun.addColorStop(0, "rgba(255, 244, 210, 0.8)");
+    sun.addColorStop(0.28, "rgba(255, 220, 160, 0.22)");
     sun.addColorStop(1, "rgba(255, 200, 120, 0)");
     ctx.fillStyle = sun;
     ctx.fillRect(0, 0, W, horizon + 90);
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, Math.max(10, H * 0.028), 0, Math.PI * 2);
+    ctx.fillStyle = "#fff4cc";
+    ctx.fill();
     ctx.fillStyle = scene.ground;
     ctx.fillRect(0, horizon, W, H - horizon);
   },
@@ -787,10 +793,10 @@ const Game = {
   collectScenery() {
     const playerZ = this.playerZ();
     const items = [];
-    const start = Math.floor((playerZ - 2) / 7);
-    const end = Math.floor((playerZ + 52) / 7);
+    const start = Math.floor((playerZ - 2) / 5);
+    const end = Math.floor((playerZ + 52) / 5);
     for (let i = start; i <= end; i++) {
-      const z = i * 7;
+      const z = i * 5;
       const scene = this.biomeAt(z);
       const seed = Math.abs((i * 1103515245 + 12345) | 0);
       items.push({ z, side: -1, seed, decor: scene.decor });
@@ -800,7 +806,7 @@ const Game = {
   },
 
   drawSceneryItem(ctx, it) {
-    const x = it.side * (4.9 + (it.seed % 6) * 0.4);
+    const x = it.side * (4.22 + (it.seed % 3) * 0.12);
     const p = this.project(x, 0, it.z);
     if (!p.visible || p.s < 5 || p.y > this.h + 50) return;
     const decor = it.decor;
@@ -831,8 +837,8 @@ const Game = {
 
   drawBuilding3D(ctx, x, z, seed) {
     const floors = 3 + (seed % 6);
-    const w = 2.05 + (seed % 5) * 0.28;
-    const d = 1.55 + (seed % 3) * 0.22;
+    const w = 1.7 + (seed % 4) * 0.18;
+    const d = 1.35 + (seed % 3) * 0.18;
     const h = 2.3 + floors * 0.82;
     const walls = ["#8a5a48", "#6d7380", "#9aa3b0", "#7a6e68", "#b07058", "#5c6570"];
     const wall = walls[seed % walls.length];
@@ -978,9 +984,10 @@ const Game = {
     });
   },
 
-  drawPlayerCar(ctx) {
+  drawPlayerCar(ctx, menu) {
     const hop = this.viewJump() * 0.09;
-    const p = this.project(this.viewLaneX(), hop * 1.5, this.playerZ());
+    const z = this.playerZ() + (menu ? 16 : 0);
+    const p = this.project(this.viewLaneX(), hop * 1.5, z);
     if (!p.visible) return;
     if (this.powers.shield > 0) {
       ctx.save();
@@ -990,7 +997,7 @@ const Game = {
       ctx.fill();
       ctx.restore();
     }
-    drawCar3D(ctx, p.x, p.y, p.s * 0.44, this.car, {
+    drawCar3D(ctx, p.x, p.y, p.s * 0.58, this.car, {
       yaw: this.viewYaw(),
       nitro: this.powers.nitro,
       flash: this.flash % 0.4 < 0.2,
@@ -1002,7 +1009,7 @@ const Game = {
     if (!this.cop || this.cop.z == null) return;
     const p = this.project(this.cop.laneX, 0, this.cop.z);
     if (!p.visible || p.y > this.h + 90) return;
-    drawCar3D(ctx, p.x, p.y, p.s * 0.44, getCar("policia"), {
+    drawCar3D(ctx, p.x, p.y, p.s * 0.56, getCar("policia"), {
       flash: this.flash % 0.4 < 0.2,
       yaw: this.viewYaw() * 0.65,
     });
@@ -1034,7 +1041,7 @@ const Game = {
     } else {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawCar3D(ctx, p.x, p.y, p.s * 0.42, e.car || randomTrafficCar(), { brake: true });
+      drawCar3D(ctx, p.x, p.y, p.s * 0.54, e.car || randomTrafficCar(), { brake: true });
     }
   },
 
@@ -1052,7 +1059,7 @@ const Game = {
     list.sort((a, b) => b.z - a.z);
     for (const item of list) {
       if (item.scenery) this.drawSceneryItem(ctx, item.scenery);
-      else if (item.player) this.drawPlayerCar(ctx);
+      else if (item.player) this.drawPlayerCar(ctx, menu);
       else if (item.cop) this.drawCopCar(ctx);
       else this.drawEntity(ctx, item.e);
     }

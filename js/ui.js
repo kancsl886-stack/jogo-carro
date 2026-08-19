@@ -328,4 +328,5 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("pointerdown", () => Sfx.unlock(), { once: true });
   refreshMenu();
   Game.idle();
+  if (location.hash === "#play") play();
 });

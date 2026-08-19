@@ -713,10 +713,10 @@ function drawCar3D(ctx, x, y, scale, car, extras) {
   ctx.ellipse(u * 0.32, len * 0.16, w * 0.78, len * 0.2, 0.08, 0, Math.PI * 2);
   ctx.fill();
 
-  const rearY = len * 0.4;
-  const frontY = -len * 0.58;
-  const rearW = w * 0.52;
-  const frontW = w * 0.36;
+  const rearY = len * 0.36;
+  const frontY = -len * 0.46;
+  const rearW = w * 0.5;
+  const frontW = w * 0.42;
   const wheel = (wx, wy, wr, hr) => {
     ctx.beginPath();
     ctx.ellipse(wx, wy, wr, hr, 0, 0, Math.PI * 2);

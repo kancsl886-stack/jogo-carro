@@ -41,7 +41,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #48d048;
+  background: #3a3a3e;
   color: var(--text);
   font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   touch-action: none;
@@ -52,8 +52,7 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
 }
 
 .vignette {
@@ -404,11 +403,12 @@ body.is-touch .hint-touch {
 
 .cop-bar {
   margin-top: 6px;
-  width: 90px;
-  height: 8px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.12);
+  width: 110px;
+  height: 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .cop-bar i {
@@ -685,14 +685,40 @@ body.is-touch .hint-touch {
 .hud-label {
   display: block;
   font-size: 11px;
-  color: var(--muted);
+  color: #ffffff;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .hud-stat strong {
-  font-size: 20px;
-  text-shadow: 0 2px 12px #000;
+  font-size: 22px;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+}
+
+.hud-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 110px;
+}
+
+.hud-col-right {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hud-run {
+  text-align: center;
+}
+
+.hud-top {
+  align-items: flex-start;
 }
 
 .hud-stat.gold strong {
@@ -736,12 +762,12 @@ body.is-touch .hint-touch {
 
 .place-chip {
   pointer-events: none;
-  background: rgba(7, 11, 20, 0.72);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 5px 12px;
+  background: rgba(12, 16, 24, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 7px 14px;
   font-size: 12px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #eef4ff;
 }
@@ -891,18 +917,18 @@ body.is-touch .hint-touch {
   }
 
   .hud-top {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: flex-start;
     gap: 6px 8px;
   }
 
   .hud-stat {
     min-width: 0;
-    flex: 1 1 28%;
+    flex: none;
   }
 
   .hud-stat.cop {
-    flex: 1 1 22%;
+    flex: none;
   }
 
   .hud-label {
@@ -972,25 +998,29 @@ body.is-touch .hint-touch {
 
     <div id="hud" class="hud hidden">
       <div class="hud-top">
-        <div class="hud-stat">
-          <span class="hud-label" data-i18n="distance">Distância</span>
-          <strong id="hud-distance">0 m</strong>
+        <div class="hud-col">
+          <div class="hud-stat">
+            <span class="hud-label" data-i18n="distance">Distância</span>
+            <strong id="hud-distance">0 m</strong>
+          </div>
+          <div class="hud-stat cop">
+            <span class="hud-label" data-i18n="copHud">Polícia</span>
+            <div class="cop-bar"><i id="cop-fill"></i></div>
+          </div>
         </div>
-        <div class="hud-stat gold">
+        <div class="hud-stat gold hud-run">
           <span class="hud-label" data-i18n="runCoins">Corrida</span>
           <strong><span class="coin-mini" aria-hidden="true">$</span><span id="hud-run-coins">0</span></strong>
         </div>
-        <div class="hud-stat">
-          <span class="hud-label" data-i18n="best">Recorde</span>
-          <strong id="hud-best">0 m</strong>
+        <div class="hud-col hud-col-right">
+          <div class="hud-stat">
+            <span class="hud-label" data-i18n="best">Recorde</span>
+            <strong id="hud-best">0 m</strong>
+          </div>
+          <button id="btn-pause" class="icon-btn" type="button" data-i18n-aria="pause" aria-label="Pausar">
+            ❚❚
+          </button>
         </div>
-        <div class="hud-stat cop">
-          <span class="hud-label" data-i18n="copHud">Polícia</span>
-          <div class="cop-bar"><i id="cop-fill"></i></div>
-        </div>
-        <button id="btn-pause" class="icon-btn" type="button" data-i18n-aria="pause" aria-label="Pausar">
-          ❚❚
-        </button>
       </div>
       <div class="hud-bottom">
         <div class="hud-left">
@@ -1735,30 +1765,325 @@ function drawCarTop(ctx, x, y, scale, car, extras) {
   ctx.restore();
 }
 
-function drawRoundCoin(ctx, x, y, r) {
-  const rr = Math.max(5, r);
+function drawRoundCoin(ctx, x, y, r, opts) {
+  const rr = Math.max(4, r);
+  const dollar = opts && opts.dollar;
+  const glow = ctx.createRadialGradient(x, y, rr * 0.15, x, y, rr * 2.4);
+  glow.addColorStop(0, "rgba(255, 214, 64, 0.95)");
+  glow.addColorStop(0.35, "rgba(255, 186, 40, 0.42)");
+  glow.addColorStop(1, "rgba(255, 160, 0, 0)");
+  ctx.beginPath();
+  ctx.arc(x, y, rr * 2.4, 0, Math.PI * 2);
+  ctx.fillStyle = glow;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + rr * 0.18, y + rr * 0.42, rr * 0.7, rr * 0.22, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+  ctx.fill();
+  const disc = ctx.createLinearGradient(x - rr, y, x + rr, y);
+  disc.addColorStop(0, "#ffe07a");
+  disc.addColorStop(0.45, "#ffd24a");
+  disc.addColorStop(1, "#c98412");
   ctx.beginPath();
   ctx.arc(x, y, rr, 0, Math.PI * 2);
-  ctx.fillStyle = "#c98a00";
+  ctx.fillStyle = disc;
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x, y, rr * 0.84, 0, Math.PI * 2);
-  ctx.fillStyle = "#ffd24a";
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(x, y, rr * 0.7, 0, Math.PI * 2);
-  ctx.strokeStyle = "#e0a020";
-  ctx.lineWidth = Math.max(1, rr * 0.08);
+  ctx.arc(x, y, rr * 0.72, 0, Math.PI * 2);
+  ctx.strokeStyle = "#e8b028";
+  ctx.lineWidth = Math.max(1, rr * 0.1);
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(x - rr * 0.22, y - rr * 0.26, rr * 0.2, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(255, 248, 200, 0.7)";
+  ctx.arc(x - rr * 0.28, y - rr * 0.3, rr * 0.22, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255, 250, 220, 0.75)";
   ctx.fill();
-  ctx.fillStyle = "#8a4e00";
-  ctx.font = `bold ${Math.max(8, Math.round(rr * 1.15))}px Trebuchet MS, sans-serif`;
+  if (dollar) {
+    ctx.fillStyle = "#8a4e00";
+    ctx.font = `bold ${Math.max(8, Math.round(rr * 1.15))}px Trebuchet MS, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("$", x, y + rr * 0.06);
+  }
+}
+
+function carProfile(shape) {
+  switch (shape) {
+    case "beetle":
+      return { w: 1.02, l: 0.9, h: 0.54, round: 0.42 };
+    case "hatch":
+      return { w: 1.04, l: 0.96, h: 0.5, round: 0.3 };
+    case "sedan":
+      return { w: 1.1, l: 1.1, h: 0.44, round: 0.22 };
+    case "taxi":
+      return { w: 1.12, l: 1.12, h: 0.48, round: 0.2 };
+    case "pickup":
+      return { w: 1.14, l: 1.18, h: 0.52, round: 0.16 };
+    case "suv":
+      return { w: 1.2, l: 1.08, h: 0.64, round: 0.2 };
+    case "muscle":
+      return { w: 1.18, l: 1.12, h: 0.4, round: 0.18 };
+    case "police":
+      return { w: 1.12, l: 1.12, h: 0.48, round: 0.2 };
+    case "sports":
+      return { w: 1.16, l: 1.04, h: 0.36, round: 0.34 };
+    case "convertible":
+      return { w: 1.14, l: 1.02, h: 0.34, round: 0.3 };
+    case "super":
+      return { w: 1.22, l: 1.08, h: 0.32, round: 0.36 };
+    case "formula":
+      return { w: 1.06, l: 1.22, h: 0.26, round: 0.12 };
+    case "hyper":
+      return { w: 1.24, l: 1.1, h: 0.3, round: 0.38 };
+    default:
+      return { w: 1.1, l: 1.02, h: 0.46, round: 0.24 };
+  }
+}
+
+function roundPoly(ctx, pts, r) {
+  if (!pts || pts.length < 3) return;
+  ctx.beginPath();
+  const n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const p = pts[(i + n - 1) % n];
+    const c = pts[i];
+    const q = pts[(i + 1) % n];
+    const dx1 = c[0] - p[0];
+    const dy1 = c[1] - p[1];
+    const dx2 = q[0] - c[0];
+    const dy2 = q[1] - c[1];
+    const len1 = Math.hypot(dx1, dy1) || 1;
+    const len2 = Math.hypot(dx2, dy2) || 1;
+    const rr = Math.min(r, len1 * 0.42, len2 * 0.42);
+    const x1 = c[0] - (dx1 / len1) * rr;
+    const y1 = c[1] - (dy1 / len1) * rr;
+    const x2 = c[0] + (dx2 / len2) * rr;
+    const y2 = c[1] + (dy2 / len2) * rr;
+    if (i === 0) ctx.moveTo(x1, y1);
+    else ctx.lineTo(x1, y1);
+    ctx.quadraticCurveTo(c[0], c[1], x2, y2);
+  }
+  ctx.closePath();
+}
+
+function drawCar3D(ctx, x, y, scale, car, extras) {
+  extras = extras || {};
+  const u = Math.max(8, scale);
+  const pal = (car && car.colors) || { body: "#4aa3e8", stripe: "#fff", glass: "#111", trim: "#222" };
+  const body = pal.body || "#4aa3e8";
+  const hi = shadeHex(body, 0.22);
+  const mid = shadeHex(body, 0.04);
+  const shade = shadeHex(body, -0.28);
+  const deep = shadeHex(body, -0.42);
+  const prof = carProfile(car && car.shape);
+  const w = prof.w * u * 1.12;
+  const len = prof.l * u * 1.48;
+  const hop = extras.jump || 0;
+  ctx.save();
+  ctx.translate(x, y - hop * u * 0.55);
+  if (extras.yaw) ctx.rotate(extras.yaw * 0.62);
+
+  ctx.fillStyle = "rgba(0,0,0,0.38)";
+  ctx.beginPath();
+  ctx.ellipse(u * 0.32, len * 0.16, w * 0.78, len * 0.2, 0.08, 0, Math.PI * 2);
+  ctx.fill();
+
+  const rearY = len * 0.4;
+  const frontY = -len * 0.58;
+  const rearW = w * 0.52;
+  const frontW = w * 0.36;
+  const wheel = (wx, wy, wr, hr) => {
+    ctx.beginPath();
+    ctx.ellipse(wx, wy, wr, hr, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "#121214";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(wx - wr * 0.18, wy - hr * 0.15, wr * 0.45, hr * 0.4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "#3a3a40";
+    ctx.fill();
+  };
+  wheel(-rearW * 0.92, rearY * 0.55, u * 0.16, u * 0.11);
+  wheel(rearW * 0.92, rearY * 0.55, u * 0.16, u * 0.11);
+  wheel(-frontW * 0.95, frontY * 0.42, u * 0.13, u * 0.09);
+  wheel(frontW * 0.95, frontY * 0.42, u * 0.13, u * 0.09);
+
+  const bodyGrad = ctx.createLinearGradient(-rearW, 0, rearW * 1.2, 0);
+  bodyGrad.addColorStop(0, hi);
+  bodyGrad.addColorStop(0.38, mid);
+  bodyGrad.addColorStop(1, shade);
+  roundPoly(
+    ctx,
+    [
+      [-rearW, rearY],
+      [rearW, rearY],
+      [frontW, frontY],
+      [-frontW, frontY],
+    ],
+    u * prof.round
+  );
+  ctx.fillStyle = bodyGrad;
+  ctx.fill();
+  ctx.strokeStyle = deep;
+  ctx.lineWidth = Math.max(1, u * 0.04);
+  ctx.stroke();
+
+  const cabinR = rearW * 0.72;
+  const cabinF = frontW * 0.7;
+  const cabinY0 = rearY * 0.12;
+  const cabinY1 = frontY * 0.55;
+  const roof = ctx.createLinearGradient(-cabinR, 0, cabinR, 0);
+  roof.addColorStop(0, shadeHex(body, 0.12));
+  roof.addColorStop(0.45, shadeHex(body, -0.08));
+  roof.addColorStop(1, deep);
+  roundPoly(
+    ctx,
+    [
+      [-cabinR, cabinY0],
+      [cabinR, cabinY0],
+      [cabinF, cabinY1],
+      [-cabinF, cabinY1],
+    ],
+    u * 0.16
+  );
+  ctx.fillStyle = roof;
+  ctx.fill();
+
+  const glass = ctx.createLinearGradient(-cabinF, cabinY1, cabinR, cabinY0);
+  glass.addColorStop(0, "#9ec8e8");
+  glass.addColorStop(0.45, pal.glass || "#1a2838");
+  glass.addColorStop(1, "#0b1520");
+  roundPoly(
+    ctx,
+    [
+      [-cabinR * 0.78, cabinY0 * 0.15],
+      [cabinR * 0.78, cabinY0 * 0.15],
+      [cabinF * 0.86, cabinY1 * 0.82],
+      [-cabinF * 0.86, cabinY1 * 0.82],
+    ],
+    u * 0.1
+  );
+  ctx.fillStyle = glass;
+  ctx.fill();
+
+  if (pal.stripe) {
+    ctx.fillStyle = pal.stripe;
+    ctx.globalAlpha = 0.85;
+    ctx.fillRect(-u * 0.07, frontY * 0.7, u * 0.14, len * 0.72);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.fillStyle = extras.brake ? "#ff2a2a" : "#ff6a22";
+  ctx.beginPath();
+  ctx.roundRect
+    ? ctx.roundRect(-rearW * 0.72, rearY - u * 0.08, u * 0.22, u * 0.1, u * 0.04)
+    : ctx.rect(-rearW * 0.72, rearY - u * 0.08, u * 0.22, u * 0.1);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect
+    ? ctx.roundRect(rearW * 0.5, rearY - u * 0.08, u * 0.22, u * 0.1, u * 0.04)
+    : ctx.rect(rearW * 0.5, rearY - u * 0.08, u * 0.22, u * 0.1);
+  ctx.fill();
+
+  ctx.fillStyle = "#fff6c8";
+  ctx.beginPath();
+  ctx.ellipse(-frontW * 0.62, frontY + u * 0.06, u * 0.08, u * 0.05, 0, 0, Math.PI * 2);
+  ctx.ellipse(frontW * 0.62, frontY + u * 0.06, u * 0.08, u * 0.05, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (car && car.shape === "police") {
+    const on = extras.flash;
+    ctx.fillStyle = on ? "#ff3030" : "#2d6cff";
+    ctx.fillRect(-u * 0.22, cabinY0 - u * 0.18, u * 0.22, u * 0.14);
+    ctx.fillStyle = on ? "#2d6cff" : "#ff3030";
+    ctx.fillRect(0, cabinY0 - u * 0.18, u * 0.22, u * 0.14);
+  }
+
+  if (extras.nitro) {
+    const flame = ctx.createLinearGradient(0, rearY, 0, rearY + u * 0.7);
+    flame.addColorStop(0, "#ffffff");
+    flame.addColorStop(0.35, "#7fe7ff");
+    flame.addColorStop(1, "rgba(60, 180, 255, 0)");
+    ctx.fillStyle = flame;
+    ctx.beginPath();
+    ctx.moveTo(-u * 0.14, rearY);
+    ctx.lineTo(u * 0.14, rearY);
+    ctx.lineTo(0, rearY + u * 0.7);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawWoodCrate(ctx, x, y, scale, count) {
+  const n = Math.max(1, Math.min(5, count || 3));
+  const s = Math.max(10, scale);
+  const crate = (cx, cy, size) => {
+    const w = size;
+    const h = size * 0.72;
+    const d = size * 0.28;
+    ctx.fillStyle = "rgba(0,0,0,0.32)";
+    ctx.beginPath();
+    ctx.ellipse(cx + d * 0.8, cy + h * 0.42, w * 0.55, h * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.5, cy);
+    ctx.lineTo(cx, cy - d);
+    ctx.lineTo(cx + w * 0.5, cy);
+    ctx.lineTo(cx, cy + d);
+    ctx.closePath();
+    ctx.fillStyle = "#e0b56a";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.5, cy);
+    ctx.lineTo(cx, cy + d);
+    ctx.lineTo(cx, cy + d + h);
+    ctx.lineTo(cx - w * 0.5, cy + h);
+    ctx.closePath();
+    ctx.fillStyle = "#c48a3a";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + w * 0.5, cy);
+    ctx.lineTo(cx, cy + d);
+    ctx.lineTo(cx, cy + d + h);
+    ctx.lineTo(cx + w * 0.5, cy + h);
+    ctx.closePath();
+    ctx.fillStyle = "#8a5a22";
+    ctx.fill();
+    ctx.strokeStyle = "#5a3510";
+    ctx.lineWidth = Math.max(1, size * 0.04);
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.5, cy + h * 0.35);
+    ctx.lineTo(cx, cy + d + h * 0.35);
+    ctx.lineTo(cx + w * 0.5, cy + h * 0.35);
+    ctx.stroke();
+  };
+  let drawn = 0;
+  for (let row = 0; row < 3 && drawn < n; row++) {
+    const inRow = row === 0 && n >= 3 ? Math.min(2, n - drawn) : 1;
+    for (let c = 0; c < inRow && drawn < n; c++) {
+      const ox = (c - (inRow - 1) / 2) * s * 0.7;
+      crate(x + ox, y - row * s * 0.52, s * (0.92 - row * 0.04));
+      drawn += 1;
+    }
+  }
+}
+
+function drawPowerOrb(ctx, x, y, r, color, letter) {
+  const g = ctx.createRadialGradient(x, y, r * 0.2, x, y, r * 1.8);
+  g.addColorStop(0, color);
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 1.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.fillStyle = "#111";
+  ctx.font = `bold ${Math.max(10, Math.round(r))}px Trebuchet MS, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("$", x, y + rr * 0.06);
+  ctx.fillText(letter, x, y + 1);
 }
 
 function randomTrafficCar() {
@@ -2470,52 +2795,62 @@ const BIOME_BLEND = 52;
 const BIOMES = [
   {
     id: "campo",
-    ground: "#48d048",
-    road: "#7a7a7a",
-    rumbleA: "#e53935",
-    rumbleB: "#ffffff",
-    dash: "#ffffff",
-    sidewalk: null,
+    ground: "#4a9a3c",
+    road: "#3e3e42",
+    rumbleA: "#e6c200",
+    rumbleB: "#8d8d93",
+    dash: "#ececec",
+    sidewalk: "#6aaa4e",
+    skyTop: "#5a9ad4",
+    skyBot: "#c8e0f4",
     decor: "trees",
   },
   {
     id: "cidade",
-    ground: "#6e6e76",
-    road: "#4e4e54",
-    rumbleA: "#f0d000",
-    rumbleB: "#1a1a1a",
-    dash: "#d8d8d8",
-    sidewalk: "#b8b4ac",
+    ground: "#6a7348",
+    road: "#3a3a3e",
+    rumbleA: "#e6c200",
+    rumbleB: "#8d8d93",
+    dash: "#ececec",
+    sidewalk: "#c4bfb4",
+    skyTop: "#6a8eae",
+    skyBot: "#c5d4e0",
     decor: "city",
   },
   {
     id: "praia",
     ground: "#e2c86a",
-    road: "#8a8680",
+    road: "#4a4844",
     rumbleA: "#ffffff",
     rumbleB: "#3aa0d8",
     dash: "#fff6d0",
     sidewalk: "#d8b45a",
+    skyTop: "#4aa0d8",
+    skyBot: "#d8ecf8",
     decor: "beach",
   },
   {
     id: "serra",
     ground: "#2f7a38",
-    road: "#5a5a5a",
-    rumbleA: "#ffffff",
-    rumbleB: "#2a2a2a",
+    road: "#3a3a3a",
+    rumbleA: "#e6c200",
+    rumbleB: "#6a6a70",
     dash: "#e0e0e0",
-    sidewalk: null,
+    sidewalk: "#3d8a42",
+    skyTop: "#4a7aaa",
+    skyBot: "#b8cce0",
     decor: "forest",
   },
   {
     id: "porto",
     ground: "#7a7468",
-    road: "#4a453e",
+    road: "#3a3632",
     rumbleA: "#f0a000",
-    rumbleB: "#2a2a2a",
+    rumbleB: "#6a6460",
     dash: "#c8c0a8",
     sidewalk: "#8a8478",
+    skyTop: "#5a6e82",
+    skyBot: "#b8c0c8",
     decor: "docks",
   },
 ];
@@ -2611,21 +2946,17 @@ const Game = {
   },
 
   resize() {
-    this.dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.w = window.innerWidth;
     this.h = window.innerHeight;
     this.canvas.width = Math.floor(this.w * this.dpr);
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    crisp(this.ctx);
-    this.pixel = Math.max(4, Math.floor(Math.min(this.w, this.h) / 128));
-    this.gw = Math.max(80, Math.ceil(this.w / this.pixel));
-    this.gh = Math.max(140, Math.ceil(this.h / this.pixel));
-    if (!this.pix) this.pix = document.createElement("canvas");
-    this.pix.width = this.gw;
-    this.pix.height = this.gh;
-    this.pctx = this.pix.getContext("2d");
-    crisp(this.pctx);
+    this.ctx.imageSmoothingEnabled = true;
+    if (this.ctx.imageSmoothingQuality) this.ctx.imageSmoothingQuality = "high";
+    this.gw = this.w;
+    this.gh = this.h;
+    this.pixel = 1;
     if (this._idle && !this.running) this.drawMenuScene();
   },
 
@@ -2785,23 +3116,64 @@ const Game = {
     return (a + b + c) * pulse * fade;
   },
 
-  toScreen(worldX, z) {
-    const W = this.gw || this.w;
-    const H = this.gh || this.h;
-    const xScale = W * 0.09;
-    const zScale = H / 52;
-    const lanePx = xScale * LANE_GAP;
-    const u = Math.max(1, Math.floor(lanePx / 11));
-    const cam = this.roadBend(this.playerZ());
-    const bend = (this.roadBend(z) - cam) * xScale;
+  toScreen(worldX, z, y) {
+    return this.project(worldX, y || 0, z);
+  },
+
+  project(wx, wy, wz) {
+    const W = this.w;
+    const H = this.h;
+    const camZ = this.playerZ();
+    const camBend = this.roadBend(camZ);
+    const dx = wx - this.viewLaneX() * 0.18 + (this.roadBend(wz) - camBend);
+    const dy = 2.55 - wy;
+    const dz = wz - camZ + 2.1;
+    if (dz < 0.12) {
+      return { x: W / 2, y: H + 80, s: 1, scale: 1, z: dz, visible: false, xScale: 1, zScale: 1 };
+    }
+    const s = 268 / dz;
+    const k = Math.min(W, H * 1.08);
+    const xScale = s * (k / 980);
     return {
-      x: W / 2 + worldX * xScale + bend,
-      y: H * 0.78 - (z - this.playerZ()) * zScale,
-      s: u,
-      u,
+      x: W * 0.5 + dx * xScale,
+      y: H * 0.155 + dy * s * (H / 520),
+      s,
+      scale: s,
+      z: dz,
+      visible: true,
       xScale,
-      zScale,
+      zScale: s * (H / 520),
     };
+  },
+
+  fillQuad(ctx, a, b, c, d, color) {
+    if (!a || !b || !c || !d) return;
+    if (![a, b, c, d].every((p) => Number.isFinite(p.x) && Number.isFinite(p.y))) return;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.lineTo(c.x, c.y);
+    ctx.lineTo(d.x, d.y);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  },
+
+  drawBox3D(ctx, x, y, z, w, h, d, colors) {
+    const p = (ox, oy, oz) => this.project(x + ox, y + oy, z + oz);
+    const fl = p(-w / 2, 0, -d / 2);
+    const fr = p(w / 2, 0, -d / 2);
+    const bl = p(-w / 2, 0, d / 2);
+    const br = p(w / 2, 0, d / 2);
+    const flh = p(-w / 2, h, -d / 2);
+    const frh = p(w / 2, h, -d / 2);
+    const blh = p(-w / 2, h, d / 2);
+    const brh = p(w / 2, h, d / 2);
+    if (!fl.visible && !fr.visible && !bl.visible && !br.visible) return;
+    this.fillQuad(ctx, fr, br, brh, frh, colors.right || colors.front);
+    this.fillQuad(ctx, fl, bl, blh, flh, colors.left || colors.front);
+    this.fillQuad(ctx, fl, fr, frh, flh, colors.front);
+    this.fillQuad(ctx, flh, frh, brh, blh, colors.top);
   },
 
   seedRoadside() {
@@ -3097,6 +3469,8 @@ const Game = {
       rumbleB: mixHex(a.rumbleB, b.rumbleB, t),
       dash: mixHex(a.dash, b.dash, t),
       sidewalk: a.sidewalk || b.sidewalk ? mixHex(a.sidewalk || a.ground, b.sidewalk || b.ground, t) : null,
+      skyTop: mixHex(a.skyTop || "#6a8eae", b.skyTop || "#6a8eae", t),
+      skyBot: mixHex(a.skyBot || "#c5d4e0", b.skyBot || "#c5d4e0", t),
       decor: t > 0.42 ? b.decor : a.decor,
     };
     if (this._biomeMemo.size > 48) this._biomeMemo.clear();
@@ -3104,315 +3478,404 @@ const Game = {
     return val;
   },
 
-  blit(ctx) {
-    const out = this.ctx;
-    out.imageSmoothingEnabled = false;
-    out.fillStyle = (this.biomeAt(this.viewCameraZ()) || BIOMES[0]).ground;
-    out.fillRect(0, 0, this.w, this.h);
-    let ox = 0;
-    let oy = 0;
-    if (this.shake > 0.4) {
-      ox = (Math.random() - 0.5) * this.shake;
-      oy = (Math.random() - 0.5) * this.shake;
-    }
-    crisp(out);
-    out.drawImage(this.pix, ox, oy, this.w, this.h);
+  drawSky3D(ctx) {
+    const scene = this.biomeAt(this.viewCameraZ() + 24) || BIOMES[0];
+    const H = this.h;
+    const W = this.w;
+    const horizon = H * 0.155;
+    const sky = ctx.createLinearGradient(0, 0, 0, horizon + 36);
+    sky.addColorStop(0, scene.skyTop || "#6a8eae");
+    sky.addColorStop(1, scene.skyBot || "#c5d4e0");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+    const sun = ctx.createRadialGradient(W * 0.1, H * 0.1, 8, W * 0.1, H * 0.1, W * 0.62);
+    sun.addColorStop(0, "rgba(255, 244, 210, 0.72)");
+    sun.addColorStop(0.32, "rgba(255, 220, 160, 0.2)");
+    sun.addColorStop(1, "rgba(255, 200, 120, 0)");
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, W, horizon + 90);
+    ctx.fillStyle = scene.ground;
+    ctx.fillRect(0, horizon, W, H - horizon);
   },
 
-  drawSky(ctx) {
-    const near = this.biomeAt(this.viewCameraZ()) || BIOMES[0];
-    const far = this.biomeAt(this.viewCameraZ() + 40) || near;
-    ctx.fillStyle = near.ground;
-    ctx.fillRect(0, 0, this.gw, this.gh);
-    if (far.ground !== near.ground) {
-      ctx.fillStyle = far.ground;
-      ctx.fillRect(0, 0, this.gw, Math.round(this.gh * 0.4));
-      ctx.fillStyle = mixHex(far.ground, near.ground, 0.5);
-      ctx.fillRect(0, Math.round(this.gh * 0.4), this.gw, Math.round(this.gh * 0.12));
-    }
-  },
-
-  paintRoad(ctx, cameraZ) {
-    const mid = this.toScreen(0, this.playerZ());
-    const laneW = Math.round(mid.xScale * LANE_GAP);
-    const roadW = laneW * LANES;
-    const rumble = Math.max(5, Math.round(laneW * 0.22));
-    const zScale = mid.zScale;
-    const xScale = mid.xScale;
-    const scroll = cameraZ == null ? this.cameraZ : cameraZ;
-    const playerZ = scroll + 8;
-    const camBend = this.roadBend(playerZ);
-    const H = this.gh;
-    const leftAt = new Array(H);
-    const block = rumble;
-    const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
-    const dashW = Math.max(2, Math.round(laneW * 0.08));
-    const dashH = Math.max(8, Math.round(laneW * 0.42));
-    const gap = Math.max(6, Math.round(laneW * 0.3));
-    const period = dashH + gap;
-    const dashOff = Math.round(((scroll * zScale) % period + period) % period);
-
-    for (let y = 0; y < H; y++) {
-      const z = playerZ + (H * 0.78 - y) / zScale;
-      const scene = this.biomeAt(z);
-      const left = Math.round(this.gw / 2 - roadW / 2 + (this.roadBend(z) - camBend) * xScale);
-      leftAt[y] = left;
-      if (scene.sidewalk) {
-        ctx.fillStyle = scene.sidewalk;
-        ctx.fillRect(left - rumble - 4, y, 4, 1);
-        ctx.fillRect(left + roadW + rumble, y, 4, 1);
-      }
-      ctx.fillStyle = scene.road;
-      ctx.fillRect(left, y, roadW, 1);
-      const stripe = Math.floor((y - offset) / block) % 2 === 0;
-      ctx.fillStyle = stripe ? scene.rumbleA : scene.rumbleB;
-      ctx.fillRect(left - rumble, y, rumble, 1);
-      ctx.fillRect(left + roadW, y, rumble, 1);
-      const dashPhase = ((y - dashOff) % period + period) % period;
-      if (dashPhase < dashH) {
-        ctx.fillStyle = scene.dash;
-        for (let lane = 1; lane < LANES; lane++) {
-          ctx.fillRect(left + lane * laneW - Math.floor(dashW / 2), y, dashW, 1);
-        }
-      }
-    }
-
-    const midY = Math.min(H - 1, Math.max(0, Math.round(H * 0.78)));
-    const left = leftAt[midY];
-    this._leftAt = leftAt;
-    return { left, roadW, laneW, rumble, leftAt };
-  },
-
-  drawRoad(ctx) {
-    this._road = this.paintRoad(ctx, this.viewCameraZ());
-  },
-
-  drawGrassDecor(ctx, left, roadW, rumble, scroll) {
-    const period = 18;
-    const off = ((scroll % period) + period) % period;
-    const count = Math.ceil(this.gh / period) + 4;
-    const inGrass = (x) => x > 3 && x < this.gw - 3;
-    const leftAt = this._leftAt;
-    const leftAtY = (y) => {
-      if (leftAt && y >= 0 && y < leftAt.length) return leftAt[y];
-      return left;
-    };
-    const cam = this.viewCameraZ();
-    const playerZ = cam + 8;
-    const zScale = this.toScreen(0, playerZ).zScale;
-    const zAt = (y) => playerZ + (this.gh * 0.78 - y) / zScale;
-    const seedOf = (n) => Math.abs((n * 1103515245 + 12345) | 0);
-
-    for (let i = -2; i < count; i++) {
-      const col = ((i % 3) + 3) % 3;
-      const yL = Math.round(i * period + off);
-      const yR = Math.round(i * period + off + 4);
-      if ((yL < -18 && yR < -18) || (yL > this.gh + 18 && yR > this.gh + 18)) continue;
-      const size = 1 + (Math.abs(i) % 2);
-      const leftL = leftAtY(yL);
-      const leftR = leftAtY(yR);
-      const xl = leftL - rumble - 10 - col * 10;
-      const xr = leftR + roadW + rumble + 10 + col * 10;
-      const xl2 = leftL - rumble - 32;
-      const xr2 = leftR + roadW + rumble + 32;
-      const decor = this.biomeAt(zAt(yL)).decor;
-      const seed = seedOf(i + col * 17);
-
-      const placeLeft = (fn) => {
-        if (inGrass(xl)) fn(xl, yL, seed);
-        if (i % 2 === 1 && inGrass(xl2)) fn(xl2 + (i % 5), yL + 6, seed + 3);
-      };
-      const placeRight = (fn) => {
-        if (inGrass(xr)) fn(xr, yR, seed + 1);
-        if (i % 2 === 0 && inGrass(xr2)) fn(xr2 - (i % 5), yR + 5, seed + 5);
-      };
-
-      if (decor === "city") {
-        placeLeft((x, y, s) => {
-          if (s % 5 === 0) drawPixelLamp(ctx, x, y);
-          else drawPixelBuilding(ctx, x, y, s);
-        });
-        placeRight((x, y, s) => {
-          if (s % 4 === 0) drawPixelLamp(ctx, x, y);
-          else drawPixelBuilding(ctx, x, y, s);
-        });
-      } else if (decor === "beach") {
-        placeLeft((x, y, s) => {
-          if (s % 3 === 0) drawPixelBush(ctx, x, y);
-          else drawPixelPalm(ctx, x, y);
-        });
-        placeRight((x, y) => drawPixelPalm(ctx, x, y));
-      } else if (decor === "forest") {
-        placeLeft((x, y, s) => {
-          if (s % 4 === 0) drawPixelRock(ctx, x, y);
-          else drawPixelPine(ctx, x, y, size);
-        });
-        placeRight((x, y, s) => drawPixelPine(ctx, x, y, 1 + (s % 2)));
-      } else if (decor === "docks") {
-        placeLeft((x, y, s) => {
-          if (s % 3 === 0) drawPixelBuilding(ctx, x, y, s);
-          else drawPixelCrate(ctx, x, y, s);
-        });
-        placeRight((x, y, s) => drawPixelCrate(ctx, x, y, s));
-      } else {
-        if (inGrass(xl)) {
-          if (i % 4 === 0) drawPixelBush(ctx, xl, yL);
-          else drawPixelTree(ctx, xl, yL, size);
-        }
-        if (inGrass(xr)) {
-          if (i % 3 === 0) drawPixelBush(ctx, xr, yR);
-          else drawPixelTree(ctx, xr, yR, 1 + ((Math.abs(i) + 1) % 2));
-        }
-        if (i % 2 === 1 && inGrass(xl2)) drawPixelTree(ctx, xl2 + (i % 5), yL + 6, 1);
-        if (i % 2 === 0 && inGrass(xr2)) drawPixelTree(ctx, xr2 - (i % 5), yR + 5, 1);
-      }
-    }
-  },
-
-  drawRoadside(ctx) {
-    const road = this._road || this.paintRoad(ctx, this.viewCameraZ());
-    const mid = this.toScreen(0, this.playerZ());
-    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, this.viewCameraZ() * mid.zScale);
-  },
-
-  drawEntities(ctx) {
+  drawRoad3D(ctx) {
     const playerZ = this.playerZ();
-    const list = this.entities.filter((e) => !e.taken).sort((a, b) => b.z - a.z);
-    this._carsToDraw = [];
-    this._coinsToDraw = [];
-    let playerDrawn = false;
-    const drawPlayer = () => {
-      const p = this.toScreen(this.viewLaneX(), playerZ);
-      const hop = this.viewJump() * 1.4;
-      this._carsToDraw.push({
-        p,
-        hop,
-        car: this.car,
-        extras: {
-          nitro: this.powers.nitro,
-          flash: this.flash % 0.4 < 0.2,
-          yaw: this.viewYaw(),
-        },
-        shield: this.powers.shield > 0,
-      });
-    };
+    const segs = 28;
+    const zFar = 58;
+    const zNear = -0.35;
+    const half = 3.38;
+    const walk = 0.78;
+    const W = this.w;
+    const p = (x, y, zOff) => this.project(x, y, playerZ + zOff);
 
-    for (const e of list) {
-      if (!playerDrawn && e.z < playerZ) {
-        drawPlayer();
-        playerDrawn = true;
+    for (let i = 0; i < segs; i++) {
+      const u0 = i / segs;
+      const u1 = (i + 1) / segs;
+      const f0 = 1 - (1 - u0) * (1 - u0);
+      const f1 = 1 - (1 - u1) * (1 - u1);
+      const za = zFar * (1 - f0) + zNear * f0;
+      const zb = zFar * (1 - f1) + zNear * f1;
+      const zMid = playerZ + (za + zb) * 0.5;
+      const scene = this.biomeAt(zMid);
+      const L0 = p(-half, 0, za);
+      const R0 = p(half, 0, za);
+      const L1 = p(-half, 0, zb);
+      const R1 = p(half, 0, zb);
+      const SL0 = p(-half - walk, 0, za);
+      const SR0 = p(half + walk, 0, za);
+      const SL1 = p(-half - walk, 0, zb);
+      const SR1 = p(half + walk, 0, zb);
+      this.fillQuad(ctx, { x: 0, y: L0.y }, SL0, SL1, { x: 0, y: L1.y }, scene.ground);
+      this.fillQuad(ctx, SR0, { x: W, y: R0.y }, { x: W, y: R1.y }, SR1, scene.ground);
+      if (scene.sidewalk) {
+        this.fillQuad(ctx, SL0, L0, L1, SL1, scene.sidewalk);
+        this.fillQuad(ctx, R0, SR0, SR1, R1, scene.sidewalk);
       }
-      const x = this.laneWorldX(e.lane);
-      const p = this.toScreen(x, e.z);
-      if (p.y < -20 || p.y > this.gh + 24) continue;
-      if (e.kind === "coin") {
-        this._coinsToDraw.push(p);
-      } else if (e.kind === "power") {
-        const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
-        ctx.fillStyle = color;
-        ctx.fillRect(Math.round(p.x) - 5, Math.round(p.y) - 5, 10, 10);
-        ctx.fillStyle = "#111111";
-        ctx.font = "bold 8px monospace";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M", Math.round(p.x), Math.round(p.y) + 1);
-        ctx.textBaseline = "alphabetic";
-      } else if (e.kind === "barrier") {
-        const w = Math.round(p.xScale * 1.6);
-        ctx.fillStyle = "#ff9f1c";
-        ctx.fillRect(Math.round(p.x) - w / 2, Math.round(p.y) - 4, w, 8);
-        ctx.fillStyle = "#111111";
-        for (let i = 0; i < 4; i++) {
-          ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
+      this.fillQuad(ctx, L0, R0, R1, L1, scene.road);
+
+      const mark = (x0, x1) => {
+        this.fillQuad(ctx, p(x0, 0, za), p(x1, 0, za), p(x1, 0, zb), p(x0, 0, zb), "rgba(18, 18, 20, 0.22)");
+      };
+      mark(-0.78, -0.52);
+      mark(0.52, 0.78);
+      mark(-2.85, -2.58);
+      mark(2.58, 2.85);
+
+      if (Math.floor(zMid / 5.4) % 2 === 0) {
+        for (const lx of [-LANE_GAP / 2, LANE_GAP / 2]) {
+          this.fillQuad(
+            ctx,
+            p(lx - 0.055, 0.01, za),
+            p(lx + 0.055, 0.01, za),
+            p(lx + 0.055, 0.01, zb),
+            p(lx - 0.055, 0.01, zb),
+            scene.dash
+          );
         }
-      } else {
-        this._carsToDraw.push({
-          p,
-          hop: 0,
-          car: e.car || randomTrafficCar(),
-          extras: { brake: true },
-        });
       }
-    }
-    if (!playerDrawn) drawPlayer();
-    this.queueCop();
 
-    for (const part of this.particles) {
-      const p = this.toScreen(part.x, part.z);
-      ctx.fillStyle = part.color;
-      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+      const stripe = Math.floor(zMid / 1.65) % 2 === 0;
+      const ja = stripe ? scene.rumbleA : scene.rumbleB;
+      const jb = stripe ? shadeHex(ja, 0.1) : shadeHex(ja, -0.08);
+      const wallH = 0.86;
+      const leftInner = -half - 0.02;
+      const leftOuter = -half - 0.42;
+      const rightInner = half + 0.02;
+      const rightOuter = half + 0.42;
+      this.fillQuad(ctx, p(leftInner, 0, za), p(leftInner, 0, zb), p(leftInner, wallH, zb), p(leftInner, wallH, za), ja);
+      this.fillQuad(ctx, p(leftInner, wallH, za), p(leftInner, wallH, zb), p(leftOuter, wallH, zb), p(leftOuter, wallH, za), jb);
+      this.fillQuad(ctx, p(leftOuter, 0, za), p(leftOuter, wallH, za), p(leftOuter, wallH, zb), p(leftOuter, 0, zb), shadeHex(ja, -0.28));
+      this.fillQuad(ctx, p(rightInner, 0, za), p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightInner, 0, zb), ja);
+      this.fillQuad(ctx, p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), jb);
+      this.fillQuad(ctx, p(rightOuter, 0, za), p(rightOuter, 0, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), shadeHex(ja, -0.32));
     }
   },
 
-  queueCop() {
-    if (!this.cop || this.cop.z == null) return;
-    const p = this.toScreen(this.cop.laneX, this.cop.z);
-    if (p.y < -20 || p.y > this.gh + 28) return;
-    this._carsToDraw.push({
-      p,
-      hop: 0,
-      car: getCar("policia"),
-      extras: { flash: this.flash % 0.4 < 0.2, yaw: this.viewYaw() * 0.65 },
+  collectScenery() {
+    const playerZ = this.playerZ();
+    const items = [];
+    const start = Math.floor((playerZ - 2) / 7);
+    const end = Math.floor((playerZ + 52) / 7);
+    for (let i = start; i <= end; i++) {
+      const z = i * 7;
+      const scene = this.biomeAt(z);
+      const seed = Math.abs((i * 1103515245 + 12345) | 0);
+      items.push({ z, side: -1, seed, decor: scene.decor });
+      items.push({ z: z + 3.4, side: 1, seed: seed + 17, decor: scene.decor });
+    }
+    return items;
+  },
+
+  drawSceneryItem(ctx, it) {
+    const x = it.side * (4.9 + (it.seed % 6) * 0.4);
+    const p = this.project(x, 0, it.z);
+    if (!p.visible || p.s < 5 || p.y > this.h + 50) return;
+    const decor = it.decor;
+    if (decor === "city") {
+      if (it.seed % 5 === 0) this.drawLamp3D(ctx, x, it.z, it.side);
+      else this.drawBuilding3D(ctx, x, it.z, it.seed);
+    } else if (decor === "beach") {
+      this.drawPalm3D(ctx, x, it.z);
+    } else if (decor === "forest") {
+      if (it.seed % 4 === 0) this.drawRock3D(ctx, x, it.z);
+      else this.drawPine3D(ctx, x, it.z, 1 + (it.seed % 2));
+    } else if (decor === "docks") {
+      if (it.seed % 3 === 0) this.drawBuilding3D(ctx, x, it.z, it.seed);
+      else {
+        this.drawBox3D(ctx, x, 0, it.z, 1.5, 1.3, 1.5, {
+          left: "#d35400",
+          right: "#7a2e00",
+          front: "#c0392b",
+          top: "#e67e22",
+        });
+      }
+    } else if (it.seed % 4 === 0) {
+      this.drawBush3D(ctx, x, it.z);
+    } else {
+      this.drawTree3D(ctx, x, it.z, 1 + (it.seed % 2));
+    }
+  },
+
+  drawBuilding3D(ctx, x, z, seed) {
+    const floors = 3 + (seed % 6);
+    const w = 2.05 + (seed % 5) * 0.28;
+    const d = 1.55 + (seed % 3) * 0.22;
+    const h = 2.3 + floors * 0.82;
+    const walls = ["#8a5a48", "#6d7380", "#9aa3b0", "#7a6e68", "#b07058", "#5c6570"];
+    const wall = walls[seed % walls.length];
+    this.drawBox3D(ctx, x, 0, z, w, h, d, {
+      left: shadeHex(wall, 0.18),
+      right: shadeHex(wall, -0.34),
+      front: wall,
+      top: shadeHex(wall, -0.16),
+    });
+    const cols = 3 + (seed % 2);
+    const rows = Math.max(2, floors - 1);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const wx = x - w * 0.3 + c * (w * 0.3);
+        const wy = 0.65 + r * (h / (rows + 0.55));
+        const faceZ = z - d / 2 - 0.02;
+        this.fillQuad(
+          ctx,
+          this.project(wx - 0.12, wy, faceZ),
+          this.project(wx + 0.12, wy, faceZ),
+          this.project(wx + 0.12, wy + 0.3, faceZ),
+          this.project(wx - 0.12, wy + 0.3, faceZ),
+          (seed + r + c) % 3 === 0 ? "#ffe08a" : "#c8e4ff"
+        );
+      }
+    }
+  },
+
+  drawLamp3D(ctx, x, z, side) {
+    const base = this.project(x, 0, z);
+    const top = this.project(x, 3.5, z);
+    const arm = this.project(x - side * 0.75, 3.5, z);
+    if (!base.visible) return;
+    ctx.strokeStyle = "#2a2a32";
+    ctx.lineWidth = Math.max(2, base.s * 0.028);
+    ctx.beginPath();
+    ctx.moveTo(base.x, base.y);
+    ctx.lineTo(top.x, top.y);
+    ctx.lineTo(arm.x, arm.y);
+    ctx.stroke();
+    const glow = ctx.createRadialGradient(arm.x, arm.y, 2, arm.x, arm.y, base.s * 0.24);
+    glow.addColorStop(0, "rgba(255, 220, 120, 0.9)");
+    glow.addColorStop(1, "rgba(255, 200, 80, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(arm.x, arm.y, base.s * 0.24, 0, Math.PI * 2);
+    ctx.fill();
+  },
+
+  drawTree3D(ctx, x, z, size) {
+    const p = this.project(x, 0, z);
+    if (!p.visible) return;
+    const s = p.s * (0.13 + size * 0.045);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.beginPath();
+    ctx.ellipse(p.x + s * 0.48, p.y, s * 0.72, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const top = this.project(x, 1.35 * size, z);
+    ctx.strokeStyle = "#6a3a18";
+    ctx.lineWidth = Math.max(2, s * 0.18);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(top.x, top.y);
+    ctx.stroke();
+    const leaf = (ox, oy, r, col) => {
+      const q = this.project(x + ox, 1.55 * size + oy, z);
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.fill();
+    };
+    leaf(0.16, 0.08, s * 0.88, "#0f6b1c");
+    leaf(-0.22, 0.04, s * 0.72, "#1a8a28");
+    leaf(0, 0.42, s * 0.56, "#2aaa3a");
+  },
+
+  drawBush3D(ctx, x, z) {
+    const p = this.project(x, 0.35, z);
+    if (!p.visible) return;
+    const s = p.s * 0.1;
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.beginPath();
+    ctx.ellipse(p.x + s * 0.3, p.y + s * 0.5, s * 0.8, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, s * 0.7, 0, Math.PI * 2);
+    ctx.fillStyle = "#166a24";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x + s * 0.35, p.y + s * 0.1, s * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#0f6b1c";
+    ctx.fill();
+  },
+
+  drawPalm3D(ctx, x, z) {
+    const p = this.project(x, 0, z);
+    const top = this.project(x, 2.4, z);
+    if (!p.visible) return;
+    const s = p.s * 0.12;
+    ctx.strokeStyle = "#8a5a28";
+    ctx.lineWidth = Math.max(2, s * 0.2);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(top.x, top.y);
+    ctx.stroke();
+    ctx.fillStyle = "#1f8a3a";
+    for (const a of [-0.9, -0.3, 0.3, 0.9]) {
+      ctx.beginPath();
+      ctx.ellipse(top.x + Math.sin(a) * s * 0.9, top.y + 4, s * 0.7, s * 0.22, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  },
+
+  drawPine3D(ctx, x, z, size) {
+    const p = this.project(x, 0, z);
+    if (!p.visible) return;
+    const s = p.s * (0.12 + size * 0.04);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.beginPath();
+    ctx.ellipse(p.x + s * 0.35, p.y, s * 0.55, s * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#4a3014";
+    ctx.fillRect(p.x - s * 0.08, p.y - s * 0.4, s * 0.16, s * 0.45);
+    ctx.fillStyle = "#0c4a22";
+    for (let i = 0; i < 3; i++) {
+      const yy = p.y - s * (0.35 + i * 0.45);
+      const ww = s * (1.1 - i * 0.28);
+      ctx.beginPath();
+      ctx.moveTo(p.x, yy - s * 0.45);
+      ctx.lineTo(p.x - ww, yy);
+      ctx.lineTo(p.x + ww, yy);
+      ctx.closePath();
+      ctx.fill();
+    }
+  },
+
+  drawRock3D(ctx, x, z) {
+    this.drawBox3D(ctx, x, 0, z, 1.1, 0.7, 0.9, {
+      left: "#8a9098",
+      right: "#4a4e54",
+      front: "#6a6e74",
+      top: "#9aa0a8",
     });
   },
 
-  drawCoinsHiRes() {
-    const coins = this._coinsToDraw;
-    if (!coins || !coins.length) return;
-    const out = this.ctx;
-    const kx = this.w / this.gw;
-    const ky = this.h / this.gh;
-    out.save();
-    for (const p of coins) {
-      const x = p.x * kx;
-      const y = p.y * ky;
-      if (y < -20 || y > this.h + 20) continue;
-      const r = Math.max(5, p.xScale * kx * 0.2);
-      drawRoundCoin(out, x, y, r);
+  drawPlayerCar(ctx) {
+    const hop = this.viewJump() * 0.09;
+    const p = this.project(this.viewLaneX(), hop * 1.5, this.playerZ());
+    if (!p.visible) return;
+    if (this.powers.shield > 0) {
+      ctx.save();
+      ctx.fillStyle = "rgba(125, 255, 184, 0.28)";
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y - p.s * 0.08, p.s * 0.42, p.s * 0.28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
-    out.restore();
+    drawCar3D(ctx, p.x, p.y, p.s * 0.44, this.car, {
+      yaw: this.viewYaw(),
+      nitro: this.powers.nitro,
+      flash: this.flash % 0.4 < 0.2,
+      jump: this.viewJump(),
+    });
   },
 
-  drawCarsHiRes() {
-    const out = this.ctx;
-    const kx = this.w / this.gw;
-    const ky = this.h / this.gh;
-    const cars = (this._carsToDraw || []).slice().sort((a, b) => a.p.y - b.p.y);
-    for (const item of cars) {
-      if (!item || !item.p || !item.car) continue;
-      const x = item.p.x * kx;
-      const y = (item.p.y - (item.hop || 0)) * ky;
-      if (y < -90 || y > this.h + 90) continue;
-      const lanePx = item.p.xScale * LANE_GAP * kx;
-      const u = Math.max(3, Math.round(lanePx / 26));
-      if (item.shield) {
-        out.save();
-        out.fillStyle = "rgba(125, 255, 184, 0.28)";
-        out.beginPath();
-        if (out.ellipse) out.ellipse(x, y, u * 8, u * 11, 0, 0, Math.PI * 2);
-        else out.rect(x - u * 8, y - u * 11, u * 16, u * 22);
-        out.fill();
-        out.restore();
-      }
-      drawCarTop(out, x, y, u, item.car, Object.assign({ u }, item.extras || {}));
+  drawCopCar(ctx) {
+    if (!this.cop || this.cop.z == null) return;
+    const p = this.project(this.cop.laneX, 0, this.cop.z);
+    if (!p.visible || p.y > this.h + 90) return;
+    drawCar3D(ctx, p.x, p.y, p.s * 0.44, getCar("policia"), {
+      flash: this.flash % 0.4 < 0.2,
+      yaw: this.viewYaw() * 0.65,
+    });
+  },
+
+  drawEntity(ctx, e) {
+    const x = this.laneWorldX(e.lane);
+    if (e.kind === "coin") {
+      const p = this.project(x, 0.9, e.z);
+      if (!p.visible) return;
+      drawRoundCoin(ctx, p.x, p.y, Math.max(6, p.s * 0.09));
+    } else if (e.kind === "power") {
+      const p = this.project(x, 0.95, e.z);
+      if (!p.visible) return;
+      const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
+      const letter = e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M";
+      drawPowerOrb(ctx, p.x, p.y, Math.max(8, p.s * 0.1), color, letter);
+    } else if (e.kind === "barrier") {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawWoodCrate(ctx, p.x, p.y, p.s * 0.22, 4);
+    } else if (e.kind === "truck") {
+      this.drawBox3D(ctx, x, 0, e.z, 1.65, 1.75, 2.5, {
+        left: "#c0392b",
+        right: "#6a1a14",
+        front: "#a93226",
+        top: "#922b21",
+      });
+    } else {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawCar3D(ctx, p.x, p.y, p.s * 0.42, e.car || randomTrafficCar(), { brake: true });
     }
+  },
+
+  drawEntities3D(ctx, menu) {
+    const playerZ = this.playerZ();
+    const list = [];
+    if (!menu) {
+      for (const e of this.entities) {
+        if (!e.taken) list.push({ z: e.z, e });
+      }
+      if (this.cop) list.push({ z: this.cop.z, cop: true });
+    }
+    list.push({ z: playerZ, player: true });
+    for (const s of this.collectScenery()) list.push({ z: s.z, scenery: s });
+    list.sort((a, b) => b.z - a.z);
+    for (const item of list) {
+      if (item.scenery) this.drawSceneryItem(ctx, item.scenery);
+      else if (item.player) this.drawPlayerCar(ctx);
+      else if (item.cop) this.drawCopCar(ctx);
+      else this.drawEntity(ctx, item.e);
+    }
+    if (menu) return;
+    for (const part of this.particles) {
+      const p = this.project(part.x, part.y || 0.4, part.z);
+      if (!p.visible) continue;
+      ctx.fillStyle = part.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(1.4, p.s * 0.028), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  },
+
+  drawWorld3D(ctx, menu) {
+    let ox = 0;
+    let oy = 0;
+    if (!menu && this.shake > 0.4) {
+      ox = (Math.random() - 0.5) * this.shake;
+      oy = (Math.random() - 0.5) * this.shake;
+    }
+    ctx.save();
+    ctx.translate(ox, oy);
+    this.drawSky3D(ctx);
+    this.drawRoad3D(ctx);
+    this.drawEntities3D(ctx, menu);
+    ctx.restore();
   },
 
   draw(alpha) {
-    if (!this.pctx) this.resize();
     const a = Math.max(0, Math.min(1, alpha == null ? 1 : alpha));
     this._drawCam = lerp(this.prevCameraZ ?? this.cameraZ, this.cameraZ, a);
     this._drawLaneX = lerp(this.prevLaneX ?? this.laneX, this.laneX, a);
     this._drawYaw = lerp(this.prevYaw ?? this.yaw, this.yaw, a);
     this._drawJump = lerp(this.prevJump ?? this.jump, this.jump, a);
-    const ctx = this.pctx;
-    this.drawSky(ctx);
-    this.drawRoad(ctx);
-    this.drawRoadside(ctx);
-    this.drawEntities(ctx);
-    this.blit();
-    this.drawCoinsHiRes();
-    this.drawCarsHiRes();
+    this.drawWorld3D(this.ctx, false);
     this._drawCam = null;
     this._drawLaneX = null;
     this._drawYaw = null;
@@ -3420,26 +3883,16 @@ const Game = {
   },
 
   drawMenuScene() {
-    if (!this.pctx) this.resize();
-    const ctx = this.pctx;
-    const W = this.gw;
-    const H = this.gh;
-    ctx.fillStyle = BIOMES[0].ground;
-    ctx.fillRect(0, 0, W, H);
-
-    const road = this.paintRoad(ctx, 0);
-    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, 0);
-
-    const car = getCar(Save.data.selected);
-    const cx = Math.round(W / 2);
-    const portrait = this.h >= this.w;
-    const cy = Math.round(H * (portrait ? 0.46 : 0.62));
-    drawPixelDude(ctx, cx - 16, cy + 2, portrait ? 1 : 2);
-    this.blit();
-    const kx = this.w / this.gw;
-    const ky = this.h / this.gh;
-    const u = Math.max(portrait ? 4 : 5, Math.round(road.laneW * kx / (portrait ? 28 : 22)));
-    drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
+    this._drawCam = BIOME_INTRO + 40;
+    this._drawLaneX = -LANE_GAP;
+    this._drawYaw = -0.05;
+    this._drawJump = 0;
+    this.cameraZ = BIOME_INTRO + 40;
+    this.drawWorld3D(this.ctx, true);
+    this._drawCam = null;
+    this._drawLaneX = null;
+    this._drawYaw = null;
+    this._drawJump = null;
   },
 
   idle() {
@@ -3562,17 +4015,33 @@ function renderShop() {
     `;
     const canvas = card.querySelector("canvas");
     const c2d = canvas.getContext("2d");
-    c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#48d048";
+    c2d.imageSmoothingEnabled = true;
+    if (c2d.imageSmoothingQuality) c2d.imageSmoothingQuality = "high";
+    const sky = c2d.createLinearGradient(0, 0, 0, 140);
+    sky.addColorStop(0, "#6a8eae");
+    sky.addColorStop(1, "#c5d4e0");
+    c2d.fillStyle = sky;
     c2d.fillRect(0, 0, 280, 140);
-    c2d.fillStyle = "#7a7a7a";
-    c2d.fillRect(90, 0, 100, 140);
-    c2d.fillStyle = "#ffffff";
-    for (let y = 6; y < 140; y += 18) {
-      c2d.fillRect(122, y, 3, 10);
-      c2d.fillRect(155, y, 3, 10);
-    }
-    drawCarTop(c2d, 140, 72, 4, car, { u: 4, flash: true });
+    c2d.fillStyle = "#6a7348";
+    c2d.fillRect(0, 78, 280, 62);
+    c2d.fillStyle = "#c4bfb4";
+    c2d.beginPath();
+    c2d.moveTo(40, 140);
+    c2d.lineTo(108, 78);
+    c2d.lineTo(172, 78);
+    c2d.lineTo(240, 140);
+    c2d.fill();
+    c2d.fillStyle = "#3a3a3e";
+    c2d.beginPath();
+    c2d.moveTo(58, 140);
+    c2d.lineTo(118, 80);
+    c2d.lineTo(162, 80);
+    c2d.lineTo(222, 140);
+    c2d.fill();
+    c2d.fillStyle = "#ececec";
+    c2d.fillRect(138, 86, 4, 12);
+    c2d.fillRect(138, 108, 4, 14);
+    drawCar3D(c2d, 140, 108, 42, car, { yaw: -0.06, flash: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");

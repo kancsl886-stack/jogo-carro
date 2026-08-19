@@ -109,17 +109,33 @@ function renderShop() {
     `;
     const canvas = card.querySelector("canvas");
     const c2d = canvas.getContext("2d");
-    c2d.imageSmoothingEnabled = false;
-    c2d.fillStyle = "#48d048";
+    c2d.imageSmoothingEnabled = true;
+    if (c2d.imageSmoothingQuality) c2d.imageSmoothingQuality = "high";
+    const sky = c2d.createLinearGradient(0, 0, 0, 140);
+    sky.addColorStop(0, "#6a8eae");
+    sky.addColorStop(1, "#c5d4e0");
+    c2d.fillStyle = sky;
     c2d.fillRect(0, 0, 280, 140);
-    c2d.fillStyle = "#7a7a7a";
-    c2d.fillRect(90, 0, 100, 140);
-    c2d.fillStyle = "#ffffff";
-    for (let y = 6; y < 140; y += 18) {
-      c2d.fillRect(122, y, 3, 10);
-      c2d.fillRect(155, y, 3, 10);
-    }
-    drawCarTop(c2d, 140, 72, 4, car, { u: 4, flash: true });
+    c2d.fillStyle = "#6a7348";
+    c2d.fillRect(0, 78, 280, 62);
+    c2d.fillStyle = "#c4bfb4";
+    c2d.beginPath();
+    c2d.moveTo(40, 140);
+    c2d.lineTo(108, 78);
+    c2d.lineTo(172, 78);
+    c2d.lineTo(240, 140);
+    c2d.fill();
+    c2d.fillStyle = "#3a3a3e";
+    c2d.beginPath();
+    c2d.moveTo(58, 140);
+    c2d.lineTo(118, 80);
+    c2d.lineTo(162, 80);
+    c2d.lineTo(222, 140);
+    c2d.fill();
+    c2d.fillStyle = "#ececec";
+    c2d.fillRect(138, 86, 4, 12);
+    c2d.fillRect(138, 108, 4, 14);
+    drawCar3D(c2d, 140, 108, 42, car, { yaw: -0.06, flash: true });
     const btn = card.querySelector("button");
     if (equipped) {
       btn.textContent = t("equipped");

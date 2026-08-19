@@ -17,7 +17,7 @@
     <link rel="icon" href="icons/nitro-surf.png" />
     <link rel="apple-touch-icon" href="icons/nitro-surf-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/style.css?v=ref20" />
+    <link rel="stylesheet" href="css/style.css?v=ref21" />
   </head>
   <body>
     <canvas id="game" aria-label="Pista do Nitro Surf"></canvas>
@@ -26,25 +26,29 @@
 
     <div id="hud" class="hud hidden">
       <div class="hud-top">
-        <div class="hud-stat">
-          <span class="hud-label" data-i18n="distance">Distância</span>
-          <strong id="hud-distance">0 m</strong>
+        <div class="hud-col">
+          <div class="hud-stat">
+            <span class="hud-label" data-i18n="distance">Distância</span>
+            <strong id="hud-distance">0 m</strong>
+          </div>
+          <div class="hud-stat cop">
+            <span class="hud-label" data-i18n="copHud">Polícia</span>
+            <div class="cop-bar"><i id="cop-fill"></i></div>
+          </div>
         </div>
-        <div class="hud-stat gold">
+        <div class="hud-stat gold hud-run">
           <span class="hud-label" data-i18n="runCoins">Corrida</span>
           <strong><span class="coin-mini" aria-hidden="true">$</span><span id="hud-run-coins">0</span></strong>
         </div>
-        <div class="hud-stat">
-          <span class="hud-label" data-i18n="best">Recorde</span>
-          <strong id="hud-best">0 m</strong>
+        <div class="hud-col hud-col-right">
+          <div class="hud-stat">
+            <span class="hud-label" data-i18n="best">Recorde</span>
+            <strong id="hud-best">0 m</strong>
+          </div>
+          <button id="btn-pause" class="icon-btn" type="button" data-i18n-aria="pause" aria-label="Pausar">
+            ❚❚
+          </button>
         </div>
-        <div class="hud-stat cop">
-          <span class="hud-label" data-i18n="copHud">Polícia</span>
-          <div class="cop-bar"><i id="cop-fill"></i></div>
-        </div>
-        <button id="btn-pause" class="icon-btn" type="button" data-i18n-aria="pause" aria-label="Pausar">
-          ❚❚
-        </button>
       </div>
       <div class="hud-bottom">
         <div class="hud-left">
@@ -195,11 +199,11 @@
 
     <div id="toast" class="toast hidden" role="status"></div>
 
-    <script src="js/cars.js?v=ref20"></script>
-    <script src="js/storage.js?v=ref20"></script>
-    <script src="js/i18n.js?v=ref20"></script>
-    <script src="js/audio.js?v=ref20"></script>
-    <script src="js/game.js?v=ref20"></script>
-    <script src="js/ui.js?v=ref20"></script>
+    <script src="js/cars.js?v=ref21"></script>
+    <script src="js/storage.js?v=ref21"></script>
+    <script src="js/i18n.js?v=ref21"></script>
+    <script src="js/audio.js?v=ref21"></script>
+    <script src="js/game.js?v=ref21"></script>
+    <script src="js/ui.js?v=ref21"></script>
   </body>
 </html>

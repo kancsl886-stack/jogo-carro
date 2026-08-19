@@ -8,52 +8,62 @@ const BIOME_BLEND = 52;
 const BIOMES = [
   {
     id: "campo",
-    ground: "#48d048",
-    road: "#7a7a7a",
-    rumbleA: "#e53935",
-    rumbleB: "#ffffff",
-    dash: "#ffffff",
-    sidewalk: null,
+    ground: "#4a9a3c",
+    road: "#3e3e42",
+    rumbleA: "#e6c200",
+    rumbleB: "#8d8d93",
+    dash: "#ececec",
+    sidewalk: "#6aaa4e",
+    skyTop: "#5a9ad4",
+    skyBot: "#c8e0f4",
     decor: "trees",
   },
   {
     id: "cidade",
-    ground: "#6e6e76",
-    road: "#4e4e54",
-    rumbleA: "#f0d000",
-    rumbleB: "#1a1a1a",
-    dash: "#d8d8d8",
-    sidewalk: "#b8b4ac",
+    ground: "#6a7348",
+    road: "#3a3a3e",
+    rumbleA: "#e6c200",
+    rumbleB: "#8d8d93",
+    dash: "#ececec",
+    sidewalk: "#c4bfb4",
+    skyTop: "#6a8eae",
+    skyBot: "#c5d4e0",
     decor: "city",
   },
   {
     id: "praia",
     ground: "#e2c86a",
-    road: "#8a8680",
+    road: "#4a4844",
     rumbleA: "#ffffff",
     rumbleB: "#3aa0d8",
     dash: "#fff6d0",
     sidewalk: "#d8b45a",
+    skyTop: "#4aa0d8",
+    skyBot: "#d8ecf8",
     decor: "beach",
   },
   {
     id: "serra",
     ground: "#2f7a38",
-    road: "#5a5a5a",
-    rumbleA: "#ffffff",
-    rumbleB: "#2a2a2a",
+    road: "#3a3a3a",
+    rumbleA: "#e6c200",
+    rumbleB: "#6a6a70",
     dash: "#e0e0e0",
-    sidewalk: null,
+    sidewalk: "#3d8a42",
+    skyTop: "#4a7aaa",
+    skyBot: "#b8cce0",
     decor: "forest",
   },
   {
     id: "porto",
     ground: "#7a7468",
-    road: "#4a453e",
+    road: "#3a3632",
     rumbleA: "#f0a000",
-    rumbleB: "#2a2a2a",
+    rumbleB: "#6a6460",
     dash: "#c8c0a8",
     sidewalk: "#8a8478",
+    skyTop: "#5a6e82",
+    skyBot: "#b8c0c8",
     decor: "docks",
   },
 ];
@@ -149,21 +159,17 @@ const Game = {
   },
 
   resize() {
-    this.dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.w = window.innerWidth;
     this.h = window.innerHeight;
     this.canvas.width = Math.floor(this.w * this.dpr);
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    crisp(this.ctx);
-    this.pixel = Math.max(4, Math.floor(Math.min(this.w, this.h) / 128));
-    this.gw = Math.max(80, Math.ceil(this.w / this.pixel));
-    this.gh = Math.max(140, Math.ceil(this.h / this.pixel));
-    if (!this.pix) this.pix = document.createElement("canvas");
-    this.pix.width = this.gw;
-    this.pix.height = this.gh;
-    this.pctx = this.pix.getContext("2d");
-    crisp(this.pctx);
+    this.ctx.imageSmoothingEnabled = true;
+    if (this.ctx.imageSmoothingQuality) this.ctx.imageSmoothingQuality = "high";
+    this.gw = this.w;
+    this.gh = this.h;
+    this.pixel = 1;
     if (this._idle && !this.running) this.drawMenuScene();
   },
 
@@ -323,23 +329,64 @@ const Game = {
     return (a + b + c) * pulse * fade;
   },
 
-  toScreen(worldX, z) {
-    const W = this.gw || this.w;
-    const H = this.gh || this.h;
-    const xScale = W * 0.09;
-    const zScale = H / 52;
-    const lanePx = xScale * LANE_GAP;
-    const u = Math.max(1, Math.floor(lanePx / 11));
-    const cam = this.roadBend(this.playerZ());
-    const bend = (this.roadBend(z) - cam) * xScale;
+  toScreen(worldX, z, y) {
+    return this.project(worldX, y || 0, z);
+  },
+
+  project(wx, wy, wz) {
+    const W = this.w;
+    const H = this.h;
+    const camZ = this.playerZ();
+    const camBend = this.roadBend(camZ);
+    const dx = wx - this.viewLaneX() * 0.18 + (this.roadBend(wz) - camBend);
+    const dy = 2.55 - wy;
+    const dz = wz - camZ + 2.1;
+    if (dz < 0.12) {
+      return { x: W / 2, y: H + 80, s: 1, scale: 1, z: dz, visible: false, xScale: 1, zScale: 1 };
+    }
+    const s = 268 / dz;
+    const k = Math.min(W, H * 1.08);
+    const xScale = s * (k / 980);
     return {
-      x: W / 2 + worldX * xScale + bend,
-      y: H * 0.78 - (z - this.playerZ()) * zScale,
-      s: u,
-      u,
+      x: W * 0.5 + dx * xScale,
+      y: H * 0.155 + dy * s * (H / 520),
+      s,
+      scale: s,
+      z: dz,
+      visible: true,
       xScale,
-      zScale,
+      zScale: s * (H / 520),
     };
+  },
+
+  fillQuad(ctx, a, b, c, d, color) {
+    if (!a || !b || !c || !d) return;
+    if (![a, b, c, d].every((p) => Number.isFinite(p.x) && Number.isFinite(p.y))) return;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.lineTo(c.x, c.y);
+    ctx.lineTo(d.x, d.y);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  },
+
+  drawBox3D(ctx, x, y, z, w, h, d, colors) {
+    const p = (ox, oy, oz) => this.project(x + ox, y + oy, z + oz);
+    const fl = p(-w / 2, 0, -d / 2);
+    const fr = p(w / 2, 0, -d / 2);
+    const bl = p(-w / 2, 0, d / 2);
+    const br = p(w / 2, 0, d / 2);
+    const flh = p(-w / 2, h, -d / 2);
+    const frh = p(w / 2, h, -d / 2);
+    const blh = p(-w / 2, h, d / 2);
+    const brh = p(w / 2, h, d / 2);
+    if (!fl.visible && !fr.visible && !bl.visible && !br.visible) return;
+    this.fillQuad(ctx, fr, br, brh, frh, colors.right || colors.front);
+    this.fillQuad(ctx, fl, bl, blh, flh, colors.left || colors.front);
+    this.fillQuad(ctx, fl, fr, frh, flh, colors.front);
+    this.fillQuad(ctx, flh, frh, brh, blh, colors.top);
   },
 
   seedRoadside() {
@@ -635,6 +682,8 @@ const Game = {
       rumbleB: mixHex(a.rumbleB, b.rumbleB, t),
       dash: mixHex(a.dash, b.dash, t),
       sidewalk: a.sidewalk || b.sidewalk ? mixHex(a.sidewalk || a.ground, b.sidewalk || b.ground, t) : null,
+      skyTop: mixHex(a.skyTop || "#6a8eae", b.skyTop || "#6a8eae", t),
+      skyBot: mixHex(a.skyBot || "#c5d4e0", b.skyBot || "#c5d4e0", t),
       decor: t > 0.42 ? b.decor : a.decor,
     };
     if (this._biomeMemo.size > 48) this._biomeMemo.clear();
@@ -642,315 +691,404 @@ const Game = {
     return val;
   },
 
-  blit(ctx) {
-    const out = this.ctx;
-    out.imageSmoothingEnabled = false;
-    out.fillStyle = (this.biomeAt(this.viewCameraZ()) || BIOMES[0]).ground;
-    out.fillRect(0, 0, this.w, this.h);
-    let ox = 0;
-    let oy = 0;
-    if (this.shake > 0.4) {
-      ox = (Math.random() - 0.5) * this.shake;
-      oy = (Math.random() - 0.5) * this.shake;
-    }
-    crisp(out);
-    out.drawImage(this.pix, ox, oy, this.w, this.h);
+  drawSky3D(ctx) {
+    const scene = this.biomeAt(this.viewCameraZ() + 24) || BIOMES[0];
+    const H = this.h;
+    const W = this.w;
+    const horizon = H * 0.155;
+    const sky = ctx.createLinearGradient(0, 0, 0, horizon + 36);
+    sky.addColorStop(0, scene.skyTop || "#6a8eae");
+    sky.addColorStop(1, scene.skyBot || "#c5d4e0");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+    const sun = ctx.createRadialGradient(W * 0.1, H * 0.1, 8, W * 0.1, H * 0.1, W * 0.62);
+    sun.addColorStop(0, "rgba(255, 244, 210, 0.72)");
+    sun.addColorStop(0.32, "rgba(255, 220, 160, 0.2)");
+    sun.addColorStop(1, "rgba(255, 200, 120, 0)");
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, W, horizon + 90);
+    ctx.fillStyle = scene.ground;
+    ctx.fillRect(0, horizon, W, H - horizon);
   },
 
-  drawSky(ctx) {
-    const near = this.biomeAt(this.viewCameraZ()) || BIOMES[0];
-    const far = this.biomeAt(this.viewCameraZ() + 40) || near;
-    ctx.fillStyle = near.ground;
-    ctx.fillRect(0, 0, this.gw, this.gh);
-    if (far.ground !== near.ground) {
-      ctx.fillStyle = far.ground;
-      ctx.fillRect(0, 0, this.gw, Math.round(this.gh * 0.4));
-      ctx.fillStyle = mixHex(far.ground, near.ground, 0.5);
-      ctx.fillRect(0, Math.round(this.gh * 0.4), this.gw, Math.round(this.gh * 0.12));
-    }
-  },
-
-  paintRoad(ctx, cameraZ) {
-    const mid = this.toScreen(0, this.playerZ());
-    const laneW = Math.round(mid.xScale * LANE_GAP);
-    const roadW = laneW * LANES;
-    const rumble = Math.max(5, Math.round(laneW * 0.22));
-    const zScale = mid.zScale;
-    const xScale = mid.xScale;
-    const scroll = cameraZ == null ? this.cameraZ : cameraZ;
-    const playerZ = scroll + 8;
-    const camBend = this.roadBend(playerZ);
-    const H = this.gh;
-    const leftAt = new Array(H);
-    const block = rumble;
-    const offset = Math.round(((scroll * zScale) % (block * 2) + block * 2) % (block * 2));
-    const dashW = Math.max(2, Math.round(laneW * 0.08));
-    const dashH = Math.max(8, Math.round(laneW * 0.42));
-    const gap = Math.max(6, Math.round(laneW * 0.3));
-    const period = dashH + gap;
-    const dashOff = Math.round(((scroll * zScale) % period + period) % period);
-
-    for (let y = 0; y < H; y++) {
-      const z = playerZ + (H * 0.78 - y) / zScale;
-      const scene = this.biomeAt(z);
-      const left = Math.round(this.gw / 2 - roadW / 2 + (this.roadBend(z) - camBend) * xScale);
-      leftAt[y] = left;
-      if (scene.sidewalk) {
-        ctx.fillStyle = scene.sidewalk;
-        ctx.fillRect(left - rumble - 4, y, 4, 1);
-        ctx.fillRect(left + roadW + rumble, y, 4, 1);
-      }
-      ctx.fillStyle = scene.road;
-      ctx.fillRect(left, y, roadW, 1);
-      const stripe = Math.floor((y - offset) / block) % 2 === 0;
-      ctx.fillStyle = stripe ? scene.rumbleA : scene.rumbleB;
-      ctx.fillRect(left - rumble, y, rumble, 1);
-      ctx.fillRect(left + roadW, y, rumble, 1);
-      const dashPhase = ((y - dashOff) % period + period) % period;
-      if (dashPhase < dashH) {
-        ctx.fillStyle = scene.dash;
-        for (let lane = 1; lane < LANES; lane++) {
-          ctx.fillRect(left + lane * laneW - Math.floor(dashW / 2), y, dashW, 1);
-        }
-      }
-    }
-
-    const midY = Math.min(H - 1, Math.max(0, Math.round(H * 0.78)));
-    const left = leftAt[midY];
-    this._leftAt = leftAt;
-    return { left, roadW, laneW, rumble, leftAt };
-  },
-
-  drawRoad(ctx) {
-    this._road = this.paintRoad(ctx, this.viewCameraZ());
-  },
-
-  drawGrassDecor(ctx, left, roadW, rumble, scroll) {
-    const period = 18;
-    const off = ((scroll % period) + period) % period;
-    const count = Math.ceil(this.gh / period) + 4;
-    const inGrass = (x) => x > 3 && x < this.gw - 3;
-    const leftAt = this._leftAt;
-    const leftAtY = (y) => {
-      if (leftAt && y >= 0 && y < leftAt.length) return leftAt[y];
-      return left;
-    };
-    const cam = this.viewCameraZ();
-    const playerZ = cam + 8;
-    const zScale = this.toScreen(0, playerZ).zScale;
-    const zAt = (y) => playerZ + (this.gh * 0.78 - y) / zScale;
-    const seedOf = (n) => Math.abs((n * 1103515245 + 12345) | 0);
-
-    for (let i = -2; i < count; i++) {
-      const col = ((i % 3) + 3) % 3;
-      const yL = Math.round(i * period + off);
-      const yR = Math.round(i * period + off + 4);
-      if ((yL < -18 && yR < -18) || (yL > this.gh + 18 && yR > this.gh + 18)) continue;
-      const size = 1 + (Math.abs(i) % 2);
-      const leftL = leftAtY(yL);
-      const leftR = leftAtY(yR);
-      const xl = leftL - rumble - 10 - col * 10;
-      const xr = leftR + roadW + rumble + 10 + col * 10;
-      const xl2 = leftL - rumble - 32;
-      const xr2 = leftR + roadW + rumble + 32;
-      const decor = this.biomeAt(zAt(yL)).decor;
-      const seed = seedOf(i + col * 17);
-
-      const placeLeft = (fn) => {
-        if (inGrass(xl)) fn(xl, yL, seed);
-        if (i % 2 === 1 && inGrass(xl2)) fn(xl2 + (i % 5), yL + 6, seed + 3);
-      };
-      const placeRight = (fn) => {
-        if (inGrass(xr)) fn(xr, yR, seed + 1);
-        if (i % 2 === 0 && inGrass(xr2)) fn(xr2 - (i % 5), yR + 5, seed + 5);
-      };
-
-      if (decor === "city") {
-        placeLeft((x, y, s) => {
-          if (s % 5 === 0) drawPixelLamp(ctx, x, y);
-          else drawPixelBuilding(ctx, x, y, s);
-        });
-        placeRight((x, y, s) => {
-          if (s % 4 === 0) drawPixelLamp(ctx, x, y);
-          else drawPixelBuilding(ctx, x, y, s);
-        });
-      } else if (decor === "beach") {
-        placeLeft((x, y, s) => {
-          if (s % 3 === 0) drawPixelBush(ctx, x, y);
-          else drawPixelPalm(ctx, x, y);
-        });
-        placeRight((x, y) => drawPixelPalm(ctx, x, y));
-      } else if (decor === "forest") {
-        placeLeft((x, y, s) => {
-          if (s % 4 === 0) drawPixelRock(ctx, x, y);
-          else drawPixelPine(ctx, x, y, size);
-        });
-        placeRight((x, y, s) => drawPixelPine(ctx, x, y, 1 + (s % 2)));
-      } else if (decor === "docks") {
-        placeLeft((x, y, s) => {
-          if (s % 3 === 0) drawPixelBuilding(ctx, x, y, s);
-          else drawPixelCrate(ctx, x, y, s);
-        });
-        placeRight((x, y, s) => drawPixelCrate(ctx, x, y, s));
-      } else {
-        if (inGrass(xl)) {
-          if (i % 4 === 0) drawPixelBush(ctx, xl, yL);
-          else drawPixelTree(ctx, xl, yL, size);
-        }
-        if (inGrass(xr)) {
-          if (i % 3 === 0) drawPixelBush(ctx, xr, yR);
-          else drawPixelTree(ctx, xr, yR, 1 + ((Math.abs(i) + 1) % 2));
-        }
-        if (i % 2 === 1 && inGrass(xl2)) drawPixelTree(ctx, xl2 + (i % 5), yL + 6, 1);
-        if (i % 2 === 0 && inGrass(xr2)) drawPixelTree(ctx, xr2 - (i % 5), yR + 5, 1);
-      }
-    }
-  },
-
-  drawRoadside(ctx) {
-    const road = this._road || this.paintRoad(ctx, this.viewCameraZ());
-    const mid = this.toScreen(0, this.playerZ());
-    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, this.viewCameraZ() * mid.zScale);
-  },
-
-  drawEntities(ctx) {
+  drawRoad3D(ctx) {
     const playerZ = this.playerZ();
-    const list = this.entities.filter((e) => !e.taken).sort((a, b) => b.z - a.z);
-    this._carsToDraw = [];
-    this._coinsToDraw = [];
-    let playerDrawn = false;
-    const drawPlayer = () => {
-      const p = this.toScreen(this.viewLaneX(), playerZ);
-      const hop = this.viewJump() * 1.4;
-      this._carsToDraw.push({
-        p,
-        hop,
-        car: this.car,
-        extras: {
-          nitro: this.powers.nitro,
-          flash: this.flash % 0.4 < 0.2,
-          yaw: this.viewYaw(),
-        },
-        shield: this.powers.shield > 0,
-      });
-    };
+    const segs = 28;
+    const zFar = 58;
+    const zNear = -0.35;
+    const half = 3.38;
+    const walk = 0.78;
+    const W = this.w;
+    const p = (x, y, zOff) => this.project(x, y, playerZ + zOff);
 
-    for (const e of list) {
-      if (!playerDrawn && e.z < playerZ) {
-        drawPlayer();
-        playerDrawn = true;
+    for (let i = 0; i < segs; i++) {
+      const u0 = i / segs;
+      const u1 = (i + 1) / segs;
+      const f0 = 1 - (1 - u0) * (1 - u0);
+      const f1 = 1 - (1 - u1) * (1 - u1);
+      const za = zFar * (1 - f0) + zNear * f0;
+      const zb = zFar * (1 - f1) + zNear * f1;
+      const zMid = playerZ + (za + zb) * 0.5;
+      const scene = this.biomeAt(zMid);
+      const L0 = p(-half, 0, za);
+      const R0 = p(half, 0, za);
+      const L1 = p(-half, 0, zb);
+      const R1 = p(half, 0, zb);
+      const SL0 = p(-half - walk, 0, za);
+      const SR0 = p(half + walk, 0, za);
+      const SL1 = p(-half - walk, 0, zb);
+      const SR1 = p(half + walk, 0, zb);
+      this.fillQuad(ctx, { x: 0, y: L0.y }, SL0, SL1, { x: 0, y: L1.y }, scene.ground);
+      this.fillQuad(ctx, SR0, { x: W, y: R0.y }, { x: W, y: R1.y }, SR1, scene.ground);
+      if (scene.sidewalk) {
+        this.fillQuad(ctx, SL0, L0, L1, SL1, scene.sidewalk);
+        this.fillQuad(ctx, R0, SR0, SR1, R1, scene.sidewalk);
       }
-      const x = this.laneWorldX(e.lane);
-      const p = this.toScreen(x, e.z);
-      if (p.y < -20 || p.y > this.gh + 24) continue;
-      if (e.kind === "coin") {
-        this._coinsToDraw.push(p);
-      } else if (e.kind === "power") {
-        const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
-        ctx.fillStyle = color;
-        ctx.fillRect(Math.round(p.x) - 5, Math.round(p.y) - 5, 10, 10);
-        ctx.fillStyle = "#111111";
-        ctx.font = "bold 8px monospace";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M", Math.round(p.x), Math.round(p.y) + 1);
-        ctx.textBaseline = "alphabetic";
-      } else if (e.kind === "barrier") {
-        const w = Math.round(p.xScale * 1.6);
-        ctx.fillStyle = "#ff9f1c";
-        ctx.fillRect(Math.round(p.x) - w / 2, Math.round(p.y) - 4, w, 8);
-        ctx.fillStyle = "#111111";
-        for (let i = 0; i < 4; i++) {
-          ctx.fillRect(Math.round(p.x) - w / 2 + i * (w / 4), Math.round(p.y) - 4, w / 8, 8);
+      this.fillQuad(ctx, L0, R0, R1, L1, scene.road);
+
+      const mark = (x0, x1) => {
+        this.fillQuad(ctx, p(x0, 0, za), p(x1, 0, za), p(x1, 0, zb), p(x0, 0, zb), "rgba(18, 18, 20, 0.22)");
+      };
+      mark(-0.78, -0.52);
+      mark(0.52, 0.78);
+      mark(-2.85, -2.58);
+      mark(2.58, 2.85);
+
+      if (Math.floor(zMid / 5.4) % 2 === 0) {
+        for (const lx of [-LANE_GAP / 2, LANE_GAP / 2]) {
+          this.fillQuad(
+            ctx,
+            p(lx - 0.055, 0.01, za),
+            p(lx + 0.055, 0.01, za),
+            p(lx + 0.055, 0.01, zb),
+            p(lx - 0.055, 0.01, zb),
+            scene.dash
+          );
         }
-      } else {
-        this._carsToDraw.push({
-          p,
-          hop: 0,
-          car: e.car || randomTrafficCar(),
-          extras: { brake: true },
-        });
       }
-    }
-    if (!playerDrawn) drawPlayer();
-    this.queueCop();
 
-    for (const part of this.particles) {
-      const p = this.toScreen(part.x, part.z);
-      ctx.fillStyle = part.color;
-      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+      const stripe = Math.floor(zMid / 1.65) % 2 === 0;
+      const ja = stripe ? scene.rumbleA : scene.rumbleB;
+      const jb = stripe ? shadeHex(ja, 0.1) : shadeHex(ja, -0.08);
+      const wallH = 0.86;
+      const leftInner = -half - 0.02;
+      const leftOuter = -half - 0.42;
+      const rightInner = half + 0.02;
+      const rightOuter = half + 0.42;
+      this.fillQuad(ctx, p(leftInner, 0, za), p(leftInner, 0, zb), p(leftInner, wallH, zb), p(leftInner, wallH, za), ja);
+      this.fillQuad(ctx, p(leftInner, wallH, za), p(leftInner, wallH, zb), p(leftOuter, wallH, zb), p(leftOuter, wallH, za), jb);
+      this.fillQuad(ctx, p(leftOuter, 0, za), p(leftOuter, wallH, za), p(leftOuter, wallH, zb), p(leftOuter, 0, zb), shadeHex(ja, -0.28));
+      this.fillQuad(ctx, p(rightInner, 0, za), p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightInner, 0, zb), ja);
+      this.fillQuad(ctx, p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), jb);
+      this.fillQuad(ctx, p(rightOuter, 0, za), p(rightOuter, 0, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), shadeHex(ja, -0.32));
     }
   },
 
-  queueCop() {
-    if (!this.cop || this.cop.z == null) return;
-    const p = this.toScreen(this.cop.laneX, this.cop.z);
-    if (p.y < -20 || p.y > this.gh + 28) return;
-    this._carsToDraw.push({
-      p,
-      hop: 0,
-      car: getCar("policia"),
-      extras: { flash: this.flash % 0.4 < 0.2, yaw: this.viewYaw() * 0.65 },
+  collectScenery() {
+    const playerZ = this.playerZ();
+    const items = [];
+    const start = Math.floor((playerZ - 2) / 7);
+    const end = Math.floor((playerZ + 52) / 7);
+    for (let i = start; i <= end; i++) {
+      const z = i * 7;
+      const scene = this.biomeAt(z);
+      const seed = Math.abs((i * 1103515245 + 12345) | 0);
+      items.push({ z, side: -1, seed, decor: scene.decor });
+      items.push({ z: z + 3.4, side: 1, seed: seed + 17, decor: scene.decor });
+    }
+    return items;
+  },
+
+  drawSceneryItem(ctx, it) {
+    const x = it.side * (4.9 + (it.seed % 6) * 0.4);
+    const p = this.project(x, 0, it.z);
+    if (!p.visible || p.s < 5 || p.y > this.h + 50) return;
+    const decor = it.decor;
+    if (decor === "city") {
+      if (it.seed % 5 === 0) this.drawLamp3D(ctx, x, it.z, it.side);
+      else this.drawBuilding3D(ctx, x, it.z, it.seed);
+    } else if (decor === "beach") {
+      this.drawPalm3D(ctx, x, it.z);
+    } else if (decor === "forest") {
+      if (it.seed % 4 === 0) this.drawRock3D(ctx, x, it.z);
+      else this.drawPine3D(ctx, x, it.z, 1 + (it.seed % 2));
+    } else if (decor === "docks") {
+      if (it.seed % 3 === 0) this.drawBuilding3D(ctx, x, it.z, it.seed);
+      else {
+        this.drawBox3D(ctx, x, 0, it.z, 1.5, 1.3, 1.5, {
+          left: "#d35400",
+          right: "#7a2e00",
+          front: "#c0392b",
+          top: "#e67e22",
+        });
+      }
+    } else if (it.seed % 4 === 0) {
+      this.drawBush3D(ctx, x, it.z);
+    } else {
+      this.drawTree3D(ctx, x, it.z, 1 + (it.seed % 2));
+    }
+  },
+
+  drawBuilding3D(ctx, x, z, seed) {
+    const floors = 3 + (seed % 6);
+    const w = 2.05 + (seed % 5) * 0.28;
+    const d = 1.55 + (seed % 3) * 0.22;
+    const h = 2.3 + floors * 0.82;
+    const walls = ["#8a5a48", "#6d7380", "#9aa3b0", "#7a6e68", "#b07058", "#5c6570"];
+    const wall = walls[seed % walls.length];
+    this.drawBox3D(ctx, x, 0, z, w, h, d, {
+      left: shadeHex(wall, 0.18),
+      right: shadeHex(wall, -0.34),
+      front: wall,
+      top: shadeHex(wall, -0.16),
+    });
+    const cols = 3 + (seed % 2);
+    const rows = Math.max(2, floors - 1);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const wx = x - w * 0.3 + c * (w * 0.3);
+        const wy = 0.65 + r * (h / (rows + 0.55));
+        const faceZ = z - d / 2 - 0.02;
+        this.fillQuad(
+          ctx,
+          this.project(wx - 0.12, wy, faceZ),
+          this.project(wx + 0.12, wy, faceZ),
+          this.project(wx + 0.12, wy + 0.3, faceZ),
+          this.project(wx - 0.12, wy + 0.3, faceZ),
+          (seed + r + c) % 3 === 0 ? "#ffe08a" : "#c8e4ff"
+        );
+      }
+    }
+  },
+
+  drawLamp3D(ctx, x, z, side) {
+    const base = this.project(x, 0, z);
+    const top = this.project(x, 3.5, z);
+    const arm = this.project(x - side * 0.75, 3.5, z);
+    if (!base.visible) return;
+    ctx.strokeStyle = "#2a2a32";
+    ctx.lineWidth = Math.max(2, base.s * 0.028);
+    ctx.beginPath();
+    ctx.moveTo(base.x, base.y);
+    ctx.lineTo(top.x, top.y);
+    ctx.lineTo(arm.x, arm.y);
+    ctx.stroke();
+    const glow = ctx.createRadialGradient(arm.x, arm.y, 2, arm.x, arm.y, base.s * 0.24);
+    glow.addColorStop(0, "rgba(255, 220, 120, 0.9)");
+    glow.addColorStop(1, "rgba(255, 200, 80, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(arm.x, arm.y, base.s * 0.24, 0, Math.PI * 2);
+    ctx.fill();
+  },
+
+  drawTree3D(ctx, x, z, size) {
+    const p = this.project(x, 0, z);
+    if (!p.visible) return;
+    const s = p.s * (0.13 + size * 0.045);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.beginPath();
+    ctx.ellipse(p.x + s * 0.48, p.y, s * 0.72, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const top = this.project(x, 1.35 * size, z);
+    ctx.strokeStyle = "#6a3a18";
+    ctx.lineWidth = Math.max(2, s * 0.18);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(top.x, top.y);
+    ctx.stroke();
+    const leaf = (ox, oy, r, col) => {
+      const q = this.project(x + ox, 1.55 * size + oy, z);
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.fill();
+    };
+    leaf(0.16, 0.08, s * 0.88, "#0f6b1c");
+    leaf(-0.22, 0.04, s * 0.72, "#1a8a28");
+    leaf(0, 0.42, s * 0.56, "#2aaa3a");
+  },
+
+  drawBush3D(ctx, x, z) {
+    const p = this.project(x, 0.35, z);
+    if (!p.visible) return;
+    const s = p.s * 0.1;
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.beginPath();
+    ctx.ellipse(p.x + s * 0.3, p.y + s * 0.5, s * 0.8, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, s * 0.7, 0, Math.PI * 2);
+    ctx.fillStyle = "#166a24";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x + s * 0.35, p.y + s * 0.1, s * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#0f6b1c";
+    ctx.fill();
+  },
+
+  drawPalm3D(ctx, x, z) {
+    const p = this.project(x, 0, z);
+    const top = this.project(x, 2.4, z);
+    if (!p.visible) return;
+    const s = p.s * 0.12;
+    ctx.strokeStyle = "#8a5a28";
+    ctx.lineWidth = Math.max(2, s * 0.2);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(top.x, top.y);
+    ctx.stroke();
+    ctx.fillStyle = "#1f8a3a";
+    for (const a of [-0.9, -0.3, 0.3, 0.9]) {
+      ctx.beginPath();
+      ctx.ellipse(top.x + Math.sin(a) * s * 0.9, top.y + 4, s * 0.7, s * 0.22, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  },
+
+  drawPine3D(ctx, x, z, size) {
+    const p = this.project(x, 0, z);
+    if (!p.visible) return;
+    const s = p.s * (0.12 + size * 0.04);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.beginPath();
+    ctx.ellipse(p.x + s * 0.35, p.y, s * 0.55, s * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#4a3014";
+    ctx.fillRect(p.x - s * 0.08, p.y - s * 0.4, s * 0.16, s * 0.45);
+    ctx.fillStyle = "#0c4a22";
+    for (let i = 0; i < 3; i++) {
+      const yy = p.y - s * (0.35 + i * 0.45);
+      const ww = s * (1.1 - i * 0.28);
+      ctx.beginPath();
+      ctx.moveTo(p.x, yy - s * 0.45);
+      ctx.lineTo(p.x - ww, yy);
+      ctx.lineTo(p.x + ww, yy);
+      ctx.closePath();
+      ctx.fill();
+    }
+  },
+
+  drawRock3D(ctx, x, z) {
+    this.drawBox3D(ctx, x, 0, z, 1.1, 0.7, 0.9, {
+      left: "#8a9098",
+      right: "#4a4e54",
+      front: "#6a6e74",
+      top: "#9aa0a8",
     });
   },
 
-  drawCoinsHiRes() {
-    const coins = this._coinsToDraw;
-    if (!coins || !coins.length) return;
-    const out = this.ctx;
-    const kx = this.w / this.gw;
-    const ky = this.h / this.gh;
-    out.save();
-    for (const p of coins) {
-      const x = p.x * kx;
-      const y = p.y * ky;
-      if (y < -20 || y > this.h + 20) continue;
-      const r = Math.max(5, p.xScale * kx * 0.2);
-      drawRoundCoin(out, x, y, r);
+  drawPlayerCar(ctx) {
+    const hop = this.viewJump() * 0.09;
+    const p = this.project(this.viewLaneX(), hop * 1.5, this.playerZ());
+    if (!p.visible) return;
+    if (this.powers.shield > 0) {
+      ctx.save();
+      ctx.fillStyle = "rgba(125, 255, 184, 0.28)";
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y - p.s * 0.08, p.s * 0.42, p.s * 0.28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
-    out.restore();
+    drawCar3D(ctx, p.x, p.y, p.s * 0.44, this.car, {
+      yaw: this.viewYaw(),
+      nitro: this.powers.nitro,
+      flash: this.flash % 0.4 < 0.2,
+      jump: this.viewJump(),
+    });
   },
 
-  drawCarsHiRes() {
-    const out = this.ctx;
-    const kx = this.w / this.gw;
-    const ky = this.h / this.gh;
-    const cars = (this._carsToDraw || []).slice().sort((a, b) => a.p.y - b.p.y);
-    for (const item of cars) {
-      if (!item || !item.p || !item.car) continue;
-      const x = item.p.x * kx;
-      const y = (item.p.y - (item.hop || 0)) * ky;
-      if (y < -90 || y > this.h + 90) continue;
-      const lanePx = item.p.xScale * LANE_GAP * kx;
-      const u = Math.max(3, Math.round(lanePx / 26));
-      if (item.shield) {
-        out.save();
-        out.fillStyle = "rgba(125, 255, 184, 0.28)";
-        out.beginPath();
-        if (out.ellipse) out.ellipse(x, y, u * 8, u * 11, 0, 0, Math.PI * 2);
-        else out.rect(x - u * 8, y - u * 11, u * 16, u * 22);
-        out.fill();
-        out.restore();
-      }
-      drawCarTop(out, x, y, u, item.car, Object.assign({ u }, item.extras || {}));
+  drawCopCar(ctx) {
+    if (!this.cop || this.cop.z == null) return;
+    const p = this.project(this.cop.laneX, 0, this.cop.z);
+    if (!p.visible || p.y > this.h + 90) return;
+    drawCar3D(ctx, p.x, p.y, p.s * 0.44, getCar("policia"), {
+      flash: this.flash % 0.4 < 0.2,
+      yaw: this.viewYaw() * 0.65,
+    });
+  },
+
+  drawEntity(ctx, e) {
+    const x = this.laneWorldX(e.lane);
+    if (e.kind === "coin") {
+      const p = this.project(x, 0.9, e.z);
+      if (!p.visible) return;
+      drawRoundCoin(ctx, p.x, p.y, Math.max(6, p.s * 0.09));
+    } else if (e.kind === "power") {
+      const p = this.project(x, 0.95, e.z);
+      if (!p.visible) return;
+      const color = e.power === "shield" ? "#5dffb0" : e.power === "nitro" ? "#3cf0ff" : "#ff9a3c";
+      const letter = e.power === "shield" ? "S" : e.power === "nitro" ? "N" : "M";
+      drawPowerOrb(ctx, p.x, p.y, Math.max(8, p.s * 0.1), color, letter);
+    } else if (e.kind === "barrier") {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawWoodCrate(ctx, p.x, p.y, p.s * 0.22, 4);
+    } else if (e.kind === "truck") {
+      this.drawBox3D(ctx, x, 0, e.z, 1.65, 1.75, 2.5, {
+        left: "#c0392b",
+        right: "#6a1a14",
+        front: "#a93226",
+        top: "#922b21",
+      });
+    } else {
+      const p = this.project(x, 0, e.z);
+      if (!p.visible) return;
+      drawCar3D(ctx, p.x, p.y, p.s * 0.42, e.car || randomTrafficCar(), { brake: true });
     }
+  },
+
+  drawEntities3D(ctx, menu) {
+    const playerZ = this.playerZ();
+    const list = [];
+    if (!menu) {
+      for (const e of this.entities) {
+        if (!e.taken) list.push({ z: e.z, e });
+      }
+      if (this.cop) list.push({ z: this.cop.z, cop: true });
+    }
+    list.push({ z: playerZ, player: true });
+    for (const s of this.collectScenery()) list.push({ z: s.z, scenery: s });
+    list.sort((a, b) => b.z - a.z);
+    for (const item of list) {
+      if (item.scenery) this.drawSceneryItem(ctx, item.scenery);
+      else if (item.player) this.drawPlayerCar(ctx);
+      else if (item.cop) this.drawCopCar(ctx);
+      else this.drawEntity(ctx, item.e);
+    }
+    if (menu) return;
+    for (const part of this.particles) {
+      const p = this.project(part.x, part.y || 0.4, part.z);
+      if (!p.visible) continue;
+      ctx.fillStyle = part.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(1.4, p.s * 0.028), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  },
+
+  drawWorld3D(ctx, menu) {
+    let ox = 0;
+    let oy = 0;
+    if (!menu && this.shake > 0.4) {
+      ox = (Math.random() - 0.5) * this.shake;
+      oy = (Math.random() - 0.5) * this.shake;
+    }
+    ctx.save();
+    ctx.translate(ox, oy);
+    this.drawSky3D(ctx);
+    this.drawRoad3D(ctx);
+    this.drawEntities3D(ctx, menu);
+    ctx.restore();
   },
 
   draw(alpha) {
-    if (!this.pctx) this.resize();
     const a = Math.max(0, Math.min(1, alpha == null ? 1 : alpha));
     this._drawCam = lerp(this.prevCameraZ ?? this.cameraZ, this.cameraZ, a);
     this._drawLaneX = lerp(this.prevLaneX ?? this.laneX, this.laneX, a);
     this._drawYaw = lerp(this.prevYaw ?? this.yaw, this.yaw, a);
     this._drawJump = lerp(this.prevJump ?? this.jump, this.jump, a);
-    const ctx = this.pctx;
-    this.drawSky(ctx);
-    this.drawRoad(ctx);
-    this.drawRoadside(ctx);
-    this.drawEntities(ctx);
-    this.blit();
-    this.drawCoinsHiRes();
-    this.drawCarsHiRes();
+    this.drawWorld3D(this.ctx, false);
     this._drawCam = null;
     this._drawLaneX = null;
     this._drawYaw = null;
@@ -958,26 +1096,16 @@ const Game = {
   },
 
   drawMenuScene() {
-    if (!this.pctx) this.resize();
-    const ctx = this.pctx;
-    const W = this.gw;
-    const H = this.gh;
-    ctx.fillStyle = BIOMES[0].ground;
-    ctx.fillRect(0, 0, W, H);
-
-    const road = this.paintRoad(ctx, 0);
-    this.drawGrassDecor(ctx, road.left, road.roadW, road.rumble, 0);
-
-    const car = getCar(Save.data.selected);
-    const cx = Math.round(W / 2);
-    const portrait = this.h >= this.w;
-    const cy = Math.round(H * (portrait ? 0.46 : 0.62));
-    drawPixelDude(ctx, cx - 16, cy + 2, portrait ? 1 : 2);
-    this.blit();
-    const kx = this.w / this.gw;
-    const ky = this.h / this.gh;
-    const u = Math.max(portrait ? 4 : 5, Math.round(road.laneW * kx / (portrait ? 28 : 22)));
-    drawCarTop(this.ctx, cx * kx, cy * ky, u, car, { u });
+    this._drawCam = BIOME_INTRO + 40;
+    this._drawLaneX = -LANE_GAP;
+    this._drawYaw = -0.05;
+    this._drawJump = 0;
+    this.cameraZ = BIOME_INTRO + 40;
+    this.drawWorld3D(this.ctx, true);
+    this._drawCam = null;
+    this._drawLaneX = null;
+    this._drawYaw = null;
+    this._drawJump = null;
   },
 
   idle() {

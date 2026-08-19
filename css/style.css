@@ -23,7 +23,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #48d048;
+  background: #3a3a3e;
   color: var(--text);
   font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   touch-action: none;
@@ -34,8 +34,7 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
 }
 
 .vignette {
@@ -386,11 +385,12 @@ body.is-touch .hint-touch {
 
 .cop-bar {
   margin-top: 6px;
-  width: 90px;
-  height: 8px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.12);
+  width: 110px;
+  height: 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .cop-bar i {
@@ -667,14 +667,40 @@ body.is-touch .hint-touch {
 .hud-label {
   display: block;
   font-size: 11px;
-  color: var(--muted);
+  color: #ffffff;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .hud-stat strong {
-  font-size: 20px;
-  text-shadow: 0 2px 12px #000;
+  font-size: 22px;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+}
+
+.hud-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 110px;
+}
+
+.hud-col-right {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hud-run {
+  text-align: center;
+}
+
+.hud-top {
+  align-items: flex-start;
 }
 
 .hud-stat.gold strong {
@@ -718,12 +744,12 @@ body.is-touch .hint-touch {
 
 .place-chip {
   pointer-events: none;
-  background: rgba(7, 11, 20, 0.72);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 5px 12px;
+  background: rgba(12, 16, 24, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 7px 14px;
   font-size: 12px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #eef4ff;
 }
@@ -873,18 +899,18 @@ body.is-touch .hint-touch {
   }
 
   .hud-top {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: flex-start;
     gap: 6px 8px;
   }
 
   .hud-stat {
     min-width: 0;
-    flex: 1 1 28%;
+    flex: none;
   }
 
   .hud-stat.cop {
-    flex: 1 1 22%;
+    flex: none;
   }
 
   .hud-label {

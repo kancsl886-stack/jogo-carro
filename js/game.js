@@ -510,6 +510,40 @@ const Game = {
     };
   },
 
+  entityHitbox(e) {
+    switch (e.kind) {
+      case "coin":
+        return { x: 0.18, z: 0.16 };
+      case "power":
+        return { x: 0.22, z: 0.2 };
+      case "oil":
+        return { x: 0.32, z: 0.22 };
+      case "cone":
+        return { x: 0.18, z: 0.16 };
+      case "tires":
+      case "barrier":
+        return { x: 0.32, z: 0.26 };
+      case "traffic":
+        return { x: 0.38, z: 0.42 };
+      case "truck":
+      case "container":
+        return { x: 0.48, z: 0.62 };
+      default:
+        return { x: 0.3, z: 0.26 };
+    }
+  },
+
+  playerTouches(e, playerZ, dt, extraX, extraZ) {
+    const box = this.entityHitbox(e);
+    const dx = Math.abs(this.laneWorldX(e.lane) - this.laneX);
+    if (dx >= 0.28 + box.x + (extraX || 0)) return false;
+    const travel = Math.max(0, (this.speed || 0) * dt);
+    const dz = e.z - playerZ;
+    const nose = 0.22 + box.z + (extraZ || 0) + travel;
+    const tail = 0.14 + box.z;
+    return dz > -tail && dz < nose;
+  },
+
   update(dt) {
     this.time += dt;
     this.flash += dt;
@@ -581,19 +615,18 @@ const Game = {
       if (e.kind === "traffic" || e.kind === "truck") e.z += (e.speed || 8) * dt;
     }
 
-    const magnetR = 1.15 * this.car.stats.magnet + (this.powers.magnet > 0 ? 2.2 : 0);
+    const magnetOn = this.powers.magnet > 0;
+    const magX = magnetOn ? 1.05 * this.car.stats.magnet + 1.6 : 0;
+    const magZ = magnetOn ? 6.5 : 0;
     for (const e of this.entities) {
       if (e.taken) continue;
-      const dz = e.z - playerZ;
-      const dx = this.laneWorldX(e.lane) - this.laneX;
       if (e.kind === "coin") {
-        const reachZ = this.powers.magnet > 0 ? 10 : 2.4;
-        if (Math.abs(dz) < reachZ && Math.abs(dx) < magnetR) {
+        if (this.playerTouches(e, playerZ, dt, magX, magZ)) {
           e.taken = true;
           this.collectCoin(e);
         }
       } else if (e.kind === "power") {
-        if (Math.abs(dz) < 2.2 && Math.abs(dx) < 1.2) {
+        if (this.playerTouches(e, playerZ, dt)) {
           e.taken = true;
           this.powers[e.power] = e.power === "nitro" ? 4 : 7;
           if (e.power === "nitro" && this.cop) this.cop.gap = Math.min(22, this.cop.gap + 6);
@@ -601,14 +634,14 @@ const Game = {
           this.burst(this.laneX, 0.6, playerZ, "#3cf0ff", 10);
         }
       } else if (e.kind === "oil") {
-        if (Math.abs(dz) < 2.2 && Math.abs(dx) < 1.2 && this.jump < 0.35) {
+        if (this.jump < 0.35 && this.playerTouches(e, playerZ, dt)) {
           if (!e.slicked) {
             e.slicked = true;
             this.oil = 1.5;
             this.shake = Math.max(this.shake, 5);
           }
         }
-      } else if (this.invuln <= 0 && Math.abs(dz) < (e.kind === "truck" || e.kind === "container" ? 3.4 : 2.6) && Math.abs(dx) < 1.2) {
+      } else if (this.invuln <= 0 && this.playerTouches(e, playerZ, dt)) {
         const jumped = this.jump > 0.9 && e.low;
         if (!jumped) this.hit();
       }

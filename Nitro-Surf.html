@@ -4188,21 +4188,99 @@ const Game = {
           );
         }
       }
+    }
+    this.drawSideWalls3D(ctx, playerZ);
+  },
 
-      const wall = "#a8a8ae";
-      const wallDark = "#6c6c72";
-      const topCol = Math.floor(zMid / 1.15) % 2 === 0 ? "#e6c200" : "#151515";
-      const wallH = 0.86;
-      const leftInner = -half - 0.02;
-      const leftOuter = -half - 0.42;
-      const rightInner = half + 0.02;
-      const rightOuter = half + 0.42;
-      this.fillQuad(ctx, p(leftInner, 0, za), p(leftInner, 0, zb), p(leftInner, wallH, zb), p(leftInner, wallH, za), wall);
-      this.fillQuad(ctx, p(leftInner, wallH, za), p(leftInner, wallH, zb), p(leftOuter, wallH, zb), p(leftOuter, wallH, za), topCol);
-      this.fillQuad(ctx, p(leftOuter, 0, za), p(leftOuter, wallH, za), p(leftOuter, wallH, zb), p(leftOuter, 0, zb), wallDark);
-      this.fillQuad(ctx, p(rightInner, 0, za), p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightInner, 0, zb), wall);
-      this.fillQuad(ctx, p(rightInner, wallH, za), p(rightInner, wallH, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), topCol);
-      this.fillQuad(ctx, p(rightOuter, 0, za), p(rightOuter, 0, zb), p(rightOuter, wallH, zb), p(rightOuter, wallH, za), wallDark);
+  drawSideWalls3D(ctx, playerZ) {
+    const samples = 28;
+    const zFar = 58;
+    const zNear = -0.28;
+    const half = 3.38;
+    const wallH = 1.42;
+    const capH = 0.1;
+    const thick = 0.52;
+    const stainH = 0.32;
+    const jointEvery = 2.35;
+    const p = (x, y, zOff) => this.project(x, y, playerZ + zOff);
+    const slice = (i) => {
+      const u = i / samples;
+      const f = 1 - (1 - u) * (1 - u);
+      const zOff = zFar * (1 - f) + zNear * f;
+      const li = -half - 0.03;
+      const lo = -half - thick;
+      const ri = half + 0.03;
+      const ro = half + thick;
+      const top = wallH + capH;
+      return {
+        zOff,
+        z: playerZ + zOff,
+        li0: p(li, 0, zOff),
+        liS: p(li, stainH, zOff),
+        liT: p(li, wallH, zOff),
+        liC: p(li, top, zOff),
+        lo0: p(lo, 0, zOff),
+        loT: p(lo, wallH, zOff),
+        loC: p(lo, top, zOff),
+        ri0: p(ri, 0, zOff),
+        riS: p(ri, stainH, zOff),
+        riT: p(ri, wallH, zOff),
+        riC: p(ri, top, zOff),
+        ro0: p(ro, 0, zOff),
+        roT: p(ro, wallH, zOff),
+        roC: p(ro, top, zOff),
+      };
+    };
+
+    let prev = slice(0);
+    for (let i = 1; i <= samples; i++) {
+      const cur = slice(i);
+      const fog = Math.min(1, Math.max(0, ((prev.zOff + cur.zOff) * 0.5 + 0.3) / 52));
+      const leftFace = mixHex("#b8bbc2", "#8c8f96", fog * 0.62);
+      const leftBase = mixHex("#8a8e96", "#6a6e74", fog * 0.5);
+      const rightFace = mixHex("#d5d8de", "#9aa0a8", fog * 0.58);
+      const rightBase = mixHex("#a4a8b0", "#787c84", fog * 0.48);
+      const cap = mixHex("#eceef2", "#b4b8be", fog * 0.45);
+      const outer = mixHex("#585c64", "#3a3e44", fog * 0.4);
+      const lip = mixHex("#c8ccd2", "#90949c", fog * 0.5);
+      const near = fog < 0.46;
+      const leftOn = prev.liC.x > -40 || cur.liC.x > -40;
+      const rightOn = prev.riC.x < this.w + 40 || cur.riC.x < this.w + 40;
+
+      if (leftOn) {
+        if (near) {
+          this.fillQuad(ctx, prev.li0, cur.li0, cur.liS, prev.liS, leftBase);
+          this.fillQuad(ctx, prev.liS, cur.liS, cur.liT, prev.liT, leftFace);
+          this.fillQuad(ctx, prev.liT, cur.liT, cur.liC, prev.liC, lip);
+          this.fillQuad(ctx, p(-half + 0.04, 0.02, prev.zOff), p(-half + 0.28, 0.02, prev.zOff), p(-half + 0.28, 0.02, cur.zOff), p(-half + 0.04, 0.02, cur.zOff), "rgba(18, 18, 22, 0.32)");
+        } else {
+          this.fillQuad(ctx, prev.li0, cur.li0, cur.liC, prev.liC, leftFace);
+        }
+        this.fillQuad(ctx, prev.liC, cur.liC, cur.loC, prev.loC, cap);
+        this.fillQuad(ctx, prev.loC, cur.loC, cur.lo0, prev.lo0, outer);
+      }
+      if (rightOn) {
+        if (near) {
+          this.fillQuad(ctx, prev.ri0, cur.ri0, cur.riS, prev.riS, rightBase);
+          this.fillQuad(ctx, prev.riS, cur.riS, cur.riT, prev.riT, rightFace);
+          this.fillQuad(ctx, prev.riT, cur.riT, cur.riC, prev.riC, lip);
+          this.fillQuad(ctx, p(half - 0.04, 0.02, prev.zOff), p(half - 0.28, 0.02, prev.zOff), p(half - 0.28, 0.02, cur.zOff), p(half - 0.04, 0.02, cur.zOff), "rgba(18, 18, 22, 0.32)");
+        } else {
+          this.fillQuad(ctx, prev.ri0, cur.ri0, cur.riC, prev.riC, rightFace);
+        }
+        this.fillQuad(ctx, prev.riC, cur.riC, cur.roC, prev.roC, cap);
+        this.fillQuad(ctx, prev.roC, cur.roC, cur.ro0, prev.ro0, outer);
+      }
+
+      const a = Math.floor(prev.z / jointEvery);
+      const b = Math.floor(cur.z / jointEvery);
+      if (near && a !== b && cur.liT.s > 12) {
+        const jz = b * jointEvery - playerZ;
+        const joint = mixHex("#5c6068", "#3e4248", fog * 0.35);
+        if (leftOn) this.fillQuad(ctx, p(-half - 0.02, 0, jz - 0.04), p(-half - 0.02, 0, jz + 0.04), p(-half - 0.02, wallH, jz + 0.04), p(-half - 0.02, wallH, jz - 0.04), joint);
+        if (rightOn) this.fillQuad(ctx, p(half + 0.02, 0, jz - 0.04), p(half + 0.02, 0, jz + 0.04), p(half + 0.02, wallH, jz + 0.04), p(half + 0.02, wallH, jz - 0.04), joint);
+      }
+      prev = cur;
     }
   },
 

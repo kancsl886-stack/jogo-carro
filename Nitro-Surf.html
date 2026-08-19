@@ -3246,8 +3246,8 @@ const Game = {
     this.distance = 0;
     this.runCoins = 0;
     this.combo = 0;
-    this.speed = 16;
-    this.baseSpeed = 16;
+    this.speed = 13;
+    this.baseSpeed = 13;
     this.lane = 1;
     this.laneX = 0;
     this.vx = 0;
@@ -3473,8 +3473,8 @@ const Game = {
     const dx = wx - this.viewLaneX() * 0.18 + (this.roadBend(wz) - camBend);
     const dy = 2.55 - wy;
     const dz = wz - camZ + 2.1;
-    if (dz < 0.12) {
-      return { x: W / 2, y: H + 80, s: 1, scale: 1, z: dz, visible: false, xScale: 1, zScale: 1 };
+    if (dz < 0.18) {
+      return { x: W / 2, y: H + 80, s: 268 / 0.18, scale: 268 / 0.18, z: dz, visible: false, xScale: (268 / 0.18) * (Math.min(W, H * 1.08) / 860), zScale: 1 };
     }
     const s = 268 / dz;
     const k = Math.min(W, H * 1.08);
@@ -3489,6 +3489,11 @@ const Game = {
       xScale,
       zScale: s * (H / 520),
     };
+  },
+
+  spriteSize(p, world) {
+    const u = p && p.xScale ? p.xScale : p && p.s ? p.s * 0.45 : 8;
+    return Math.max(4, u * world);
   },
 
   fillQuad(ctx, a, b, c, d, color) {
@@ -3628,8 +3633,8 @@ const Game = {
     this.spawnAhead();
 
     const nitro = this.powers.nitro > 0 ? 1.35 : 1;
-    const ramp = Math.min(1, this.distance / 4200);
-    this.baseSpeed = 13 + 40 * ramp;
+    const ramp = Math.min(1, this.distance / 4800);
+    this.baseSpeed = 11 + 32 * ramp;
     const targetSpeed = this.baseSpeed * this.car.stats.speed * nitro;
     this.speed = expDamp(this.speed, targetSpeed, 2.6, dt);
     this.cameraZ += this.speed * dt;
@@ -3916,7 +3921,7 @@ const Game = {
       if (((zMid | 0) % 31) === 7) {
         const mx = ((zMid | 0) % 3) - 1;
         const mp = p(mx * LANE_GAP, 0.02, (za + zb) * 0.5);
-        drawManholeAsset(ctx, mp.x, mp.y, Math.max(6, mp.s * 0.1));
+        drawManholeAsset(ctx, mp.x, mp.y, this.spriteSize(mp, 0.7));
       }
 
       if (Math.floor(zMid / 5.4) % 2 === 0) {
@@ -3981,7 +3986,7 @@ const Game = {
       if (it.seed % 3 === 0) this.drawBuilding3D(ctx, x, it.z, it.seed);
       else {
         const p = this.project(x, 0, it.z);
-        if (p.visible) drawContainerAsset(ctx, p.x, p.y, p.s * 0.22);
+        if (p.visible) drawContainerAsset(ctx, p.x, p.y, this.spriteSize(p, 1.2));
       }
     } else if (it.seed % 4 === 0) {
       this.drawBush3D(ctx, x, it.z);
@@ -4173,7 +4178,7 @@ const Game = {
       ctx.fill();
       ctx.restore();
     }
-    drawIsoCar(ctx, p.x, p.y, p.s * 0.58, this.car, {
+    drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 1.25), this.car, {
       yaw: this.viewYaw(),
       nitro: this.powers.nitro,
       flash: this.flash % 0.4 < 0.2,
@@ -4186,7 +4191,7 @@ const Game = {
     if (!this.cop || this.cop.z == null) return;
     const p = this.project(this.cop.laneX, 0, this.cop.z);
     if (!p.visible || p.y > this.h + 90) return;
-    drawIsoCar(ctx, p.x, p.y, p.s * 0.56, getCar("policia"), {
+    drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 1.22), getCar("policia"), {
       flash: this.flash % 0.4 < 0.2,
       yaw: this.viewYaw() * 0.65,
       skid: true,
@@ -4198,39 +4203,39 @@ const Game = {
     if (e.kind === "coin") {
       const p = this.project(x, 0.9, e.z);
       if (!p.visible) return;
-      drawAssetCoin(ctx, p.x, p.y, Math.max(6, p.s * 0.09));
+      drawAssetCoin(ctx, p.x, p.y, this.spriteSize(p, 0.42));
     } else if (e.kind === "power") {
       const p = this.project(x, 0.95, e.z);
       if (!p.visible) return;
-      drawPowerIcon(ctx, p.x, p.y, Math.max(8, p.s * 0.11), e.power);
+      drawPowerIcon(ctx, p.x, p.y, this.spriteSize(p, 0.48), e.power);
     } else if (e.kind === "barrier") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawCrateAsset(ctx, p.x, p.y, p.s * 0.22, 3 + ((e.z | 0) % 3));
+      drawCrateAsset(ctx, p.x, p.y, this.spriteSize(p, 1.05), 3 + ((e.z | 0) % 3));
     } else if (e.kind === "cone") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawConeAsset(ctx, p.x, p.y, p.s * 0.2);
+      drawConeAsset(ctx, p.x, p.y, this.spriteSize(p, 0.9));
     } else if (e.kind === "tires") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawTireStackAsset(ctx, p.x, p.y, p.s * 0.2);
+      drawTireStackAsset(ctx, p.x, p.y, this.spriteSize(p, 0.95));
     } else if (e.kind === "oil") {
       const p = this.project(x, 0.02, e.z);
       if (!p.visible) return;
-      drawOilAsset(ctx, p.x, p.y, p.s * 0.24);
+      drawOilAsset(ctx, p.x, p.y, this.spriteSize(p, 1.15));
     } else if (e.kind === "container") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawContainerAsset(ctx, p.x, p.y, p.s * 0.28);
+      drawContainerAsset(ctx, p.x, p.y, this.spriteSize(p, 1.45));
     } else if (e.kind === "truck") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawDumpTruckAsset(ctx, p.x, p.y, p.s * 0.5, { brake: true });
+      drawDumpTruckAsset(ctx, p.x, p.y, this.spriteSize(p, 1.25), { brake: true });
     } else {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawIsoCar(ctx, p.x, p.y, p.s * 0.54, e.car || randomTrafficCar(), { brake: true, skid: true });
+      drawIsoCar(ctx, p.x, p.y, this.spriteSize(p, 1.2), e.car || randomTrafficCar(), { brake: true, skid: true });
     }
   },
 

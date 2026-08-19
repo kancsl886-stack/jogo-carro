@@ -3509,6 +3509,18 @@ const Game = {
     ctx.fill();
   },
 
+  fillTri(ctx, a, b, c, color) {
+    if (!a || !b || !c) return;
+    if (![a, b, c].every((p) => Number.isFinite(p.x) && Number.isFinite(p.y))) return;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.lineTo(c.x, c.y);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  },
+
   drawBox3D(ctx, x, y, z, w, h, d, colors) {
     const p = (ox, oy, oz) => this.project(x + ox, y + oy, z + oz);
     const fl = p(-w / 2, 0, -d / 2);
@@ -3706,7 +3718,7 @@ const Game = {
             this.shake = Math.max(this.shake, 5);
           }
         }
-      } else if (this.invuln <= 0 && Math.abs(dz) < (e.kind === "truck" || e.kind === "container" ? 3.2 : 2.4) && Math.abs(dx) < 1.05) {
+      } else if (this.invuln <= 0 && Math.abs(dz) < (e.kind === "truck" || e.kind === "container" ? 3.4 : 2.6) && Math.abs(dx) < 1.2) {
         const jumped = this.jump > 0.9 && e.low;
         if (!jumped) this.hit();
       }
@@ -3970,7 +3982,8 @@ const Game = {
   },
 
   drawSceneryItem(ctx, it) {
-    const x = it.side * (4.22 + (it.seed % 3) * 0.12);
+    const city = it.decor === "city" || it.decor === "docks";
+    const x = it.side * (city ? 4.38 + (it.seed % 3) * 0.1 : 5.15 + (it.seed % 3) * 0.28);
     const p = this.project(x, 0, it.z);
     if (!p.visible || p.s < 5 || p.y > this.h + 50) return;
     const decor = it.decor;
@@ -4048,6 +4061,19 @@ const Game = {
     }
   },
 
+  worldBlob(ctx, wx, wy, wz, rx, ry, col) {
+    const c = this.project(wx, wy, wz);
+    if (!c.visible) return;
+    const ex = this.project(wx + rx, wy, wz);
+    const ey = this.project(wx, wy + ry, wz);
+    const rr = Math.max(3, Math.abs(ex.x - c.x));
+    const rh = Math.max(3, Math.abs(c.y - ey.y));
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, rr, rh, 0, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+  },
+
   drawLamp3D(ctx, x, z, side) {
     const base = this.project(x, 0, z);
     const top = this.project(x, 4.2, z);
@@ -4070,89 +4096,93 @@ const Game = {
   },
 
   drawTree3D(ctx, x, z, size) {
-    const p = this.project(x, 0, z);
-    if (!p.visible) return;
-    const s = p.s * (0.13 + size * 0.045);
-    ctx.fillStyle = "rgba(0,0,0,0.28)";
-    ctx.beginPath();
-    ctx.ellipse(p.x + s * 0.48, p.y, s * 0.72, s * 0.22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const top = this.project(x, 1.35 * size, z);
-    ctx.strokeStyle = "#6a3a18";
-    ctx.lineWidth = Math.max(2, s * 0.18);
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y);
-    ctx.lineTo(top.x, top.y);
-    ctx.stroke();
-    const leaf = (ox, oy, r, col) => {
-      const q = this.project(x + ox, 1.55 * size + oy, z);
-      ctx.beginPath();
-      ctx.arc(q.x, q.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = col;
-      ctx.fill();
-    };
-    leaf(0.16, 0.08, s * 0.88, "#0f6b1c");
-    leaf(-0.22, 0.04, s * 0.72, "#1a8a28");
-    leaf(0, 0.42, s * 0.56, "#2aaa3a");
+    const h = 3.4 + size * 1.35;
+    const base = this.project(x, 0, z);
+    if (!base.visible) return;
+    this.worldBlob(ctx, x + 0.45, 0.04, z, 0.95, 0.18, "rgba(0,0,0,0.28)");
+    this.fillQuad(
+      ctx,
+      this.project(x - 0.16, 0, z),
+      this.project(x + 0.16, 0, z),
+      this.project(x + 0.11, h * 0.52, z),
+      this.project(x - 0.11, h * 0.52, z),
+      "#6a3a18"
+    );
+    this.fillQuad(
+      ctx,
+      this.project(x - 0.11, h * 0.52, z),
+      this.project(x + 0.11, h * 0.52, z),
+      this.project(x + 0.07, h * 0.7, z),
+      this.project(x - 0.07, h * 0.7, z),
+      "#8a5220"
+    );
+    this.worldBlob(ctx, x + 0.12, h * 0.62, z, 1.15, 0.95, "#0c4e18");
+    this.worldBlob(ctx, x - 0.42, h * 0.58, z, 0.95, 0.82, "#146628");
+    this.worldBlob(ctx, x + 0.38, h * 0.7, z, 0.82, 0.7, "#1a7a30");
+    this.worldBlob(ctx, x - 0.08, h * 0.88, z, 0.78, 0.72, "#228a38");
+    this.worldBlob(ctx, x + 0.1, h * 1.02, z, 0.55, 0.48, "#2aaa44");
   },
 
   drawBush3D(ctx, x, z) {
-    const p = this.project(x, 0.35, z);
+    const p = this.project(x, 0, z);
     if (!p.visible) return;
-    const s = p.s * 0.1;
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
-    ctx.beginPath();
-    ctx.ellipse(p.x + s * 0.3, p.y + s * 0.5, s * 0.8, s * 0.22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, s * 0.7, 0, Math.PI * 2);
-    ctx.fillStyle = "#166a24";
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(p.x + s * 0.35, p.y + s * 0.1, s * 0.5, 0, Math.PI * 2);
-    ctx.fillStyle = "#0f6b1c";
-    ctx.fill();
+    this.worldBlob(ctx, x + 0.28, 0.04, z, 0.7, 0.16, "rgba(0,0,0,0.25)");
+    this.worldBlob(ctx, x, 0.45, z, 0.62, 0.42, "#166a24");
+    this.worldBlob(ctx, x + 0.32, 0.38, z, 0.48, 0.32, "#0f6b1c");
+    this.worldBlob(ctx, x - 0.22, 0.4, z, 0.42, 0.3, "#1a8a28");
   },
 
   drawPalm3D(ctx, x, z) {
     const p = this.project(x, 0, z);
-    const top = this.project(x, 2.4, z);
     if (!p.visible) return;
-    const s = p.s * 0.12;
-    ctx.strokeStyle = "#8a5a28";
-    ctx.lineWidth = Math.max(2, s * 0.2);
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y);
-    ctx.lineTo(top.x, top.y);
-    ctx.stroke();
-    ctx.fillStyle = "#1f8a3a";
-    for (const a of [-0.9, -0.3, 0.3, 0.9]) {
-      ctx.beginPath();
-      ctx.ellipse(top.x + Math.sin(a) * s * 0.9, top.y + 4, s * 0.7, s * 0.22, a, 0, Math.PI * 2);
-      ctx.fill();
+    this.worldBlob(ctx, x + 0.4, 0.04, z, 0.7, 0.14, "rgba(0,0,0,0.25)");
+    this.fillQuad(
+      ctx,
+      this.project(x - 0.12, 0, z),
+      this.project(x + 0.12, 0, z),
+      this.project(x + 0.08, 3.2, z),
+      this.project(x - 0.08, 3.2, z),
+      "#8a5a28"
+    );
+    const tips = [
+      [0.9, 2.85],
+      [0.55, 3.35],
+      [-0.15, 3.55],
+      [-0.7, 3.2],
+      [-0.95, 2.7],
+    ];
+    for (const [ox, oy] of tips) {
+      this.worldBlob(ctx, x + ox * 0.55, oy, z, 0.85, 0.22, "#1f8a3a");
     }
+    this.worldBlob(ctx, x, 3.25, z, 0.35, 0.28, "#2aaa3a");
   },
 
   drawPine3D(ctx, x, z, size) {
     const p = this.project(x, 0, z);
     if (!p.visible) return;
-    const s = p.s * (0.12 + size * 0.04);
-    ctx.fillStyle = "rgba(0,0,0,0.28)";
-    ctx.beginPath();
-    ctx.ellipse(p.x + s * 0.35, p.y, s * 0.55, s * 0.18, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#4a3014";
-    ctx.fillRect(p.x - s * 0.08, p.y - s * 0.4, s * 0.16, s * 0.45);
-    ctx.fillStyle = "#0c4a22";
-    for (let i = 0; i < 3; i++) {
-      const yy = p.y - s * (0.35 + i * 0.45);
-      const ww = s * (1.1 - i * 0.28);
-      ctx.beginPath();
-      ctx.moveTo(p.x, yy - s * 0.45);
-      ctx.lineTo(p.x - ww, yy);
-      ctx.lineTo(p.x + ww, yy);
-      ctx.closePath();
-      ctx.fill();
+    const h = 3.6 + size * 1.2;
+    this.worldBlob(ctx, x + 0.35, 0.04, z, 0.7, 0.14, "rgba(0,0,0,0.28)");
+    this.fillQuad(
+      ctx,
+      this.project(x - 0.12, 0, z),
+      this.project(x + 0.12, 0, z),
+      this.project(x + 0.09, h * 0.28, z),
+      this.project(x - 0.09, h * 0.28, z),
+      "#4a3014"
+    );
+    const layers = [
+      [0.28, 1.35, "#0a3a1c"],
+      [0.48, 1.05, "#0c4a22"],
+      [0.68, 0.78, "#166a32"],
+    ];
+    for (const [yy, half, col] of layers) {
+      this.fillTri(
+        ctx,
+        this.project(x, yy + half * 1.15, z),
+        this.project(x - half, yy, z),
+        this.project(x + half, yy, z),
+        col
+      );
     }
   },
 
@@ -4211,27 +4241,27 @@ const Game = {
     } else if (e.kind === "barrier") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawCrateAsset(ctx, p.x, p.y, this.spriteSize(p, 1.05), 3 + ((e.z | 0) % 3));
+      drawCrateAsset(ctx, p.x, p.y, this.spriteSize(p, 1.55), 4 + ((e.z | 0) % 2));
     } else if (e.kind === "cone") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawConeAsset(ctx, p.x, p.y, this.spriteSize(p, 0.9));
+      drawConeAsset(ctx, p.x, p.y, this.spriteSize(p, 1.35));
     } else if (e.kind === "tires") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawTireStackAsset(ctx, p.x, p.y, this.spriteSize(p, 0.95));
+      drawTireStackAsset(ctx, p.x, p.y, this.spriteSize(p, 1.4));
     } else if (e.kind === "oil") {
       const p = this.project(x, 0.02, e.z);
       if (!p.visible) return;
-      drawOilAsset(ctx, p.x, p.y, this.spriteSize(p, 1.15));
+      drawOilAsset(ctx, p.x, p.y, this.spriteSize(p, 1.5));
     } else if (e.kind === "container") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawContainerAsset(ctx, p.x, p.y, this.spriteSize(p, 1.45));
+      drawContainerAsset(ctx, p.x, p.y, this.spriteSize(p, 1.9));
     } else if (e.kind === "truck") {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;
-      drawDumpTruckAsset(ctx, p.x, p.y, this.spriteSize(p, 0.92), { brake: true });
+      drawDumpTruckAsset(ctx, p.x, p.y, this.spriteSize(p, 1.15), { brake: true });
     } else {
       const p = this.project(x, 0, e.z);
       if (!p.visible) return;

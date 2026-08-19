@@ -19,55 +19,41 @@ function drawSkidMarks(ctx, x, y, scale, yaw) {
 
 function drawIsoCar(ctx, x, y, scale, car, extras) {
   extras = extras || {};
-  if (extras.skid !== false && !extras.jump) drawSkidMarks(ctx, x, y, scale, extras.yaw);
+  if (extras.skid !== false && !extras.jump && scale > 18) drawSkidMarks(ctx, x, y, scale, extras.yaw);
   drawCar3D(ctx, x, y, scale, car, extras);
 }
 
 function drawAssetCoin(ctx, x, y, r) {
   const rr = Math.max(5, r);
-  const glow = ctx.createRadialGradient(x, y, rr * 0.2, x, y, rr * 2.2);
-  glow.addColorStop(0, "rgba(255, 214, 64, 0.9)");
-  glow.addColorStop(0.4, "rgba(255, 186, 40, 0.35)");
-  glow.addColorStop(1, "rgba(255, 160, 0, 0)");
-  ctx.beginPath();
-  ctx.arc(x, y, rr * 2.2, 0, Math.PI * 2);
-  ctx.fillStyle = glow;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(x + rr * 0.2, y + rr * 0.45, rr * 0.7, rr * 0.2, 0, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(0,0,0,0.3)";
-  ctx.fill();
-  const disc = ctx.createLinearGradient(x - rr, y - rr, x + rr, y + rr);
-  disc.addColorStop(0, "#ffe27a");
-  disc.addColorStop(0.45, "#ffd24a");
-  disc.addColorStop(1, "#b87410");
+  if (rr > 9) {
+    const glow = ctx.createRadialGradient(x, y, rr * 0.2, x, y, rr * 2.0);
+    glow.addColorStop(0, "rgba(255, 214, 64, 0.85)");
+    glow.addColorStop(1, "rgba(255, 160, 0, 0)");
+    ctx.beginPath();
+    ctx.arc(x, y, rr * 2.0, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+  }
   ctx.beginPath();
   ctx.arc(x, y, rr, 0, Math.PI * 2);
-  ctx.fillStyle = disc;
+  ctx.fillStyle = "#ffd24a";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(x, y, rr * 0.78, 0, Math.PI * 2);
+  ctx.arc(x, y, rr * 0.72, 0, Math.PI * 2);
   ctx.strokeStyle = "#d9a020";
   ctx.lineWidth = Math.max(1, rr * 0.08);
   ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x, y - rr * 0.42);
-  ctx.lineTo(x + rr * 0.34, y - rr * 0.12);
-  ctx.lineTo(x + rr * 0.22, y + rr * 0.36);
-  ctx.lineTo(x - rr * 0.22, y + rr * 0.36);
-  ctx.lineTo(x - rr * 0.34, y - rr * 0.12);
-  ctx.closePath();
-  ctx.fillStyle = "#8a4e00";
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(x, y - rr * 0.28);
-  ctx.lineTo(x + rr * 0.18, y - rr * 0.06);
-  ctx.lineTo(x + rr * 0.1, y + rr * 0.2);
-  ctx.lineTo(x - rr * 0.1, y + rr * 0.2);
-  ctx.lineTo(x - rr * 0.18, y - rr * 0.06);
-  ctx.closePath();
-  ctx.fillStyle = "#f6d56a";
-  ctx.fill();
+  if (rr > 7) {
+    ctx.beginPath();
+    ctx.moveTo(x, y - rr * 0.42);
+    ctx.lineTo(x + rr * 0.34, y - rr * 0.12);
+    ctx.lineTo(x + rr * 0.22, y + rr * 0.36);
+    ctx.lineTo(x - rr * 0.22, y + rr * 0.36);
+    ctx.lineTo(x - rr * 0.34, y - rr * 0.12);
+    ctx.closePath();
+    ctx.fillStyle = "#8a4e00";
+    ctx.fill();
+  }
 }
 
 function drawCrateAsset(ctx, x, y, scale, count) {

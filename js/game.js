@@ -147,6 +147,7 @@ const Game = {
     this.caughtBy = null;
     this.cop = { lane: 1, laneX: 0, gap: 18, siren: 0 };
     this.oil = 0;
+    this._wallHit = false;
   },
 
   init(canvas) {
@@ -160,14 +161,14 @@ const Game = {
   },
 
   resize() {
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     this.w = window.innerWidth;
     this.h = window.innerHeight;
     this.canvas.width = Math.floor(this.w * this.dpr);
     this.canvas.height = Math.floor(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.ctx.imageSmoothingEnabled = true;
-    if (this.ctx.imageSmoothingQuality) this.ctx.imageSmoothingQuality = "high";
+    if (this.ctx.imageSmoothingQuality) this.ctx.imageSmoothingQuality = "medium";
     this.gw = this.w;
     this.gh = this.h;
     this.pixel = 1;
@@ -286,6 +287,7 @@ const Game = {
       this.acc -= STEP;
       steps += 1;
     }
+    if (this.acc > STEP) this.acc = 0;
     try {
       this.draw(this.acc / STEP);
     } catch (err) {
@@ -532,17 +534,36 @@ const Game = {
     const slide = 2.6 + 3.0 * grip + this.speed * 0.014;
     const desiredVx = Math.sin(this.yaw) * slide;
     const kappa = this.roadBend(this.cameraZ + 18) - this.roadBend(this.cameraZ + 6);
-    const curve = -kappa * (1.5 / grip);
+    let curve = -kappa * 1.15;
+    if (curve > 1.6) curve = 1.6;
+    if (curve < -1.6) curve = -1.6;
     this.vx = expDamp(this.vx, desiredVx + curve, 5.5 + 2.8 * grip, dt);
     if (this.oil > 0) this.yaw += Math.sin(this.time * 16) * 0.014;
     this.laneX += this.vx * dt;
     this.lane = Math.max(0, Math.min(LANES - 1, Math.round(this.laneX / LANE_GAP + 1)));
-    const limit = LANE_GAP * 1.55;
-    if (Math.abs(this.laneX) > limit) {
-      this.laneX = Math.sign(this.laneX) * limit;
-      this.vx *= -0.2;
-      this.yaw *= 0.72;
-      this.shake = Math.max(this.shake, 5);
+    const limit = 2.62;
+    const atRight = this.laneX >= limit;
+    const atLeft = this.laneX <= -limit;
+    if (atRight) {
+      this.laneX = limit;
+      if (this.vx > 0) this.vx = 0;
+      if (this.yaw > 0) this.yaw *= 0.35;
+      if (input < -0.12) this.vx = -slide * 0.7;
+      if (!this._wallHit) {
+        this._wallHit = true;
+        this.shake = 4;
+      }
+    } else if (atLeft) {
+      this.laneX = -limit;
+      if (this.vx < 0) this.vx = 0;
+      if (this.yaw < 0) this.yaw *= 0.35;
+      if (input > 0.12) this.vx = slide * 0.7;
+      if (!this._wallHit) {
+        this._wallHit = true;
+        this.shake = 4;
+      }
+    } else {
+      this._wallHit = false;
     }
 
     this.jumpVel -= 46 * dt;
@@ -758,7 +779,7 @@ const Game = {
 
   drawRoad3D(ctx) {
     const playerZ = this.playerZ();
-    const segs = 28;
+    const segs = 16;
     const zFar = 58;
     const zNear = -0.35;
     const half = 3.38;
@@ -838,10 +859,10 @@ const Game = {
   collectScenery() {
     const playerZ = this.playerZ();
     const items = [];
-    const start = Math.floor((playerZ - 2) / 5);
-    const end = Math.floor((playerZ + 52) / 5);
+    const start = Math.floor((playerZ - 2) / 7);
+    const end = Math.floor((playerZ + 48) / 7);
     for (let i = start; i <= end; i++) {
-      const z = i * 5;
+      const z = i * 7;
       const scene = this.biomeAt(z);
       const seed = Math.abs((i * 1103515245 + 12345) | 0);
       items.push({ z, side: -1, seed, decor: scene.decor });
@@ -890,6 +911,8 @@ const Game = {
       front: wall,
       top: shadeHex(wall, -0.16),
     });
+    const probe = this.project(x, 0, z);
+    if (!probe.visible || probe.s < 14) return;
     const cols = 3 + (seed % 2);
     const rows = Math.max(2, floors - 1);
     for (let r = 0; r < rows; r++) {
@@ -968,6 +991,18 @@ const Game = {
     const h = 3.4 + size * 1.35;
     const base = this.project(x, 0, z);
     if (!base.visible) return;
+    if (base.s < 11) {
+      this.worldBlob(ctx, x, h * 0.7, z, 0.9, 0.8, "#167a28");
+      this.fillQuad(
+        ctx,
+        this.project(x - 0.12, 0, z),
+        this.project(x + 0.12, 0, z),
+        this.project(x + 0.08, h * 0.45, z),
+        this.project(x - 0.08, h * 0.45, z),
+        "#6a3a18"
+      );
+      return;
+    }
     this.worldBlob(ctx, x + 0.45, 0.04, z, 0.95, 0.18, "rgba(0,0,0,0.28)");
     this.fillQuad(
       ctx,
